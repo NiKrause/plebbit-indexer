@@ -1,0 +1,27 @@
+{
+  "name": "plebbit-crawler",
+  "version": "0.0.1",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "crawler": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:server": "mocha test/server.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@elastic/elasticsearch": "^9.0.1",
+    "@plebbit/plebbit-js": "github:plebbit/plebbit-js#d6c9a7210800d05f53fdf701288740e352a2a08f",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "mocha": "^11.2.2",
+    "plebbit-js": "^1.0.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "supertest": "^7.1.0"
+  }
+}

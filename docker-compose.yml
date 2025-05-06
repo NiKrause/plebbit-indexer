@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  plebindex:
+    build:
+      context: ./plebindex
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:3001
+    ports:
+      - "3000:3000"
+    volumes:
+      - plebbit_db:/app/plebbit_db
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+
+  crawler:
+    build: ./crawler
+    ports:
+      - "3001:3001"
+    volumes:
+      - plebbit_db:/app/plebbit_db
+    environment:
+      - PLEBBIT_WS_URL=ws://host.docker.internal:9138
+
+volumes:
+  plebbit_db:
