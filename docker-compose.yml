@@ -11,6 +11,8 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   crawler:
     build: ./crawler
@@ -21,8 +23,10 @@ services:
     environment:
       - PLEBBIT_WS_URL=ws://host.docker.internal:9138
       # - PLEBBIT_WS_URL=ws://plebbit-cli:9138
-    depends_on:
+    # depends_on:
       # - plebbit-cli
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   # plebbit-cli:
   #   build: ./plebbit-cli

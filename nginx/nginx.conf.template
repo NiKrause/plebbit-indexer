@@ -1,5 +1,5 @@
-upstream relay_service {
-    server relay-service:12345;
+upstream plebindex {
+    server plebindex:3000;
 }
 map $http_upgrade $connection_upgrade {
        default upgrade;
