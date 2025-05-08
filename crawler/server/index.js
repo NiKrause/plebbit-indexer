@@ -5,15 +5,21 @@ import cors from 'cors';
 import sqlite3 from 'sqlite3';
 const sqlite = sqlite3.verbose();
 import path from 'path';
+import fs from 'fs';
 
 export function startServer() {
   const app = express();
   const PORT = 3001;
   app.use(cors());
 
-  // Use DB_PATH from .env, fallback to default if not set
   const dbPath = process.env.DB_PATH ||
     path.join(path.dirname(new URL(import.meta.url).pathname), '../db/plebbit_posts.db');
+  
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+  
   const db = new sqlite.Database(dbPath);
 
   app.get('/api/posts', (req, res) => {

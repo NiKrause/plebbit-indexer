@@ -7,6 +7,7 @@ export async function getDb() {
   // Ensure the directory exists
   const dir = path.resolve('./db');
   if (!fs.existsSync(dir)) {
+    console.log('Creating db directory');
     fs.mkdirSync(dir, { recursive: true });
   }
 

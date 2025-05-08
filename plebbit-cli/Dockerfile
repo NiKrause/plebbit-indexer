@@ -1,19 +1,27 @@
-FROM node:22-alpine
+FROM ubuntu:22.04
 
-RUN apk add --no-cache git curl && \
-    corepack enable && \
-    corepack prepare yarn@stable --activate
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    fontconfig \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g corepack \
+    && corepack enable \
+    && corepack prepare yarn@stable --activate \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-RUN git clone https://github.com/plebbit/plebbit-cli.git .
-
-RUN npm install && \
-    npm run build && \
-    npm run oclif manifest && \
-    npm run ci:download-web-uis && \
+RUN git clone https://github.com/plebbit/plebbit-cli.git && \
+    cd plebbit-cli && \
+    yarn install && \
+    yarn build && \
+    yarn oclif manifest && \
+    yarn ci:download-web-uis && \
     mkdir -p /app/plebbit_db
 
 EXPOSE 9138
 
-CMD ["./bin/run", "daemon"]
+CMD ["/app/plebbit-cli/bin/run", "daemon"]
