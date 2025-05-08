@@ -22,7 +22,7 @@ services:
       - PLEBBIT_WS_URL=ws://host.docker.internal:9138
       # - PLEBBIT_WS_URL=ws://plebbit-cli:9138
     depends_on:
-      - plebbit-cli
+      # - plebbit-cli
 
   # plebbit-cli:
   #   build: ./plebbit-cli
