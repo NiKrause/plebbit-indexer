@@ -1,28 +1,19 @@
-# Use Node.js 22
 FROM node:22-alpine
 
-# Install Git and Yarn
-RUN apk add --no-cache git && \
+RUN apk add --no-cache git curl && \
     corepack enable && \
     corepack prepare yarn@stable --activate
 
-# Create app directory
 WORKDIR /app
 
-# Clone the repository
 RUN git clone https://github.com/plebbit/plebbit-cli.git .
 
-# Install dependencies
-RUN yarn install
+RUN npm install && \
+    npm run build && \
+    npm run oclif manifest && \
+    npm run ci:download-web-uis && \
+    mkdir -p /app/plebbit_db
 
-# Build the project
-RUN yarn build
-
-# Create data directory
-RUN mkdir -p /app/plebbit_db
-
-# Expose the WebSocket port
 EXPOSE 9138
 
-# Set the default command
-CMD ["yarn", "start", "daemon"]
+CMD ["./bin/run", "daemon"]

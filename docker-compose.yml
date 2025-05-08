@@ -19,20 +19,21 @@ services:
     volumes:
       - plebbit_db:/app/plebbit_db
     environment:
-      - PLEBBIT_WS_URL=ws://plebbit-cli:9138
+      - PLEBBIT_WS_URL=ws://host.docker.internal:9138
+      # - PLEBBIT_WS_URL=ws://plebbit-cli:9138
     depends_on:
       - plebbit-cli
 
-  plebbit-cli:
-    build: ./plebbit-cli
-    ports:
-      - "9138:9138"
-    volumes:
-      - plebbit_db:/app/plebbit_db
-    environment:
-      - PLEBBIT_DATA_PATH=/app/plebbit_db
-      - PLEBBIT_WS_URL=ws://0.0.0.0:9138
-    command: yarn start daemon --plebbitOptions.dataPath /app/plebbit_db
+  # plebbit-cli:
+  #   build: ./plebbit-cli
+  #   ports:
+  #     - "9138:9138"
+  #   volumes:
+  #     - plebbit_db:/app/plebbit_db
+  #   environment:
+  #     - PLEBBIT_DATA_PATH=/app/plebbit_db
+  #     - PLEBBIT_WS_URL=ws://0.0.0.0:9138
+  #   command: yarn start daemon --plebbitOptions.dataPath /app/plebbit_db
 
   nginx:
     image: nginx:1.22.0
