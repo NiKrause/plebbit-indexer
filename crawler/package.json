@@ -14,7 +14,7 @@
   "description": "",
   "dependencies": {
     "@elastic/elasticsearch": "^9.0.1",
-    "@plebbit/plebbit-js": "github:plebbit/plebbit-js#d6c9a7210800d05f53fdf701288740e352a2a08f",
+    "@plebbit/plebbit-js": "github:plebbit/plebbit-js",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",

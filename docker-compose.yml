@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   plebindex:
     build:
@@ -21,7 +19,44 @@ services:
     volumes:
       - plebbit_db:/app/plebbit_db
     environment:
-      - PLEBBIT_WS_URL=ws://host.docker.internal:9138
+      - PLEBBIT_WS_URL=ws://plebbit-cli:9138
+    depends_on:
+      - plebbit-cli
+
+  plebbit-cli:
+    build: ./plebbit-cli
+    ports:
+      - "9138:9138"
+    volumes:
+      - plebbit_db:/app/plebbit_db
+    environment:
+      - PLEBBIT_DATA_PATH=/app/plebbit_db
+      - PLEBBIT_WS_URL=ws://0.0.0.0:9138
+    command: yarn start daemon --plebbitOptions.dataPath /app/plebbit_db
+
+  nginx:
+    image: nginx:1.22.0
+    depends_on:
+      - plebindex
+    environment:
+      - SERVER_NAME=${SERVER_NAME}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template
+      - ./nginx/docker-entrypoint.d/:/docker-entrypoint.d/
+      - ./data/nginx:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/docker-entrypoint.sh"
+    command: ["nginx"]
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   plebbit_db:
