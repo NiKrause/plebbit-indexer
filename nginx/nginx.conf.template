@@ -1,6 +1,7 @@
 upstream plebindex {
     server plebindex:3000;
 }
+
 map $http_upgrade $connection_upgrade {
        default upgrade;
         '' close;

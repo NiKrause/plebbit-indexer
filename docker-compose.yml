@@ -3,30 +3,33 @@ services:
     build:
       context: ./plebindex
       args:
-        NEXT_PUBLIC_API_BASE_URL: http://localhost:3001
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
     ports:
       - "3000:3000"
     volumes:
       - plebbit_db:/app/plebbit_db
+      - ./plebindex:/app
     environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+      - NODE_ENV=${NODE_ENV}
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
   crawler:
-    build: ./crawler
+    build:
+      context: ./crawler
+      args:
+        PLEBBIT_WS_URL: ${PLEBBIT_WS_URL}
     ports:
       - "3001:3001"
     volumes:
       - plebbit_db:/app/plebbit_db
     environment:
-      - PLEBBIT_WS_URL=ws://plebbit-cli:9138/AUUz0CPyTwcSJct1zVyE9nYVtKKk3Fb4RbwbcSyw
+      - PLEBBIT_WS_URL=${PLEBBIT_WS_URL}
     # depends_on:
       # - plebbit-cli
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
   plebbit-cli:
     build: ./plebbit-cli
     image: plebbit-cli
