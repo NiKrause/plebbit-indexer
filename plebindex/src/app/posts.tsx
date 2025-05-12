@@ -1,7 +1,7 @@
 // app/Posts.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import moment from 'moment';
 
@@ -15,7 +15,7 @@ type Post = {
   timestamp: number;
 };
 
-export default function Posts() {
+function PostsContent() {
   const [posts, setPosts] = useState<Post[]>([]);
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('q');
@@ -79,5 +79,13 @@ export default function Posts() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function Posts() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PostsContent />
+    </Suspense>
   );
 }

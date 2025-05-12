@@ -1,5 +1,9 @@
 crawler/node_modules
+crawler/db
+crawler/.plebbit
 plebindex/node_modules
 plebindex/db
+plebindex/.plebbit
 crawler/db
 data/
+.env
