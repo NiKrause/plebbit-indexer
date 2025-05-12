@@ -1,11 +1,10 @@
 {
-  "name": "plebbit-crawler",
-  "version": "0.0.1",
-  "main": "index.js",
+  "name": "plebbit-indexer-crawler",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "crawler": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles test/subplebbit.test.js",
     "test:server": "mocha test/server.test.js"
   },
   "keywords": [],
@@ -15,6 +14,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^9.0.1",
     "@plebbit/plebbit-js": "github:plebbit/plebbit-js",
+    "better-sqlite3": "^8.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
@@ -23,5 +23,16 @@
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
     "supertest": "^7.1.0"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "transform": {},
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   }
 }

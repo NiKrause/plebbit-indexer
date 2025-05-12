@@ -8,18 +8,22 @@ export async function getSubplebbitAddresses() {
 }
 
 export async function indexSubplebbit(sub, db) {
-  let postsPage = await sub.posts.getPage(sub.posts.pageCids.new);
-  let allPosts = [...postsPage.comments];
-  while (postsPage.nextCid) {
+  if(sub.posts.pageCids.new) {
+    let postsPage = await sub.posts.getPage(sub.posts.pageCids.new);
+    let allPosts = [...postsPage.comments];
+    console.log("allPosts", allPosts.length);
+    while (postsPage.nextCid) {
     try {
       postsPage = await sub.posts.getPage(postsPage.nextCid);
       allPosts = allPosts.concat(postsPage.comments);
+      console.log("allPosts", allPosts.length);
     } catch (err) {
       console.error(`Error loading next page (${postsPage.nextCid}):`, err);
       break;
+      }
     }
+    await indexPosts(db, allPosts);
   }
-  await indexPosts(db, allPosts);
 }
 
 export async function setupSubplebbitListeners(plebbit, addresses, db) {

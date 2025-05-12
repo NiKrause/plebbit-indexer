@@ -1,8 +1,9 @@
 import { strict as assert } from 'assert';
 import supertest from 'supertest';
-import '../src/app/server/index.js'; // Ensure your server is running
 
-const request = supertest('http://localhost:3001');
+let PORT = 3001;
+const request = supertest(`http://localhost:${PORT}`);
+
 
 describe('GET /api/posts', function () {
   it('should return an array of posts', async function () {

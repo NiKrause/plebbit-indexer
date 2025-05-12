@@ -14,7 +14,8 @@ import { startServer } from './server/index.js';
  * Todo:
  * - [x] create a nextjs app to view the posts
  * - [x] test subplebbit updates are indexed
- * - [ ] write a test for the crawler
+ * - [x] test search functionality
+ * - [x] write a test for the crawler
  * - [ ] add a way to find new subplebbit address while the crawler is running (e.g. by daily searching github for new subplebbit repos, getting an event from the DAO smart contract, etc.)
  * - [ ] if a subplebbit is erroring out, it should be written into another table so we can pick it up later
  * 
