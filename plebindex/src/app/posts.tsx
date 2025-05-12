@@ -2,6 +2,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import moment from 'moment';
 
 type Post = {
   id: string;
@@ -10,22 +12,34 @@ type Post = {
   subplebbitAddress: string;
   authorAddress: string;
   authorDisplayName: string;
+  timestamp: number;
 };
 
 export default function Posts() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('q');
 
   useEffect(() => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-    console.log('API BASE URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
-    fetch(`${apiBaseUrl}/api/posts`)
+    const endpoint = searchTerm ? `/api/posts/search?q=${encodeURIComponent(searchTerm)}` : '/api/posts';
+    
+    fetch(`${apiBaseUrl}${endpoint}`)
       .then(res => res.json())
-      .then(setPosts);
-  }, []);
+      .then(data => {
+        // Sort posts by timestamp in descending order (latest first)
+        const sortedPosts = [...data].sort((a, b) => b.timestamp - a.timestamp);
+        setPosts(sortedPosts);
+      });
+  }, [searchTerm]);
+
+  const formatTimestamp = (timestamp: number) => {
+    return moment(timestamp*1000).fromNow();
+  };
 
   return (
     <div>
-      <h2>Search Results</h2>
+      <h2>{searchTerm ? `Search Results for "${searchTerm}"` : 'All Posts'}</h2>
       <div>
         {posts.map(post => (
           <div key={post.id} style={{ borderBottom: '1px solid #ccc', marginBottom: 16, paddingBottom: 8 }}>
@@ -47,6 +61,10 @@ export default function Posts() {
               >
                 {post.authorDisplayName || post.authorAddress}
               </a>
+              {' • '}
+              <span title={new Date(post.timestamp).toLocaleString()}>
+                {formatTimestamp(post.timestamp)}
+              </span>
             </div>
             <a
               href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
