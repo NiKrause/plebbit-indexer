@@ -4,11 +4,9 @@ import fs from 'fs';
 import path from 'path';
 
 export async function getDb() {
-  
-  const dbPath = process.env.DB_PATH ||
-    (process.cwd().endsWith('crawler') 
-      ? 'db/plebbit_posts.db'
-      : path.join(path.dirname(new URL(import.meta.url).pathname), '../db/plebbit_posts.db'));
+  // Always resolve the database path relative to the project root (crawler directory)
+  const projectRoot = path.resolve(process.cwd(), 'crawler');
+  const dbPath = process.env.DB_PATH || path.join(projectRoot, 'db', 'plebbit_posts.db');
   
   const dbDir = path.dirname(dbPath);
   if (!fs.existsSync(dbDir)) {
@@ -16,7 +14,7 @@ export async function getDb() {
   }
   
   const db = new sqlite.Database(dbPath);
-  console.log("db opened", db);
+  console.log("db opened at", dbPath);
   await db.exec(`
     CREATE TABLE IF NOT EXISTS posts (
       id TEXT PRIMARY KEY,

@@ -24,6 +24,7 @@ services:
       - "3001:3001"
     volumes:
       - plebbit_db:/app/plebbit_db
+      - ./crawler:/app
     environment:
       - PLEBBIT_WS_URL=${PLEBBIT_WS_URL}
     # depends_on:
