@@ -23,38 +23,15 @@ import { startServer } from './server/index.js';
  * - [ ] add prometheus metrics for indexing speed, error rate, amount of posts indexed, amount of subplebbit listeners, etc.
  * - [ ] if a subplebbit is updated, it could be published to a pubsub topic so that other services can pick it up - question: is an ipns publish sufficient or should we use a pubsub topic?
  */
-function main() {
-  console.log("starting crawler");
-  getDb((err, db) => {
-    if (err) {
-      console.error("Failed to initialize database:", err);
-      return;
-    }
+async function main() {
+  startServer(); // Start the REST server
 
-    startServer(db); // Start the REST server
-    getPlebbitClient((err, plebbit) => {
-      if (err) {
-        console.error("Failed to get plebbit client:", err);
-        return;
-      }
-
-      getSubplebbitAddresses((err, addresses) => {
-        if (err) {
-          console.error("Failed to get subplebbit addresses:", err);
-          return;
-        }
-
-        setupSubplebbitListeners(plebbit, addresses, db, (err, subs) => {
-          if (err) {
-            console.error("Failed to setup subplebbit listeners:", err);
-            return;
-          }
-          console.log("listening to updates for " + subs.length + " subplebbits");
-          process.stdin.resume();
-        });
-      });
-    });
-  });
+  const db = await getDb();
+  const plebbit = await getPlebbitClient();
+  const addresses = await getSubplebbitAddresses();
+  const subs = await setupSubplebbitListeners(plebbit, addresses, db);
+  console.log("listening to updates for " + subs.length + " subplebbits");
+  process.stdin.resume();
 }
 
 main();

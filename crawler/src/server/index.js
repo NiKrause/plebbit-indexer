@@ -1,13 +1,15 @@
 // server.js (as ES Module)
-import 'dotenv/config';
+import 'dotenv/config'; // This loads .env automatically
 import express from 'express';
 import cors from 'cors';
+import { getDb } from '../db.js';
 
-export async function startServer(db) {
+export async function startServer() {
   const app = express();
   const PORT = 3001;
   app.use(cors());
 
+  const db = await getDb();
 
   // Check if posts table exists and count records
   db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'", (err, table) => {
@@ -15,7 +17,6 @@ export async function startServer(db) {
       console.error('Error checking posts table:', err);
       return;
     }
-    console.log('Successfully checked posts table existence');
     
     if (!table) {
       console.log('Posts table does not exist');
