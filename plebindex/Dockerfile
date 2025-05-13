@@ -2,7 +2,8 @@ FROM node:20
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
+COPY . .
+#COPY package.json package-lock.json* ./
 RUN npm install
 
 # Accept build argument
@@ -10,7 +11,6 @@ ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
 # Copy the rest of the application code
-COPY . .
 
 # Build the application
 RUN npm run build
