@@ -7,7 +7,6 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - plebbit_db:/app/plebbit_db
       - ./plebindex:/app
     environment:
       - NODE_ENV=${NODE_ENV}
@@ -23,22 +22,27 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - plebbit_db:/app/plebbit_db
       - ./crawler:/app
+      - ./data/plebbit:/app/data
     environment:
       - PLEBBIT_WS_URL=${PLEBBIT_WS_URL}
-    # depends_on:
-      # - plebbit-cli
+    depends_on:
+      - plebbit-cli
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    command: >
+      sh -c '
+
+      '
   plebbit-cli:
     build: ./plebbit-cli
     image: plebbit-cli
     ports:
       - "9138:9138"
     volumes:
-      - plebbit_db:/app/plebbit_db
-    command: ["/app/plebbit-cli/bin/run", "daemon"]
+      - plebbit_cli_data:/app
+      - ./start-plebbit.sh:/app/start-plebbit.sh
+    command: ["sh", "-c", "./start-plebbit.sh"]
   nginx:
     image: nginx:1.22.0
     depends_on:
@@ -64,4 +68,4 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
-  plebbit_db:
+  plebbit_cli_data:

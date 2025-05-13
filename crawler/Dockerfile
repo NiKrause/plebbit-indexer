@@ -2,7 +2,10 @@ FROM node:20
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
+# Install netcat for the wait script
+RUN apt-get update && apt-get install -y netcat-traditional
+
+COPY package.json ./
 RUN npm install
 
 # Accept build argument
@@ -11,4 +14,9 @@ ENV PLEBBIT_WS_URL=$PLEBBIT_WS_URL
 
 COPY . .
 
-CMD ["npm", "start"]
+# Make the wait script executable
+COPY wait-for-plebbit.sh /app/
+RUN chmod +x /app/wait-for-plebbit.sh
+
+# Use the wait script as entrypoint
+ENTRYPOINT ["/app/wait-for-plebbit.sh"]

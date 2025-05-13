@@ -2,14 +2,12 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { getDb } from '../db.js';
 
-export async function startServer() {
+export async function startServer(db) {
   const app = express();
   const PORT = 3001;
   app.use(cors());
 
-  const db = await getDb();
 
   // Check if posts table exists and count records
   db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'", (err, table) => {

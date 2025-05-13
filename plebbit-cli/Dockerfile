@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-
+COPY start-plebbit.sh /app/data/start-plebbit.sh
 RUN git clone https://github.com/plebbit/plebbit-cli.git && \
     cd plebbit-cli && \
     yarn install && \
