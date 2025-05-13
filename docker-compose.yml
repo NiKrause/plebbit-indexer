@@ -40,9 +40,9 @@ services:
     ports:
       - "9138:9138"
     volumes:
-      - plebbit_cli_data:/app
-      - ./start-plebbit.sh:/app/start-plebbit.sh
-    command: ["sh", "-c", "./start-plebbit.sh"]
+      - ./plebbit-cli/start-plebbit.sh:/start-plebbit.sh:ro
+      - ./data/plebbit:/app/data
+    command: ["sh", "-c", "/start-plebbit.sh"]
   nginx:
     image: nginx:1.22.0
     depends_on:
@@ -66,6 +66,3 @@ services:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
-volumes:
-  plebbit_cli_data:
