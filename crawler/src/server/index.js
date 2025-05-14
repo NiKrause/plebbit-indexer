@@ -73,8 +73,26 @@ export async function startServer(_db) {
     }
   });
 
-  
-  app.get('/api/queue', async (req, res) => {
+  // Add this middleware function after the imports and before the routes
+  const requireAuth = (req, res, next) => {
+    // Check for token in Authorization header
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+    
+    // Check for auth key in query parameters
+    const authKey = req.query.auth;
+    
+    // Allow access if either token or auth key is valid
+    if ((token && token === process.env.PLEBBIT_AUTH_TOKEN) || 
+        (authKey && authKey === process.env.PLEBBIT_AUTH_KEY)) {
+      return next();
+    }
+    
+    return res.status(401).json({ error: 'Unauthorized - Invalid or missing authentication' });
+  };
+
+  // Modify the queue endpoints to use the middleware
+  app.get('/api/queue', requireAuth, async (req, res) => {
     try {
       const db = getDb();
       const { status } = req.query;
@@ -99,7 +117,7 @@ export async function startServer(_db) {
     }
   });
   
-  app.get('/api/queue/stats', async (req, res) => {
+  app.get('/api/queue/stats', requireAuth, async (req, res) => {
     try {
       const db = getDb();
       
@@ -131,7 +149,7 @@ export async function startServer(_db) {
     }
   });
   
-  app.post('/api/queue/add', express.json(), async (req, res) => {
+  app.post('/api/queue/add', requireAuth, express.json(), async (req, res) => {
     try {
       const { address } = req.body;
       
@@ -149,7 +167,7 @@ export async function startServer(_db) {
     }
   });
   
-  app.post('/api/queue/retry', express.json(), async (req, res) => {
+  app.post('/api/queue/retry', requireAuth, express.json(), async (req, res) => {
     try {
       const { address } = req.body;
       
@@ -167,7 +185,7 @@ export async function startServer(_db) {
     }
   });
   
-  app.post('/api/queue/refresh', async (req, res) => {
+  app.post('/api/queue/refresh', requireAuth, async (req, res) => {
     try {
       const db = getDb();
       const count = await refreshSubplebbitQueue(db);
@@ -179,7 +197,7 @@ export async function startServer(_db) {
     }
   });
   
-  app.post('/api/queue/process', async (req, res) => {
+  app.post('/api/queue/process', requireAuth, async (req, res) => {
     try {
       const { limit } = req.body || {};
       const batchSize = limit ? parseInt(limit) : 5;
@@ -195,6 +213,65 @@ export async function startServer(_db) {
       res.json({ success: true, message: `Processing ${batchSize} items from queue` });
     } catch (err) {
       console.error('Error processing queue:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/queue/errors', requireAuth, async (req, res) => {
+    try {
+      const db = getDb();
+      
+      const errorsQuery = `
+        SELECT 
+          address,
+          status,
+          error_message,
+          failure_count,
+          success_count,
+          total_runs,
+          updated_at
+        FROM subplebbit_queue
+        WHERE status = 'failed'
+        ORDER BY failure_count DESC, updated_at DESC
+      `;
+      
+      const stmt = db.prepare(errorsQuery);
+      const rows = stmt.all();
+      
+      // Group by address
+      const groupedErrors = rows.reduce((acc, row) => {
+        if (!acc[row.address]) {
+          acc[row.address] = {
+            address: row.address,
+            errors: [],
+            total_failures: 0,
+            total_successes: 0,
+            total_runs: 0
+          };
+        }
+        
+        acc[row.address].errors.push({
+          status: row.status,
+          error_message: row.error_message,
+          failure_count: row.failure_count,
+          success_count: row.success_count,
+          total_runs: row.total_runs,
+          updated_at: row.updated_at
+        });
+        
+        acc[row.address].total_failures += row.failure_count;
+        acc[row.address].total_successes += row.success_count;
+        acc[row.address].total_runs += row.total_runs;
+        
+        return acc;
+      }, {});
+      
+      // Convert to array and sort by total failures
+      const result = Object.values(groupedErrors).sort((a, b) => b.total_failures - a.total_failures);
+      
+      res.json(result);
+    } catch (err) {
+      console.error('Error fetching queue errors:', err);
       res.status(500).json({ error: err.message });
     }
   });
