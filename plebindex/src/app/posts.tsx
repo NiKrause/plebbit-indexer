@@ -21,16 +21,43 @@ function PostsContent() {
   const searchTerm = searchParams.get('q');
 
   useEffect(() => {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-    const endpoint = searchTerm ? `/api/posts/search?q=${encodeURIComponent(searchTerm)}` : '/api/posts';
-    
-    fetch(`${apiBaseUrl}${endpoint}`)
-      .then(res => res.json())
-      .then(data => {
-        // Sort posts by timestamp in descending order (latest first)
-        const sortedPosts = [...data].sort((a, b) => b.timestamp - a.timestamp);
-        setPosts(sortedPosts);
-      });
+    const checkApiEndpoint = async (url: string) => {
+      try {
+        const response = await fetch(url, { method: 'OPTIONS' });
+        return response.ok;
+      } catch {
+        return false;
+      }
+    };
+
+    const getApiBaseUrl = async () => {
+      // First try NEXT_PUBLIC_API_BASE_URL if it exists
+      if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+        const isWorking = await checkApiEndpoint(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/posts`);
+        if (isWorking) return process.env.NEXT_PUBLIC_API_BASE_URL;
+      }
+
+      // Then try window.location.origin
+      if (typeof window !== 'undefined') {
+        const isWorking = await checkApiEndpoint(`${window.location.origin}/api/posts`);
+        if (isWorking) return window.location.origin;
+      }
+
+      // Fallback to localhost
+      return 'http://localhost:3001';
+    };
+
+    const fetchPosts = async () => {
+      const apiBaseUrl = await getApiBaseUrl();
+      const endpoint = searchTerm ? `/api/posts/search?q=${encodeURIComponent(searchTerm)}` : '/api/posts';
+      
+      const response = await fetch(`${apiBaseUrl}${endpoint}`);
+      const data = await response.json();
+      const sortedPosts = [...data].sort((a, b) => b.timestamp - a.timestamp);
+      setPosts(sortedPosts);
+    };
+
+    fetchPosts();
   }, [searchTerm]);
 
   const formatTimestamp = (timestamp: number) => {
