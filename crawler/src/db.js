@@ -60,7 +60,6 @@ export function getDb() {
     CREATE INDEX IF NOT EXISTS idx_subplebbit_queue_next_retry ON subplebbit_queue(next_retry_date);
   `);
   
-  // Überprüfen, ob die Tabellen existieren
   const tablesCheck = {
     posts: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'").get(),
     queue: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='subplebbit_queue'").get()
@@ -81,10 +80,8 @@ export function getDb() {
   return dbInstance;
 }
 
-// Hilfsfunktionen für die Subplebbit-Queue
 
 /**
- * Fügt eine Adresse zur Queue hinzu oder aktualisiert sie, wenn sie bereits existiert
  */
 export function queueSubplebbit(db, address) {
   const now = Date.now();
@@ -102,14 +99,11 @@ export function queueSubplebbit(db, address) {
 }
 
 /**
- * Aktualisiert den Status einer Adresse in der Queue
  */
 export function updateSubplebbitStatus(db, address, status, errorMessage = null) {
   const now = Date.now();
   let nextRetryDate = null;
   
-  // Wenn der Status 'failed' ist, berechne das nächste Wiederholungsdatum
-  // basierend auf der Anzahl der Fehlversuche (exponentielles Backoff)
   if (status === 'failed') {
     const currentFailures = db.prepare('SELECT failure_count FROM subplebbit_queue WHERE address = ?').get(address)?.failure_count || 0;
     const retryHours = Math.min(Math.pow(2, currentFailures), 24); // Max 24 Stunden Wartezeit
@@ -137,7 +131,7 @@ export function updateSubplebbitStatus(db, address, status, errorMessage = null)
 }
 
 /**
- * Holt die nächsten zu verarbeitenden Adressen aus der Queue
+
  */
 export function getNextSubplebbitsFromQueue(db, limit = 10) {
   const now = Date.now();
@@ -157,7 +151,7 @@ export function getNextSubplebbitsFromQueue(db, limit = 10) {
 }
 
 /**
- * Fügt mehrere Adressen zur Queue hinzu
+ * Queue multiple subplebbit addresses
  */
 export function queueMultipleSubplebbits(db, addresses) {
   const transaction = db.transaction((addressList) => {

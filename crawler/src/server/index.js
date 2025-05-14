@@ -73,9 +73,7 @@ export async function startServer(_db) {
     }
   });
 
-  // API-Endpunkte für die Queue-Verwaltung
   
-  // Alle Subplebbits in der Queue anzeigen
   app.get('/api/queue', async (req, res) => {
     try {
       const db = getDb();
@@ -101,7 +99,6 @@ export async function startServer(_db) {
     }
   });
   
-  // Queue-Statistiken anzeigen
   app.get('/api/queue/stats', async (req, res) => {
     try {
       const db = getDb();
@@ -134,7 +131,6 @@ export async function startServer(_db) {
     }
   });
   
-  // Eine Adresse manuell zur Queue hinzufügen
   app.post('/api/queue/add', express.json(), async (req, res) => {
     try {
       const { address } = req.body;
@@ -153,7 +149,6 @@ export async function startServer(_db) {
     }
   });
   
-  // Eine fehlgeschlagene Adresse manuell erneut versuchen
   app.post('/api/queue/retry', express.json(), async (req, res) => {
     try {
       const { address } = req.body;
@@ -172,7 +167,6 @@ export async function startServer(_db) {
     }
   });
   
-  // Queue manuell aktualisieren
   app.post('/api/queue/refresh', async (req, res) => {
     try {
       const db = getDb();
@@ -185,7 +179,6 @@ export async function startServer(_db) {
     }
   });
   
-  // Queue manuell verarbeiten
   app.post('/api/queue/process', async (req, res) => {
     try {
       const { limit } = req.body || {};

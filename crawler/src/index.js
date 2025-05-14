@@ -28,19 +28,19 @@ import { startServer } from './server/index.js';
  * - [ ] if a subplebbit is updated, it could be published to a pubsub topic so that other services can pick it up - question: is an ipns publish sufficient or should we use a pubsub topic?
  */
 async function main() {
-  startServer(); // Start the REST server
+  startServer(); // starts the server on port 3001
 
   const db = getDb();
   const plebbit = await getPlebbitClient();
   
-  // Initialisiere die Queue mit Adressen von GitHub
+  // Initialize the queue with addresses from GitHub
   const queuedCount = await initializeSubplebbitQueue(db);
   console.log(`Initialized queue with ${queuedCount} subplebbit addresses`);
   
-  // Starte den Queue-Prozessor, der alle 15 Minuten läuft
+  // Start the queue processor, which runs every 15 minutes
   startQueueProcessor(plebbit, db, 15);
   
-  // Aktualisiere die Queue alle 6 Stunden mit neuen Adressen von GitHub
+  // Refresh the queue every 6 hours with new addresses from GitHub
   setInterval(() => {
     refreshSubplebbitQueue(db)
       .then(count => console.log(`Refreshed queue with ${count} addresses`))

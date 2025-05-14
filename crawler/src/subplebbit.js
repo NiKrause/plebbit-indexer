@@ -3,7 +3,7 @@ import { withTimeout } from './utils.js';
 import { queueMultipleSubplebbits, getNextSubplebbitsFromQueue, updateSubplebbitStatus } from './db.js';
 
 /**
- * Holt die Subplebbit-Adressen von GitHub und fügt sie zur Queue hinzu
+ * Fetches subplebbit addresses from GitHub and adds them to the queue
  */
 export async function getSubplebbitAddresses() {
   try {
@@ -18,7 +18,7 @@ export async function getSubplebbitAddresses() {
 }
 
 /**
- * Initialisiert die Queue mit Adressen von GitHub
+ * Initializes the queue with addresses from GitHub
  */
 export async function initializeSubplebbitQueue(db) {
   const addresses = await getSubplebbitAddresses();
@@ -30,7 +30,7 @@ export async function initializeSubplebbitQueue(db) {
 }
 
 /**
- * Verarbeitet die nächsten Subplebbits aus der Queue
+ * Processes the next subplebbits from the queue
  */
 export async function processSubplebbitQueue(plebbit, db, batchSize = 10) {
   const queueItems = getNextSubplebbitsFromQueue(db, batchSize);
@@ -40,7 +40,7 @@ export async function processSubplebbitQueue(plebbit, db, batchSize = 10) {
   for (const item of queueItems) {
     const { address } = item;
     try {
-      // Markiere als "in Bearbeitung"
+      // Mark as "in progress"
       updateSubplebbitStatus(db, address, 'processing');
       
       const sub = await withTimeout(
@@ -58,16 +58,16 @@ export async function processSubplebbitQueue(plebbit, db, batchSize = 10) {
       console.log(`Indexing subplebbit at ${address}`);
       await indexSubplebbit(sub, db);
       
-      // Markiere als erfolgreich
+      // Mark as successful
       updateSubplebbitStatus(db, address, 'success');
       
-      // Listener für Updates einrichten
+      // Set up listener for updates
       setupSubplebbitListener(sub, db, address);
       
       subs.push(sub);
     } catch (err) {
       console.error(`Error processing subplebbit at address ${address}:`, err);
-      // Markiere als fehlgeschlagen mit Fehlermeldung
+      // Mark as failed with error message
       updateSubplebbitStatus(db, address, 'failed', err.message || 'Unknown error');
     }
   }
@@ -76,7 +76,7 @@ export async function processSubplebbitQueue(plebbit, db, batchSize = 10) {
 }
 
 /**
- * Richtet einen Listener für ein einzelnes Subplebbit ein
+ * Sets up a listener for a single subplebbit
  */
 export function setupSubplebbitListener(sub, db, address) {
   // Listen for errors on this subplebbit
@@ -129,26 +129,26 @@ export async function indexSubplebbit(sub, db) {
 }
 
 /**
- * Richtet Listener für alle Subplebbits ein (Legacy-Methode, verwendet jetzt die Queue)
+ * Sets up listeners for all subplebbits (Legacy method, now uses queue)
  */
 export async function setupSubplebbitListeners(plebbit, addresses, db) {
-  // Zuerst alle Adressen zur Queue hinzufügen
+  // First add all addresses to the queue
   queueMultipleSubplebbits(db, addresses);
   
-  // Dann die Queue verarbeiten
+  // Then process the queue
   return await processSubplebbitQueue(plebbit, db, addresses.length);
 }
 
 /**
- * Startet einen regelmäßigen Queue-Prozessor, der die Queue alle X Minuten überprüft
+ * Starts a regular queue processor that checks the queue every X minutes
  */
 export function startQueueProcessor(plebbit, db, intervalMinutes = 15) {
   console.log(`Starting queue processor with interval of ${intervalMinutes} minutes`);
   
-  // Sofort die Queue einmal verarbeiten
+  // Process the queue immediately once
   processSubplebbitQueue(plebbit, db);
   
-  // Dann regelmäßig die Queue überprüfen
+  // Then check the queue regularly
   const intervalMs = intervalMinutes * 60 * 1000;
   const intervalId = setInterval(() => {
     processSubplebbitQueue(plebbit, db);
@@ -158,7 +158,7 @@ export function startQueueProcessor(plebbit, db, intervalMinutes = 15) {
 }
 
 /**
- * Aktualisiert die Queue mit neuen Adressen von GitHub
+ * Updates the queue with new addresses from GitHub
  */
 export async function refreshSubplebbitQueue(db) {
   const addresses = await getSubplebbitAddresses();
