@@ -147,8 +147,44 @@ npm run dev
 
 ## API
 
+### Public Endpoints
+
 - `GET /api/posts`  
   Returns all indexed posts as JSON.
+
+- `GET /api/posts/search?q=<search_term>`  
+  Search posts by title, content, author name, or subplebbit address.
+  Returns matching posts as JSON.
+
+### Protected Endpoints
+The following endpoints require authentication using either:
+- Bearer token in the Authorization header: `Authorization: Bearer <token>`
+- Auth key as a query parameter: `?auth=<auth_key>`
+
+- `GET /api/queue`  
+  Returns the current subplebbit queue status.
+  Optional query parameter: `?status=<status>` to filter by status.
+
+- `GET /api/queue/stats`  
+  Returns statistics about the queue including counts by status.
+
+- `GET /api/queue/errors`  
+  Returns detailed error information for failed subplebbit processing attempts.
+
+- `POST /api/queue/add`  
+  Add a new subplebbit address to the queue.
+  Body: `{ "address": "<subplebbit_address>" }`
+
+- `POST /api/queue/retry`  
+  Retry processing a failed subplebbit.
+  Body: `{ "address": "<subplebbit_address>" }`
+
+- `POST /api/queue/refresh`  
+  Refresh the subplebbit queue with new addresses.
+
+- `POST /api/queue/process`  
+  Process items from the queue.
+  Optional body: `{ "limit": <number> }` to specify batch size (default: 5)
 
 ---
 
