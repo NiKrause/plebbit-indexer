@@ -3,7 +3,7 @@ FROM node:20
 WORKDIR /app
 
 # Install netcat for the wait script
-RUN apt-get update && apt-get install -y netcat-traditional
+RUN apt-get update
 
 COPY package.json ./
 RUN npm install
