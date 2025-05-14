@@ -48,29 +48,5 @@ export function getDb() {
     console.log("posts table is available");
   }
   
-  dbInstance.getAsync = function(sql, params) {
-    const stmt = this.prepare(sql);
-    return Promise.resolve(stmt.get(params));
-  };
-  
-  dbInstance.allAsync = function(sql, params) {
-    const stmt = this.prepare(sql);
-    return Promise.resolve(stmt.all(params));
-  };
-  
-  dbInstance.runAsync = function(sql, params) {
-    const stmt = this.prepare(sql);
-    const result = stmt.run(params);
-    return Promise.resolve({
-      lastID: result.lastInsertRowid,
-      changes: result.changes
-    });
-  };
-  
-  dbInstance.exec = function(sql) {
-    this.exec(sql);
-    return Promise.resolve();
-  };
-  
   return dbInstance;
 }
