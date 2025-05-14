@@ -2,7 +2,9 @@
 import 'dotenv/config'; 
 import express from 'express';
 import cors from 'cors';
-import { getDb } from '../db.js';
+import { getDb, updateSubplebbitStatus, queueSubplebbit } from '../db.js';
+import { refreshSubplebbitQueue, processSubplebbitQueue } from '../subplebbit.js';
+import { getPlebbitClient } from '../plebbitClient.js';
 
 export async function startServer(_db) {
   const db = getDb(); 
@@ -67,6 +69,139 @@ export async function startServer(_db) {
       res.json(rows);
     } catch (err) {
       console.error('Error searching posts:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // API-Endpunkte für die Queue-Verwaltung
+  
+  // Alle Subplebbits in der Queue anzeigen
+  app.get('/api/queue', async (req, res) => {
+    try {
+      const db = getDb();
+      const { status } = req.query;
+      
+      let query = 'SELECT * FROM subplebbit_queue';
+      const params = [];
+      
+      if (status) {
+        query += ' WHERE status = ?';
+        params.push(status);
+      }
+      
+      query += ' ORDER BY updated_at DESC';
+      
+      const stmt = db.prepare(query);
+      const rows = params.length > 0 ? stmt.all(params) : stmt.all();
+      
+      res.json(rows);
+    } catch (err) {
+      console.error('Error fetching queue:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  // Queue-Statistiken anzeigen
+  app.get('/api/queue/stats', async (req, res) => {
+    try {
+      const db = getDb();
+      
+      const statsQuery = `
+        SELECT
+          status,
+          COUNT(*) as count,
+          SUM(success_count) as total_successes,
+          SUM(failure_count) as total_failures,
+          SUM(total_runs) as total_runs
+        FROM subplebbit_queue
+        GROUP BY status
+      `;
+      
+      const stmt = db.prepare(statsQuery);
+      const stats = stmt.all();
+      
+      const totalQuery = 'SELECT COUNT(*) as total FROM subplebbit_queue';
+      const totalStmt = db.prepare(totalQuery);
+      const { total } = totalStmt.get();
+      
+      res.json({
+        total,
+        stats
+      });
+    } catch (err) {
+      console.error('Error fetching queue stats:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  // Eine Adresse manuell zur Queue hinzufügen
+  app.post('/api/queue/add', express.json(), async (req, res) => {
+    try {
+      const { address } = req.body;
+      
+      if (!address) {
+        return res.status(400).json({ error: 'Address is required' });
+      }
+      
+      const db = getDb();
+      queueSubplebbit(db, address);
+      
+      res.json({ success: true, message: `Address ${address} added to queue` });
+    } catch (err) {
+      console.error('Error adding to queue:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  // Eine fehlgeschlagene Adresse manuell erneut versuchen
+  app.post('/api/queue/retry', express.json(), async (req, res) => {
+    try {
+      const { address } = req.body;
+      
+      if (!address) {
+        return res.status(400).json({ error: 'Address is required' });
+      }
+      
+      const db = getDb();
+      updateSubplebbitStatus(db, address, 'queued');
+      
+      res.json({ success: true, message: `Address ${address} queued for retry` });
+    } catch (err) {
+      console.error('Error retrying address:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  // Queue manuell aktualisieren
+  app.post('/api/queue/refresh', async (req, res) => {
+    try {
+      const db = getDb();
+      const count = await refreshSubplebbitQueue(db);
+      
+      res.json({ success: true, message: `Queue refreshed with ${count} addresses` });
+    } catch (err) {
+      console.error('Error refreshing queue:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  // Queue manuell verarbeiten
+  app.post('/api/queue/process', async (req, res) => {
+    try {
+      const { limit } = req.body || {};
+      const batchSize = limit ? parseInt(limit) : 5;
+      
+      const db = getDb();
+      const plebbit = await getPlebbitClient();
+      
+      // Asynchron verarbeiten, damit die API-Antwort nicht blockiert wird
+      processSubplebbitQueue(plebbit, db, batchSize)
+        .then(subs => console.log(`Processed ${subs.length} subplebbits from queue`))
+        .catch(err => console.error('Error processing queue:', err));
+      
+      res.json({ success: true, message: `Processing ${batchSize} items from queue` });
+    } catch (err) {
+      console.error('Error processing queue:', err);
       res.status(500).json({ error: err.message });
     }
   });
