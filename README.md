@@ -103,7 +103,7 @@ SERVER_NAME=example.com,www.example.com  # Comma-separated list of domains
 ```
 
 The initialization process:
-1. Creates dummy certificates to start nginx
+1. Creates dummy certificates and a nginx.conf for each domain to start nginx
 2. Deletes dummy certificates
 3. Requests real certificates from Let's Encrypt
 4. Creates symbolic links for all domains
