@@ -82,6 +82,41 @@ This will:
 - By default, the backend API runs on port `3001` and the frontend on port `3000`.
 - Environment variables can be set in the `docker-compose.yml` or via `.env` files.
 
+## SSL Certificate Configuration
+
+To enable HTTPS with Let's Encrypt certificates:
+
+1. Configure your domain(s) in the `.env` file:
+```bash
+SERVER_NAME=example.com,www.example.com  # Comma-separated list of domains
+```
+
+2. Initialize Let's Encrypt certificates:
+```bash
+./init-letsencrypt.sh
+```
+
+The initialization process:
+1. Creates dummy certificates to start nginx
+2. Deletes dummy certificates
+3. Requests real certificates from Let's Encrypt
+4. Creates symbolic links for all domains
+5. Reloads nginx with the new certificates
+
+The setup uses:
+- `nginx/nginx.conf.template`: Template for nginx configuration
+- `nginx/docker-entrypoint.d/001-parse-template.sh`: Script to generate nginx configs
+- Docker containers:
+  - `nginx`: Serves the application and handles SSL
+  - `certbot`: Manages Let's Encrypt certificates
+- Required volume mounts:
+  - `./data/certbot/conf:/etc/letsencrypt`: Stores certificates
+  - `./data/certbot/www:/var/www/certbot`: Webroot for Let's Encrypt validation
+  - `./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template`: Nginx template
+  - `./nginx/docker-entrypoint.d/:/docker-entrypoint.d/`: Entrypoint scripts
+
+Certificates will auto-renew every 12 days controlled by certbot container.
+
 ---
 
 ## Development
