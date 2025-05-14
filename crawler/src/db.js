@@ -1,12 +1,14 @@
-import sqlite3 from 'sqlite3';
-const sqlite = sqlite3.verbose();
+import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 
-export async function getDb() {
+let dbInstance = null;
+
+export function getDb() {
+  if (dbInstance) return dbInstance;
   
   const dbPath = process.env.DB_PATH ||
-    (process.cwd().endsWith('crawler') 
+    (process.cwd().endsWith('crawler')
       ? 'db/plebbit_posts.db'
       : path.join(path.dirname(new URL(import.meta.url).pathname), '../db/plebbit_posts.db'));
   
@@ -15,25 +17,60 @@ export async function getDb() {
     fs.mkdirSync(dbDir, { recursive: true });
   }
   
-  const db = new sqlite.Database(dbPath);
-  console.log("db opened", db);
-  await db.exec(`
+  dbInstance = new Database(dbPath, {
+    prepareRetain: true,
+    verbose: console.log
+  });
+  
+  dbInstance.pragma('journal_mode = WAL');
+  dbInstance.pragma('synchronous = NORMAL');
+  
+  dbInstance.exec(`
     CREATE TABLE IF NOT EXISTS posts (
       id TEXT PRIMARY KEY,
-      timestamp INTEGER,
-      title TEXT,
+      timestamp INTEGER NOT NULL,
+      title TEXT NOT NULL,
       content TEXT,
-      subplebbitAddress TEXT,
+      subplebbitAddress TEXT NOT NULL,
       authorAddress TEXT,
       authorDisplayName TEXT
-    )
+    );
+    
+    -- Indizes für häufige Abfragen
+    CREATE INDEX IF NOT EXISTS idx_posts_subplebbit ON posts(subplebbitAddress);
+    CREATE INDEX IF NOT EXISTS idx_posts_timestamp ON posts(timestamp);
   `);
-  // Verify the table was created
-  const tableCheck = await db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'");
+  
+  const tableCheck = dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'").get();
   if (!tableCheck) {
     throw new Error('Failed to create posts table');
   } else {
     console.log("posts table is available");
   }
-  return db;
+  
+  dbInstance.getAsync = function(sql, params) {
+    const stmt = this.prepare(sql);
+    return Promise.resolve(stmt.get(params));
+  };
+  
+  dbInstance.allAsync = function(sql, params) {
+    const stmt = this.prepare(sql);
+    return Promise.resolve(stmt.all(params));
+  };
+  
+  dbInstance.runAsync = function(sql, params) {
+    const stmt = this.prepare(sql);
+    const result = stmt.run(params);
+    return Promise.resolve({
+      lastID: result.lastInsertRowid,
+      changes: result.changes
+    });
+  };
+  
+  dbInstance.exec = function(sql) {
+    this.exec(sql);
+    return Promise.resolve();
+  };
+  
+  return dbInstance;
 }

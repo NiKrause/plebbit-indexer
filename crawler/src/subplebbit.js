@@ -10,23 +10,25 @@ export async function getSubplebbitAddresses() {
 export async function indexSubplebbit(sub, db) {
   if (Object.keys(sub.posts.pageCids).length === 0) return Object.values(sub.posts.pages)[0].comments; // no need to fetch page cids, just use the preloaded page
   let postsPage = await sub.posts.getPage(sub.posts.pageCids.new);
+  // console.log("postsPage", postsPage);
   let allPosts = [...postsPage.comments];
-  const lastPostIndexed = await db.getLastPostIndexed(sub.address);
+  // const lastPostIndexed = await db.getLastPostIndexed(sub.address);
   while (postsPage.nextCid) {
     try {
       postsPage = await sub.posts.getPage(postsPage.nextCid);
       allPosts = allPosts.concat(postsPage.comments);
 
-      if (lastPostIndexed && allPosts.some(post => post.cid === lastPostIndexed)) {
-        // no need to keep going and load new pages as we've reached the last post indexed
-        // 'new' is sorted by post creation time, so if we've reached the last post indexed, there's no new posts to index
-        break;
-      }
+        // if (lastPostIndexed && allPosts.some(post => post.cid === lastPostIndexed)) {
+        //   // no need to keep going and load new pages as we've reached the last post indexed
+        //   // 'new' is sorted by post creation time, so if we've reached the last post indexed, there's no new posts to index
+        //   break;
+        // }
     } catch (err) {
       console.error(`Error loading next page (${postsPage.nextCid}):`, err);
       break;
     }
   }
+  console.log("now indexing ", allPosts.length, " posts");
   await indexPosts(db, allPosts);
 }
 

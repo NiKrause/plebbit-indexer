@@ -26,7 +26,7 @@ import { startServer } from './server/index.js';
 async function main() {
   startServer(); // Start the REST server
 
-  const db = await getDb();
+  const db = getDb(); // getDb ist jetzt synchron
   const plebbit = await getPlebbitClient();
   const addresses = await getSubplebbitAddresses();
   const subs = await setupSubplebbitListeners(plebbit, addresses, db);
