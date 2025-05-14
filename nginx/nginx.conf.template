@@ -1,6 +1,6 @@
-upstream plebindex {
-    server plebindex:3000;
-}
+#upstream plebindex {
+#    server plebindex:3000;
+#}
 
 map $http_upgrade $connection_upgrade {
        default upgrade;
@@ -8,7 +8,7 @@ map $http_upgrade $connection_upgrade {
 }
 server {
     listen 80;
-    server_name ${SERVER_NAME};
+    server_name ${domain};
     location / {
         return 301 https://$host$request_uri;
     }
@@ -19,10 +19,10 @@ server {
 }
 server {
     listen 443 ssl;
-    server_name ${SERVER_NAME};
+    server_name ${domain};
 
-    ssl_certificate /etc/letsencrypt/live/${SERVER_NAME}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${SERVER_NAME}/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/${domain}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${domain}/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
@@ -30,7 +30,7 @@ server {
     keepalive_requests 1000;
 
     location / {
-        proxy_pass http://relay_service;
+        proxy_pass http://plebindex:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
