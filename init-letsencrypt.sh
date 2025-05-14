@@ -57,7 +57,7 @@ done
 echo
 
 echo "### Requesting Let's Encrypt certificate for $domains ..."
-#Join $domains to -d args
+
 domain_args=""
 for domain in "${domains[@]}"; do
   domain_args="$domain_args -d $domain"
@@ -71,6 +71,7 @@ esac
 
 # Enable staging mode if needed
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
+echo "### Requesting Let's Encrypt certificate for $domains with $staging_arg $email_arg $domain_args"
 
 docker compose run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
@@ -81,6 +82,19 @@ docker compose run --rm --entrypoint "\
     --agree-tos \
     --force-renewal" certbot
 echo
+
+# Create symbolic links for all domains
+echo "### Creating symbolic links for all domains ..."
+first_domain="${domains[0]}"
+# Create link for the first domain (without -0001)
+docker compose run --rm --entrypoint "\
+  ln -sf /etc/letsencrypt/live/$first_domain-0001 /etc/letsencrypt/live/$first_domain" certbot
+
+# Create links for additional domains
+for domain in "${domains[@]:1}"; do
+  docker compose run --rm --entrypoint "\
+    ln -sf /etc/letsencrypt/live/$first_domain-0001 /etc/letsencrypt/live/$domain" certbot
+done
 
 echo "### Reloading nginx ..."
 docker compose exec nginx nginx -s reload
