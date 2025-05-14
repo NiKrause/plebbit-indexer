@@ -54,7 +54,7 @@ function PostsContent() {
               </a>
               {' • Posted by '}
               <a
-                href={`https://seedit.app/#/u/${post.authorAddress}`}
+                href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: '#888', textDecoration: 'underline' }}
