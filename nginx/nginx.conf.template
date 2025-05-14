@@ -1,7 +1,3 @@
-#upstream plebindex {
-#    server plebindex:3000;
-#}
-
 map $http_upgrade $connection_upgrade {
        default upgrade;
         '' close;
@@ -31,6 +27,22 @@ server {
 
     location / {
         proxy_pass http://plebindex:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 12h;
+        proxy_connect_timeout 12h;
+        proxy_send_timeout 12h;
+        proxy_buffers 8 32k;
+        proxy_buffer_size 64k;
+    }
+
+    location /api {
+        proxy_pass http://crawler:3001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;

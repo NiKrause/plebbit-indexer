@@ -4,8 +4,8 @@
 mkdir -p /etc/nginx/conf.d
 
 # Split SERVER_NAME into an array by comma and process each domain
-IFS=',' read -ra DOMAINS <<< "$SERVER_NAME"
-for domain in "${DOMAINS[@]}"; do
+IFS=','
+for domain in $SERVER_NAME; do
     echo "Processing domain: $domain"
     # Create a temporary config file for each domain
     export domain && envsubst '${domain}' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/${domain}.conf
