@@ -2,9 +2,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import SeeditLogo from '../app/seeditlogo';
 import SearchBar from '../app/search';
+import { useState, useEffect } from 'react';
 
 // Inline CSS für den Header
-const headerStyles = {
+const getHeaderStyles = (isMobile) => ({
   header: {
     width: '100%',
     borderBottom: '1px solid #e5e7eb',
@@ -17,13 +18,15 @@ const headerStyles = {
   },
   flexRow: {
     display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: isMobile ? 'center' : 'space-between',
+    gap: isMobile ? '16px' : '0'
   },
   logoContainer: {
     display: 'flex',
     alignItems: 'center',
-    marginRight: '16px',
+    marginRight: isMobile ? '0' : '16px',
     flexShrink: 0
   },
   logoText: {
@@ -33,8 +36,9 @@ const headerStyles = {
   },
   searchContainer: {
     flex: '1',
-    maxWidth: '400px',
-    margin: '0 16px'
+    width: isMobile ? '100%' : 'auto',
+    maxWidth: isMobile ? '100%' : '400px',
+    margin: isMobile ? '0' : '0 16px'
   },
   socialContainer: {
     display: 'flex',
@@ -49,9 +53,28 @@ const headerStyles = {
   iconLinkHover: {
     opacity: '0.8'
   }
-};
+});
 
 export default function Header() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    checkIfMobile();
+    
+    // Add event listener
+    window.addEventListener('resize', checkIfMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+  
+  const headerStyles = getHeaderStyles(isMobile);
+
   return (
     <header style={headerStyles.header}>
       <div style={headerStyles.container}>
