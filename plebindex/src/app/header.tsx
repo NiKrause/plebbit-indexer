@@ -2,10 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import SeeditLogo from '../app/seeditlogo';
 import SearchBar from '../app/search';
-import { useState, useEffect } from 'react';
 
-// Inline CSS für den Header
-const getHeaderStyles = (isMobile) => ({
+const styles = {
   header: {
     width: '100%',
     borderBottom: '1px solid #e5e7eb',
@@ -16,17 +14,9 @@ const getHeaderStyles = (isMobile) => ({
     margin: '0 auto',
     padding: '0 16px'
   },
-  flexRow: {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' : 'row',
-    alignItems: 'center',
-    justifyContent: isMobile ? 'center' : 'space-between',
-    gap: isMobile ? '16px' : '0'
-  },
   logoContainer: {
     display: 'flex',
     alignItems: 'center',
-    marginRight: isMobile ? '0' : '16px',
     flexShrink: 0
   },
   logoText: {
@@ -36,9 +26,8 @@ const getHeaderStyles = (isMobile) => ({
   },
   searchContainer: {
     flex: '1',
-    width: isMobile ? '100%' : 'auto',
-    maxWidth: isMobile ? '100%' : '400px',
-    margin: isMobile ? '0' : '0 16px'
+    maxWidth: '400px',
+    margin: '0 16px'
   },
   socialContainer: {
     display: 'flex',
@@ -49,57 +38,32 @@ const getHeaderStyles = (isMobile) => ({
   iconLink: {
     opacity: '1',
     transition: 'opacity 0.2s'
-  },
-  iconLinkHover: {
-    opacity: '0.8'
   }
-});
+};
 
 export default function Header() {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Initial check
-    checkIfMobile();
-    
-    // Add event listener
-    window.addEventListener('resize', checkIfMobile);
-    
-    // Cleanup
-    return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
-  
-  const headerStyles = getHeaderStyles(isMobile);
-
   return (
-    <header style={headerStyles.header}>
-      <div style={headerStyles.container}>
-        <div style={headerStyles.flexRow}>
-          {/* Logo und Name - linke Seite */}
-          <div style={headerStyles.logoContainer}>
+    <header style={styles.header}>
+      <div style={styles.container}>
+        <div className="header-flex-row">
+          <div style={styles.logoContainer}>
             <Link href="https://seedit.app/" target="_blank" rel="noopener noreferrer">
               <SeeditLogo />
             </Link>
-            <span style={headerStyles.logoText}>Plebscan</span>
+            <span style={styles.logoText}>Plebscan</span>
           </div>
           
-          {/* Suchleiste - mittlerer Bereich */}
-          <div style={headerStyles.searchContainer}>
+          <div style={styles.searchContainer} className="search-container">
             <SearchBar />
           </div>
           
-          {/* Social Media Links - rechte Seite */}
-          <div style={headerStyles.socialContainer}>
+          <div style={styles.socialContainer}>
             <Link
               href="https://github.com/NiKrause/plebbit-indexer/"
               target="_blank"
               rel="noopener noreferrer"
               title="GitHub Repository"
-              style={headerStyles.iconLink}
+              style={styles.iconLink}
             >
               <Image src="/github.svg" alt="GitHub" width={24} height={24} />
             </Link>
@@ -108,13 +72,35 @@ export default function Header() {
               target="_blank"
               rel="noopener noreferrer"
               title="Telegram Channel"
-              style={headerStyles.iconLink}
+              style={styles.iconLink}
             >
               <Image src="/telegram.svg" alt="Telegram" width={24} height={24} />
             </Link>
           </div>
         </div>
       </div>
+      <style jsx>{`
+        .header-flex-row {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+        
+        @media (max-width: 767px) {
+          .header-flex-row {
+            flex-direction: column;
+            gap: 16px;
+            justify-content: center;
+          }
+          
+          .search-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+          }
+        }
+      `}</style>
     </header>
   );
 }
