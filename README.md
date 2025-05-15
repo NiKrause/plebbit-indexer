@@ -1,6 +1,6 @@
 # plebbit-indexer
 
-A full-stack indexer and frontend for the Plebbit protocol.
+A Plebbit crawler, indexer and UI.
 
 - **Crawler**: Indexes posts from all known subplebbits and exposes them via a REST API.
 - **Plebindex**: Next.js frontend to search and view indexed posts.
