@@ -198,6 +198,9 @@ The following endpoints require authentication using either:
 - `POST /api/queue/retry`  
   Retry processing a failed subplebbit.
   Body: `{ "address": "<subplebbit_address>" }`
+  Example: ```curl -X POST "https://plebscan.org/api/queue/retry?auth=xyz" \
+  -H "Content-Type: application/json" \
+  -d '{"address": "leblore.eth"}'```
 
 - `POST /api/queue/refresh`  
   Refresh the subplebbit queue with new addresses.

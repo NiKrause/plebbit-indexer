@@ -43,7 +43,7 @@ describe('Subplebbit functionality', function () {
     assert(addresses.length > 0, 'Should return at least one address');
   });
 
-  it.only('should index the first subplebbit and be queryable via API', async function() {
+  it('should index the first subplebbit and be queryable via API', async function() {
     // await db.runAsync('DELETE FROM posts');
     const addresses = await getSubplebbitAddresses();
     const firstAddress = addresses[0];
@@ -60,7 +60,7 @@ describe('Subplebbit functionality', function () {
     // assert('id' in response.body[0], 'Post should have an id');
   }, 200000);
 
-  it.only('should check if posts are available', async function() { //when we have fresh db this will fail
+  it('should check if posts are available', async function() { //when we have fresh db this will fail
     console.log("checking if posts are available");
     const response = await request.get('/api/posts');
     assert.equal(response.status, 200);
@@ -80,7 +80,7 @@ describe('Subplebbit functionality', function () {
    }, 20000);
 
 
-  it.only('should search posts for the word "piracy"', async function() {
+  it('should search posts for the word "piracy"', async function() {
     const sub = await plebbit.getSubplebbit("plebpiracy.eth");
     await sub.update();
     await indexSubplebbit(sub, db);
@@ -99,5 +99,36 @@ describe('Subplebbit functionality', function () {
       assert(hasPiracy, 'Each returned post should contain the word "piracy" in some field');
     });
   }, 20000);
+
+  it.only('should index pleblore.eth and check for a specific comment', async function() {
+    // Target the specific subplebbit "pleblore.eth"
+    const address = "pleblore.eth";
+    console.log("Testing specific subplebbit address:", address);
+    
+    // Get the subplebbit object
+    const sub = await plebbit.getSubplebbit(address);
+    await sub.update();
+    
+    // Index the subplebbit
+    await indexSubplebbit(sub, db);
+
+    // Verify the subplebbit was indexed by checking API
+    const postsResponse = await request.get('/api/posts');
+    assert.equal(postsResponse.status, 200);
+    assert(Array.isArray(postsResponse.body), 'Should return an array of posts');
+    assert(postsResponse.body.length > 0, 'Should return at least one post');
+    
+    // Find posts from pleblore.eth
+    const pleblorePostsResponse = await request.get('/api/posts/search?q=pleblore.eth');
+    assert.equal(pleblorePostsResponse.status, 200);
+    assert(Array.isArray(pleblorePostsResponse.body), 'Should return an array of posts');
+    
+    // Check if the specific comment exists
+    const targetCid = "Qmc6i3fZ9BDTt3xyjZywPaLYkG8BzuRzp9QhVmBcSQpgWp";
+    const specificPost = pleblorePostsResponse.body.find(post => post.id === targetCid);
+    
+    assert(specificPost, `Comment with CID ${targetCid} should exist in pleblore.eth`);
+    console.log("Found the specific comment:", specificPost);
+  }, 200000);
 
 }, 20000); 
