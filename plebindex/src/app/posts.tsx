@@ -129,7 +129,7 @@ async function PostsContent({ searchTerm }: { searchTerm?: string | null }) {
 
 export default async function Posts({ searchParams }: { searchParams?: { q?: string } }) {
   // Get the search parameter from URL query
-  const searchTerm = (await searchParams)?.q || null;
+  const searchTerm = searchParams?.q || null;
   
   return (
     <Suspense fallback={<div>Loading...</div>}>
