@@ -21,9 +21,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: process.env.NEXT_PUBLIC_APP_TITLE ?? "Plebindex",
     description: process.env.NEXT_PUBLIC_APP_DESCRIPTION ?? "",
+    icons: {
+      icon: '/favicon.ico',
+    },
   };
 }
 
+// ... existing code ...
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,8 +35,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen p-4 md:p-8`}>
+        <div className="container mx-auto">
+          {children}
+        </div>
       </body>
     </html>
   );
