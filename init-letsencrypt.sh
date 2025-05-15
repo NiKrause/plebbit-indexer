@@ -46,6 +46,21 @@ done
 echo "### Starting nginx ..."
 docker compose up --force-recreate -d nginx
 echo
+# Create symbolic links for all domains
+echo "### Creating symbolic links for all domains ..."
+first_domain="${domains[0]}"
+# Create link for the first domain (without -0001)
+docker compose run --rm --entrypoint "\
+  ln -sf /etc/letsencrypt/live/$first_domain-0001 /etc/letsencrypt/live/$first_domain" certbot
+
+# Create links for additional domains
+for domain in "${domains[@]:1}"; do
+  docker compose run --rm --entrypoint "\
+    ln -sf /etc/letsencrypt/live/$first_domain-0001 /etc/letsencrypt/live/$domain" certbot
+done
+
+# when enabled 
+#exit
 
 for domain in "${domains[@]}"; do
 echo "### Deleting dummy certificates for $domain ..."
