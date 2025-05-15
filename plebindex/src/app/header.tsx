@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import SeeditLogo from '../app/seeditlogo';
 import SearchBar from '../app/search';
+import './header.css';
 
 const styles = {
   header: {
@@ -79,28 +80,6 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <style jsx>{`
-        .header-flex-row {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: space-between;
-        }
-        
-        @media (max-width: 767px) {
-          .header-flex-row {
-            flex-direction: column;
-            gap: 16px;
-            justify-content: center;
-          }
-          
-          .search-container {
-            width: 100%;
-            max-width: 100%;
-            margin: 0;
-          }
-        }
-      `}</style>
     </header>
   );
 }
