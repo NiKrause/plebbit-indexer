@@ -7,6 +7,26 @@ A full-stack indexer and frontend for the Plebbit protocol.
 
 ---
 
+## Table of Contents
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Quickstart (with Docker Compose)](#quickstart-with-docker-compose)
+- [How it Works](#how-it-works)
+  - [Crawler (Backend)](#crawler-backend)
+  - [Plebindex (Frontend)](#plebindex-frontend)
+- [Configuration](#configuration)
+- [SSL Certificate Configuration](#ssl-certificate-configuration)
+- [Development](#development)
+  - [Run Crawler Locally](#run-crawler-locally)
+  - [Run Frontend Locally](#run-frontend-locally)
+- [API](#api)
+  - [Public Endpoints](#public-endpoints)
+  - [Protected Endpoints](#protected-endpoints)
+- [Notes](#notes)
+- [License](#license)
+
+---
+
 ## Features
 
 - Crawls all known subplebbit addresses and indexes their posts into a local SQLite database.
