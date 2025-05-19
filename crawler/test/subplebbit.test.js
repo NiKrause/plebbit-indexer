@@ -80,7 +80,7 @@ describe('Subplebbit functionality', function () {
    }, 20000);
 
 
-  it('should search posts for the word "piracy"', async function() {
+  it.only('should search posts for the word "piracy"', async function() {
     const sub = await plebbit.getSubplebbit("plebpiracy.eth");
     await sub.update();
     await indexSubplebbit(sub, db);
@@ -129,6 +129,37 @@ describe('Subplebbit functionality', function () {
     
     assert(specificPost, `Comment with CID ${targetCid} should exist in pleblore.eth`);
     console.log("Found the specific comment:", specificPost);
+  }, 200000);
+
+  it.only('should index redditdeath.sol and verify posts are available', async function() {
+    // Target the specific subplebbit "redditdeath.sol"
+    const address = "redditdeath.sol";
+    console.log("Testing specific subplebbit address:", address);
+    
+    // Get the subplebbit object
+    const sub = await plebbit.getSubplebbit(address);
+    await sub.update();
+    
+    // Index the subplebbit
+    await indexSubplebbit(sub, db);
+
+    // Verify the subplebbit was indexed by checking API
+    const postsResponse = await request.get('/api/posts');
+    assert.equal(postsResponse.status, 200);
+    assert(Array.isArray(postsResponse.body), 'Should return an array of posts');
+    
+    // Find posts from redditdeath.sol
+    const redditdeathPosts = postsResponse.body.filter(post => 
+      post.subplebbitAddress === address
+    );
+    
+    assert(redditdeathPosts.length > 0, `Should have posts from ${address}`);
+    console.log(`Found ${redditdeathPosts.length} posts from ${address}`);
+    
+    // Log first post details for verification
+    if (redditdeathPosts.length > 0) {
+      console.log("Sample post:", redditdeathPosts[0]);
+    }
   }, 200000);
 
 }, 20000); 

@@ -7,3 +7,4 @@ plebindex/.plebbit
 crawler/db
 data/
 .env
+.DS_Store
