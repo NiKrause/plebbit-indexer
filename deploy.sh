@@ -40,19 +40,19 @@ if [ "$REBUILD_PLEBINDEX" = true ]; then
   
   # For zero-downtime deployment (after configuration updates):
   # Uncomment these lines after implementing blue-green deployment
-  #if docker-compose ps | grep -q "plebindex01.*Up"; then
-  #  echo "plebindex01 is active, updating plebindex02..."
-  #  docker-compose build plebindex02
-  #  docker-compose up -d plebindex02
-  #  sleep 5 # Wait for service to be fully up
-  #  docker-compose exec nginx nginx -s reload # Switch traffic
-  #else
-  #  echo "plebindex02 is active, updating plebindex01..."
-  #  docker-compose build plebindex01
-  #  docker-compose up -d plebindex01
-  #  sleep 5 # Wait for service to be fully up
-  #  docker-compose exec nginx nginx -s reload # Switch traffic
-  #fi
+  if docker-compose ps | grep -q "plebindex01.*Up"; then
+   echo "plebindex01 is active, updating plebindex02..."
+   docker-compose build plebindex02
+   docker-compose up -d plebindex02
+   sleep 5 # Wait for service to be fully up
+   docker-compose exec nginx nginx -s reload # Switch traffic
+  else
+   echo "plebindex02 is active, updating plebindex01..."
+   docker-compose build plebindex01
+   docker-compose up -d plebindex01
+   sleep 5 # Wait for service to be fully up
+   docker-compose exec nginx nginx -s reload # Switch traffic
+  fi
   
   # Current implementation (before zero-downtime setup)
   docker-compose build plebindex
