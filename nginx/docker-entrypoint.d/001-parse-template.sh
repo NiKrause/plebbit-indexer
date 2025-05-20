@@ -18,23 +18,33 @@ mkdir -p "$data_path/conf"
 curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/tls_configs/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
 curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
 
-# Create default upstream configuration
-mkdir -p /etc/nginx/conf.d
-cat > /etc/nginx/conf.d/001-upstream.conf << EOF
+# Include the upstream configuration if it exists
+if [ -f "/etc/nginx/conf.d/001-upstream.conf" ]; then
+    cp /etc/nginx/conf.d/001-upstream.conf /etc/nginx/conf.d/001-upstream.conf.bak
+else
+    # Create default upstream configuration
+    mkdir -p /etc/nginx/conf.d
+    cat > /etc/nginx/conf.d/001-upstream.conf << EOF
 upstream plebindex_backend {
     server plebindex01:3000;
     # server plebindex02:3000;
 }
 EOF
+fi
 
-# Create default crawler upstream configuration
-mkdir -p /etc/nginx/conf.d
-cat > /etc/nginx/conf.d/002-crawler_upstream.conf << EOF
+# Include the crawler upstream configuration
+if [ -f "/etc/nginx/conf.d/002-crawler_upstream.conf" ]; then
+    cp /etc/nginx/conf.d/002-crawler_upstream.conf /etc/nginx/conf.d/002-crawler_upstream.conf.bak
+else
+    # Create default crawler upstream configuration
+    mkdir -p /etc/nginx/conf.d
+    cat > /etc/nginx/conf.d/002-crawler_upstream.conf << EOF
 upstream crawler_backend {
     server crawler01:3001;
     # server crawler02:3001;
 }
 EOF
+fi
 
 # Process the nginx configuration template
 # envsubst '${domain}' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf

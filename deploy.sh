@@ -33,14 +33,14 @@ if [ "$REBUILD_CRAWLER" = true ]; then
   echo -e "${YELLOW}Rebuilding and restarting crawler with zero-downtime...${NC}"
   
   # Check which crawler instance is currently active
-  if grep -q "crawler01" ./data/nginx/crawler_upstream.conf && ! grep -q "#server crawler01" ./data/nginx/crawler_upstream.conf; then
+  if grep -q "crawler01" ./data/nginx/002-crawler_upstream.conf && ! grep -q "#server crawler01" ./data/nginx/002-crawler_upstream.conf; then
     echo "crawler01 is active, updating crawler02..."
     docker-compose build crawler02
     docker-compose up -d crawler02
     sleep 5 # Wait for service to be fully up
     
     # Update the upstream configuration
-    cat > ./data/nginx/crawler_upstream.conf << EOF
+    cat > ./data/nginx/002-crawler_upstream.conf << EOF
 upstream crawler_backend {
     # server crawler01:3001;
     server crawler02:3001;
@@ -55,7 +55,7 @@ EOF
     sleep 5 # Wait for service to be fully up
     
     # Update the upstream configuration
-    cat > ./data/nginx/crawler_upstream.conf << EOF
+    cat > ./data/nginx/002-crawler_upstream.conf << EOF
 upstream crawler_backend {
     server crawler01:3001;
     # server crawler02:3001;
@@ -70,14 +70,14 @@ if [ "$REBUILD_PLEBINDEX" = true ]; then
   echo -e "${YELLOW}Rebuilding and restarting plebindex with zero-downtime...${NC}"
   
   # Check which plebindex instance is currently active
-  if grep -q "plebindex01" ./data/nginx/upstream.conf && ! grep -q "#server plebindex01" ./data/nginx/upstream.conf; then
+  if grep -q "plebindex01" ./data/nginx/001-upstream.conf && ! grep -q "#server plebindex01" ./data/nginx/001-upstream.conf; then
     echo "plebindex01 is active, updating plebindex02..."
     docker-compose build plebindex02
     docker-compose up -d plebindex02
     sleep 5 # Wait for service to be fully up
     
     # Update the upstream configuration
-    cat > ./data/nginx/upstream.conf << EOF
+    cat > ./data/nginx/001-upstream.conf << EOF
 upstream plebindex_backend {
     # server plebindex01:3000;
     server plebindex02:3000;
@@ -92,7 +92,7 @@ EOF
     sleep 5 # Wait for service to be fully up
     
     # Update the upstream configuration
-    cat > ./data/nginx/upstream.conf << EOF
+    cat > ./data/nginx/001-upstream.conf << EOF
 upstream plebindex_backend {
     server plebindex01:3000;
     # server plebindex02:3000;
