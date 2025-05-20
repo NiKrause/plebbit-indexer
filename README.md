@@ -19,6 +19,7 @@ A Plebbit crawler, indexer and UI.
 - [Development](#development)
   - [Run Crawler Locally](#run-crawler-locally)
   - [Run Frontend Locally](#run-frontend-locally)
+  - [Zero Downtime Deployment](#zero-downtime-deployment)
 - [API](#api)
   - [Public Endpoints](#public-endpoints)
   - [Protected Endpoints](#protected-endpoints)
@@ -162,6 +163,16 @@ cd plebindex
 npm install
 npm run dev
 ```
+
+### Zero Downtime Deployment
+
+The project includes a zero downtime deployment system using dual-instance architecture:
+- Each service (crawler and plebindex) runs two separate instances (01 and 02)
+- The included `deploy.sh` script intelligently detects which components need updating
+- When deploying changes, it builds and starts the inactive instance
+- Once the new instance is running, it updates the Nginx configuration to route traffic to the new instance
+- This blue/green deployment approach ensures continuous service availability during updates
+- To deploy, simply run `./deploy.sh` which will pull the latest changes and handle the upgrade process
 
 ---
 
