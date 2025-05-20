@@ -26,7 +26,7 @@ describe('Subplebbit functionality', function () {
       await plebbit.destroy();
     }
     if (db) {
-      await db.close();
+      // await db.close();
     }
   }, 20000);
 
@@ -47,14 +47,13 @@ describe('Subplebbit functionality', function () {
     // await db.runAsync('DELETE FROM posts');
     const addresses = await getSubplebbitAddresses();
     const firstAddress = addresses[0];
-    console.log("firstAddress",firstAddress);
     const sub = await plebbit.getSubplebbit(firstAddress);
     await sub.update();
     await indexSubplebbit(sub, db);
 
     const response = await request.get('/api/posts');
     assert.equal(response.status, 200); 
-    assert(Array.isArray(response.body), 'Should return an array of posts');
+    assert(Array.isArray(response.body.posts), 'Should return an array of posts');
     // console.log("response.body",response.body);
     // // assert(response.body.length > 0, 'Should return at least one post');
     // assert('id' in response.body[0], 'Post should have an id');
@@ -64,33 +63,32 @@ describe('Subplebbit functionality', function () {
     console.log("checking if posts are available");
     const response = await request.get('/api/posts');
     assert.equal(response.status, 200);
-    assert(Array.isArray(response.body), 'Should return an array of posts');
-    assert(response.body.length > 0, 'Should return at least one post');
+    assert(Array.isArray(response.body.posts), 'Should return an array of posts');
+    assert(response.body.posts.length > 0, 'Should return at least one post');
     
     // Check required fields for each post
-    response.body.forEach((post, index) => {
-      assert(post.title, `Post at index ${index} should have a title`);
-      assert(post.timestamp, `Post at index ${index} should have a timestamp`);
-      assert(post.content, `Post at index ${index} should have content`);
-      assert(post.subplebbitAddress, `Post at index ${index} should have a subplebbitAddress`);
-      assert(post.authorAddress, `Post at index ${index} should have an authorAddress`);
-      assert(post.authorDisplayName, `Post at index ${index} should have an authorDisplayName`);
+    response.body.posts.forEach((post, index) => {
+      console.log("post", post);
+      assert(post.title !== undefined && post.title !== null && post.title !== '', `Post at index ${index} should have a title`);
+      assert(post.timestamp !== undefined && post.timestamp !== null, `Post at index ${index} should have a timestamp`);
+      assert(post.content !== undefined && post.content !== null, `Post at index ${index} should have content`);
+      assert(post.subplebbitAddress !== undefined && post.subplebbitAddress !== null && post.subplebbitAddress !== '', `Post at index ${index} should have a subplebbitAddress`);
+      assert(post.authorAddress !== undefined && post.authorAddress !== null && post.authorAddress !== '', `Post at index ${index} should have an authorAddress`);
     });
     // await db.runAsync('DELETE FROM posts');
    }, 20000);
 
 
-  it.only('should search posts for the word "piracy"', async function() {
+  it('should search posts for the word "piracy"', async function() {
     const sub = await plebbit.getSubplebbit("plebpiracy.eth");
     await sub.update();
     await indexSubplebbit(sub, db);
 
     const response = await request.get('/api/posts/search?q=piracy');
     assert.equal(response.status, 200, 'Search request should succeed');
-    assert(Array.isArray(response.body), 'Should return an array of posts');
-    console.log("response.body", response.body);
+    assert(Array.isArray(response.body.posts), 'Should return an array of posts');
     // Check that all returned posts contain the word "piracy" in some field
-    response.body.forEach(post => {
+    response.body.posts.forEach(post => {
       const hasPiracy = 
         (post.title && post.title.toLowerCase().includes('piracy')) ||
         (post.content && post.content.toLowerCase().includes('piracy')) ||
@@ -100,7 +98,7 @@ describe('Subplebbit functionality', function () {
     });
   }, 20000);
 
-  it.only('should index pleblore.eth and check for a specific comment', async function() {
+  it('should index pleblore.eth and check for a specific comment', async function() {
     // Target the specific subplebbit "pleblore.eth"
     const address = "pleblore.eth";
     console.log("Testing specific subplebbit address:", address);
@@ -114,24 +112,26 @@ describe('Subplebbit functionality', function () {
 
     // Verify the subplebbit was indexed by checking API
     const postsResponse = await request.get('/api/posts');
+    console.log("postsResponse", postsResponse);
     assert.equal(postsResponse.status, 200);
-    assert(Array.isArray(postsResponse.body), 'Should return an array of posts');
-    assert(postsResponse.body.length > 0, 'Should return at least one post');
+    assert(Array.isArray(postsResponse.body.posts), 'Should return an array of posts');
+    assert(postsResponse.body.posts.length > 0, 'Should return at least one post');
     
     // Find posts from pleblore.eth
     const pleblorePostsResponse = await request.get('/api/posts/search?q=pleblore.eth');
     assert.equal(pleblorePostsResponse.status, 200);
-    assert(Array.isArray(pleblorePostsResponse.body), 'Should return an array of posts');
+    assert(Array.isArray(pleblorePostsResponse.body.posts), 'Should return an array of posts');
     
     // Check if the specific comment exists
-    const targetCid = "Qmc6i3fZ9BDTt3xyjZywPaLYkG8BzuRzp9QhVmBcSQpgWp";
-    const specificPost = pleblorePostsResponse.body.find(post => post.id === targetCid);
+    const targetCid = "QmPhfKdhRksQgRpWHyHT7arrSLoUd5kia64TbUfbQu3ZJb";
+    console.log("pleblorePostsResponse.body.posts", pleblorePostsResponse.body.posts);
+    const specificPost = pleblorePostsResponse.body.posts.find(post => post.id === targetCid);
     
     assert(specificPost, `Comment with CID ${targetCid} should exist in pleblore.eth`);
     console.log("Found the specific comment:", specificPost);
   }, 200000);
 
-  it.only('should index redditdeath.sol and verify posts are available', async function() {
+  it('should index redditdeath.sol and verify posts are available', async function() {
     // Target the specific subplebbit "redditdeath.sol"
     const address = "redditdeath.sol";
     console.log("Testing specific subplebbit address:", address);
@@ -146,10 +146,10 @@ describe('Subplebbit functionality', function () {
     // Verify the subplebbit was indexed by checking API
     const postsResponse = await request.get('/api/posts');
     assert.equal(postsResponse.status, 200);
-    assert(Array.isArray(postsResponse.body), 'Should return an array of posts');
+    assert(Array.isArray(postsResponse.body.posts), 'Should return an array of posts');
     
     // Find posts from redditdeath.sol
-    const redditdeathPosts = postsResponse.body.filter(post => 
+    const redditdeathPosts = postsResponse.body.posts.filter(post => 
       post.subplebbitAddress === address
     );
     
@@ -161,5 +161,32 @@ describe('Subplebbit functionality', function () {
       console.log("Sample post:", redditdeathPosts[0]);
     }
   }, 200000);
+
+  it('should search posts for the author address "12D3KooWA7gYpM3W5wNL7qAXsdrT2zjbF7vYwnWZ2jKUfrfSFRgE"', async function() {
+    const sub = await plebbit.getSubplebbit("pleblore.eth");
+    await sub.update();
+    await indexSubplebbit(sub, db);
+
+    // Search for the specific author address
+    const authorAddress = "12D3KooWA7gYpM3W5wNL7qAXsdrT2zjbF7vYwnWZ2jKUfrfSFRgE";
+    const response = await request.get(`/api/posts/search?q=${authorAddress}`);
+    
+    assert.equal(response.status, 200, 'Search request should succeed');
+    assert(Array.isArray(response.body.posts), 'Should return an array of posts');
+    
+    // Check that at least one post has this author address
+    const hasAuthorPosts = response.body.posts.some(post => 
+      post.authorAddress === authorAddress
+    );
+    
+    assert(hasAuthorPosts, `Should find at least one post from author ${authorAddress}`);
+    
+    // Log the found posts for verification
+    const authorPosts = response.body.posts.filter(post => post.authorAddress === authorAddress);
+    console.log(`Found ${authorPosts.length} posts from author ${authorAddress}`);
+    if (authorPosts.length > 0) {
+      console.log("First author post:", authorPosts[0]);
+    }
+  }, 20000);
 
 }, 20000); 

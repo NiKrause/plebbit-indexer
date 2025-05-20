@@ -31,13 +31,44 @@ export async function startServer(_db) {
   app.get('/api/posts', async (req, res) => {
     try {
       const db = getDb(); 
-      console.log("getting posts");
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const rawLimit = req.query.limit !== undefined ? parseInt(req.query.limit) : 20;
       
-      const postsStmt = db.prepare('SELECT * FROM posts ORDER BY rowid DESC');
-      const rows = postsStmt.all();
+      // Special case: limit=0 means "return all posts"
+      const limit = rawLimit === 0 ? null : Math.max(1, rawLimit);
+      const offset = limit ? (page - 1) * limit : 0;
       
-      console.log("rows delivered", rows.length);
-      res.json(rows);
+      console.log(`Getting posts ${limit ? `page ${page} with limit ${limit}` : 'with no limit'}`);
+      
+      // Get total count for pagination metadata
+      const countStmt = db.prepare('SELECT COUNT(*) as total FROM posts');
+      const { total } = countStmt.get();
+      
+      // Get posts - either paginated or all
+      let postsStmt;
+      let rows;
+      
+      if (limit) {
+        postsStmt = db.prepare('SELECT * FROM posts ORDER BY rowid DESC LIMIT ? OFFSET ?');
+        rows = postsStmt.all([limit, offset]);
+      } else {
+        postsStmt = db.prepare('SELECT * FROM posts ORDER BY rowid DESC');
+        rows = postsStmt.all();
+      }
+      
+      const pages = limit ? Math.ceil(total / limit) : 1;
+      console.log(`Delivered ${rows.length} rows ${limit ? `(page ${page} of ${pages})` : '(all posts)'}`);
+      
+      // Return response with metadata
+      res.json({
+        posts: rows,
+        pagination: {
+          total,
+          page: limit ? page : 1,
+          limit: limit || total,
+          pages: pages
+        }
+      });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -47,26 +78,76 @@ export async function startServer(_db) {
     try {
       const db = getDb();
       const { q } = req.query;
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const rawLimit = req.query.limit !== undefined ? parseInt(req.query.limit) : 20;
+      
+      // Special case: limit=0 means "return all posts"
+      const limit = rawLimit === 0 ? null : Math.max(1, rawLimit);
+      const offset = limit ? (page - 1) * limit : 0;
+      
       if (!q) {
         return res.status(400).json({ error: 'Search query parameter "q" is required' });
       }
 
-      const searchQuery = `
+      const searchTerm = `%${q}%`;
+      
+      // Modified count query with authorAddress
+      const countQuery = `
+        SELECT COUNT(*) as total FROM posts
+        WHERE LOWER(title) LIKE LOWER(?)
+        OR LOWER(content) LIKE LOWER(?)
+        OR LOWER(authorDisplayName) LIKE LOWER(?)
+        OR LOWER(authorAddress) LIKE LOWER(?)
+        OR LOWER(subplebbitAddress) LIKE LOWER(?)
+      `;
+      
+      const countStmt = db.prepare(countQuery);
+      const { total } = countStmt.get([searchTerm, searchTerm, searchTerm, searchTerm, searchTerm]);
+      
+      // Modified search query with authorAddress (with limit)
+      let searchQuery = `
         SELECT * FROM posts
         WHERE LOWER(title) LIKE LOWER(?)
         OR LOWER(content) LIKE LOWER(?)
         OR LOWER(authorDisplayName) LIKE LOWER(?)
+        OR LOWER(authorAddress) LIKE LOWER(?)
         OR LOWER(subplebbitAddress) LIKE LOWER(?)
         ORDER BY rowid DESC
+        LIMIT ? OFFSET ?
       `;
+      let searchStmt = db.prepare(searchQuery);
+      let rows;
       
-      const searchTerm = `%${q}%`;
-    
-      const searchStmt = db.prepare(searchQuery);
-      const rows = searchStmt.all([searchTerm, searchTerm, searchTerm, searchTerm]);
+      if (limit) {
+        rows = searchStmt.all([searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, limit, offset]);
+      } else {
+        // Modified search query with authorAddress (without limit)
+        searchQuery = `
+          SELECT * FROM posts
+          WHERE LOWER(title) LIKE LOWER(?)
+          OR LOWER(content) LIKE LOWER(?)
+          OR LOWER(authorDisplayName) LIKE LOWER(?)
+          OR LOWER(authorAddress) LIKE LOWER(?)
+          OR LOWER(subplebbitAddress) LIKE LOWER(?)
+          ORDER BY rowid DESC
+        `;
+        searchStmt = db.prepare(searchQuery);
+        rows = searchStmt.all([searchTerm, searchTerm, searchTerm, searchTerm, searchTerm]);
+      }
       
-      console.log(`Search results for "${q}":`, rows.length);
-      res.json(rows);
+      const pages = limit ? Math.ceil(total / limit) : 1;
+      console.log(`Search results for "${q}" ${limit ? `(page ${page})` : '(all results)'}:`, rows.length);
+      
+      // Return response with metadata
+      res.json({
+        posts: rows,
+        pagination: {
+          total,
+          page: limit ? page : 1,
+          limit: limit || total,
+          pages: pages
+        }
+      });
     } catch (err) {
       console.error('Error searching posts:', err);
       res.status(500).json({ error: err.message });

@@ -106,6 +106,7 @@ export function setupSubplebbitListener(sub, db, address) {
 export async function indexSubplebbit(sub, db) {
 
   if (Object.keys(sub.posts.pageCids).length !== 0) { // no need to fetch page cids, just use the preloaded page in else case
+    console.log("sub.posts.pageCids", sub.posts.pageCids);
     let postsPage = await sub.posts.getPage(sub.posts.pageCids.new);
     // console.log("postsPage", postsPage);
     let allPosts = [...postsPage.comments];

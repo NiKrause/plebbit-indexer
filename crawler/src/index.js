@@ -28,7 +28,7 @@ import { startServer } from './server/index.js';
  * - [ ] if a subplebbit is updated, it could be published to a pubsub topic so that other services can pick it up - question: is an ipns publish sufficient or should we use a pubsub topic?
  */
 async function main() {
-  startServer(); // starts the server on port 3001
+  await startServer(); // starts the server on port 3001
 
   const db = getDb();
   const plebbit = await getPlebbitClient();

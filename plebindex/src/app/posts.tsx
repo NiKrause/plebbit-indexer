@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react';
 import moment from 'moment';
+import Link from 'next/link';
 
 interface Post {
   id: string;
@@ -13,7 +14,17 @@ interface Post {
   timestamp: number;
 }
 
-async function fetchPosts(searchTerm?: string | null) {
+interface PaginatedResponse {
+  posts: Post[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  }
+}
+
+async function fetchPosts(searchTerm?: string | null, page: number = 1, limit: number = 0) {
   let apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!apiBaseUrl && process.env.NODE_ENV === 'development') {
     apiBaseUrl = 'http://crawler:3001';
@@ -21,9 +32,13 @@ async function fetchPosts(searchTerm?: string | null) {
     apiBaseUrl = '';  
   }
   
-  const endpoint = searchTerm ? `/api/posts/search?q=${encodeURIComponent(searchTerm)}` : '/api/posts';
+  const endpoint = searchTerm 
+    ? `/api/posts/search?q=${encodeURIComponent(searchTerm)}&page=${page}&limit=${limit}` 
+    : `/api/posts?page=${page}&limit=${limit}`;
+    
   const url = apiBaseUrl ? `${apiBaseUrl}${endpoint}` : endpoint;
   console.log("url", url);
+  
   try {
     const response = await fetch(url, { 
       method: 'GET',
@@ -37,17 +52,29 @@ async function fetchPosts(searchTerm?: string | null) {
       throw new Error(`API request failed with status ${response.status}`);
     }
     
-    const data = await response.json() as Post[];
+    const rawData = await response.json();
+    const data: PaginatedResponse = {
+      posts: rawData.posts || [],
+      pagination: { total: rawData.pagination.total, page, limit, pages: rawData.pagination.pages }
+    };
     
-    // Sort posts by timestamp (newest first)
-    return [...data].sort((a, b) => b.timestamp - a.timestamp);
+    return data;
   } catch (error) {
     console.error('Error fetching posts:', error);
     // Return mock data in development for testing
     if (process.env.NODE_ENV === 'development') {
-      return getMockPosts();
+      const mockPosts = getMockPosts();
+      return {
+        posts: mockPosts,
+        pagination: {
+          total: mockPosts.length,
+          page: 1,
+          limit: 20,
+          pages: 1
+        }
+      };
     }
-    return [];
+    return { posts: [], pagination: { total: 0, page: 1, limit: 20, pages: 0 } };
   }
 }
 
@@ -79,61 +106,168 @@ function formatTimestamp(timestamp: number) {
   return moment(timestamp*1000).fromNow();
 }
 
-async function PostsContent({ searchTerm }: { searchTerm?: string | null }) {
-  const posts = await fetchPosts(searchTerm);
-
+// Component for pagination controls
+function Pagination({ pagination, searchTerm }: { pagination: PaginatedResponse['pagination'], searchTerm?: string | null }) {
+  const { page, pages } = pagination;
+  
+  // Generate array of page numbers to display
+  const pageNumbers = [];
+  const maxPageButtons = 5;
+  
+  let startPage = Math.max(1, page - Math.floor(maxPageButtons / 2));
+  const endPage = Math.min(pages, startPage + maxPageButtons - 1);
+  
+  // Adjust if we're near the end
+  if (endPage - startPage + 1 < maxPageButtons) {
+    startPage = Math.max(1, endPage - maxPageButtons + 1);
+  }
+  
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
+  }
+  
+  // Create base URL
+  const createPageUrl = (pageNum: number) => {
+    const baseUrl = searchTerm ? `/?q=${encodeURIComponent(searchTerm)}` : '/';
+    return pageNum === 1 ? baseUrl : `${baseUrl}&page=${pageNum}`;
+  };
+  
+  // Simple pagination styles
+  const paginationStyles = {
+    container: {
+      display: 'flex',
+      justifyContent: 'center',
+      margin: '20px 0',
+      gap: '8px'
+    },
+    pageLink: {
+      padding: '8px 12px',
+      border: '1px solid #d1d5db',
+      borderRadius: '4px',
+      textDecoration: 'none',
+      color: '#374151'
+    },
+    activePage: {
+      backgroundColor: '#4b5563',
+      color: 'white',
+      borderColor: '#4b5563'
+    },
+    disabledLink: {
+      opacity: 0.5,
+      cursor: 'not-allowed'
+    }
+  };
+  
   return (
-    <div>
-      <h2>{searchTerm ? `Search Results for "${searchTerm}"` : 'All Posts'}</h2>
-      <div>
-        {posts.map(post => (
-          <div key={post.id} style={{ borderBottom: '1px solid #ccc', marginBottom: 16, paddingBottom: 8 }}>
-            <div style={{ fontSize: 12, color: '#888' }}>
-              <a
-                href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#888', textDecoration: 'underline' }}
-              >
-                r/{post.subplebbitAddress}
-              </a>
-              {' • Posted by '}
-              <a
-                href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#888', textDecoration: 'underline' }}
-              >
-                {post.authorDisplayName || post.authorAddress}
-              </a>
-              {' • '}
-              <span title={new Date(post.timestamp).toLocaleString()}>
-                {formatTimestamp(post.timestamp)}
-              </span>
-            </div>
-            <a
-              href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontWeight: 'bold', fontSize: 18 }}
-            >
-              {post.title}
-            </a>
-            <div style={{ marginTop: 4 }}>{post.content}</div>
-          </div>
-        ))}
-      </div>
+    <div style={paginationStyles.container}>
+      {/* Previous Page */}
+      {page > 1 ? (
+        <Link 
+          href={createPageUrl(page - 1)}
+          style={paginationStyles.pageLink}
+        >
+          &laquo; Prev
+        </Link>
+      ) : (
+        <span style={{...paginationStyles.pageLink, ...paginationStyles.disabledLink}}>
+          &laquo; Prev
+        </span>
+      )}
+      
+      {/* Page Numbers */}
+      {pageNumbers.map(num => (
+        <Link
+          key={num}
+          href={createPageUrl(num)}
+          style={{
+            ...paginationStyles.pageLink,
+            ...(num === page ? paginationStyles.activePage : {})
+          }}
+        >
+          {num}
+        </Link>
+      ))}
+      
+      {/* Next Page */}
+      {page < pages ? (
+        <Link 
+          href={createPageUrl(page + 1)}
+          style={paginationStyles.pageLink}
+        >
+          Next &raquo;
+        </Link>
+      ) : (
+        <span style={{...paginationStyles.pageLink, ...paginationStyles.disabledLink}}>
+          Next &raquo;
+        </span>
+      )}
     </div>
   );
 }
 
-export default async function Posts({ searchParams }: { searchParams?: { q?: string } }) {
-  // Get the search parameter from URL query
+async function PostsContent({ searchTerm, page = 1 }: { searchTerm?: string | null, page?: number }) {
+  const { posts, pagination } = await fetchPosts(searchTerm, page);
+  return (
+    <div>
+      <h2>{searchTerm ? `Search Results for "${searchTerm}"` : 'All Posts'}</h2>
+      <div>
+        {posts.length > 0 ? (
+          posts.map(post => (
+            <div key={post.id} style={{ borderBottom: '1px solid #ccc', marginBottom: 16, paddingBottom: 8 }}>
+              <div style={{ fontSize: 12, color: '#888' }}>
+                <a
+                  href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#888', textDecoration: 'underline' }}
+                >
+                  r/{post.subplebbitAddress}
+                </a>
+                {' • Posted by '}
+                <a
+                  href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#888', textDecoration: 'underline' }}
+                >
+                  {post.authorDisplayName || post.authorAddress}
+                </a>
+                {' • '}
+                <span title={new Date(post.timestamp * 1000).toLocaleString()}>
+                  {formatTimestamp(post.timestamp)}
+                </span>
+              </div>
+              <a
+                href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontWeight: 'bold', fontSize: 18 }}
+              >
+                {post.title}
+              </a>
+              <div style={{ marginTop: 4 }}>{post.content}</div>
+            </div>
+          ))
+        ) : (
+          <div>No posts found.</div>
+        )}
+      </div>
+      
+      {pagination.pages > 1 && (
+        <Pagination pagination={pagination} searchTerm={searchTerm} />
+      )}
+    </div>
+  );
+}
+
+export default async function Posts({ searchParams }: { searchParams?: { q?: string, page?: string } }) {
+  // Get the search parameter and page from URL query
   const searchTerm = searchParams?.q || null;
+  const page = searchParams?.page ? parseInt(searchParams.page) : 1;
   
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <PostsContent searchTerm={searchTerm} />
+      <PostsContent searchTerm={searchTerm} page={page} />
     </Suspense>
   );
 }

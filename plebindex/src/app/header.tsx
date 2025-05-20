@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import SeeditLogo from '../app/seeditlogo';
-import SearchBar from '../app/search';
+import PlebscanLogo from './plebscanlogo';
+import SearchBar from './search';
 import './header.css';
 
 const styles = {
@@ -49,7 +49,7 @@ export default function Header() {
         <div className="header-flex-row">
           <div style={styles.logoContainer}>
             <Link href="https://seedit.app/" target="_blank" rel="noopener noreferrer">
-              <SeeditLogo />
+              <PlebscanLogo />
             </Link>
             <span style={styles.logoText}>Plebscan</span>
           </div>
