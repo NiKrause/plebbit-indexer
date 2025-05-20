@@ -47,7 +47,7 @@ EOF
 fi
 
 # Process the nginx configuration template
-envsubst '${domain}' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf
+# envsubst '${domain}' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf
 
 echo 'running nginx now and reload every 6 hours'
 while :; do sleep 6h & wait ${!}; nginx -s reload; done & nginx -g "daemon off;"
