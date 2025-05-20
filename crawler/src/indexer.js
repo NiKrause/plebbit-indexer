@@ -48,12 +48,12 @@ export async function indexPosts(db, posts) {
           console.log("deleted post", post.cid);
           insertStmt.run(
             post.cid,
-            post.timestamp ?? 0,
-            post.title ?? '',
-            post.content ?? '',
-            post.subplebbitAddress ?? '',
-            post.author?.address ?? '',
-            post.author?.displayName ?? '',
+            post.timestamp,
+            post.title,
+            post.content,
+            post.subplebbitAddress,
+            post.author?.address,
+            post.author?.displayName,
             post.upvoteCount ?? 0,
             post.downvoteCount ?? 0,
             post.replyCount ?? 0
