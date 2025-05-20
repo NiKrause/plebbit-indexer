@@ -33,7 +33,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  crawler:
+  crawler01:
     build:
       context: ./crawler
       args:
@@ -48,6 +48,23 @@ services:
       - plebbit-cli
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  crawler02:
+    build:
+      context: ./crawler
+      args:
+        PLEBBIT_WS_URL: ${PLEBBIT_WS_URL}
+    ports:
+      - "3011:3001"
+    volumes:
+      - ./data/plebbit:/app/data
+    environment:
+      - PLEBBIT_WS_URL=${PLEBBIT_WS_URL}
+    depends_on:
+      - plebbit-cli
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   plebbit-cli:
     build: ./plebbit-cli
     image: plebbit-cli

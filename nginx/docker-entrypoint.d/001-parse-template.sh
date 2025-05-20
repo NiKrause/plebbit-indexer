@@ -32,6 +32,20 @@ upstream plebindex_backend {
 EOF
 fi
 
+# Include the crawler upstream configuration
+if [ -f "/etc/nginx/conf.d/crawler_upstream.conf" ]; then
+    cp /etc/nginx/conf.d/crawler_upstream.conf /etc/nginx/conf.d/crawler_upstream.conf.bak
+else
+    # Create default crawler upstream configuration
+    mkdir -p /etc/nginx/conf.d
+    cat > /etc/nginx/conf.d/crawler_upstream.conf << EOF
+upstream crawler_backend {
+    server crawler01:3001;
+    # server crawler02:3001;
+}
+EOF
+fi
+
 # Process the nginx configuration template
 envsubst '${domain}' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf
 

@@ -30,33 +30,77 @@ fi
 
 # 3. Rebuild and restart containers as needed
 if [ "$REBUILD_CRAWLER" = true ]; then
-  echo -e "${YELLOW}Rebuilding and restarting crawler...${NC}"
-  docker-compose build crawler
-  docker-compose up -d crawler
+  echo -e "${YELLOW}Rebuilding and restarting crawler with zero-downtime...${NC}"
+  
+  # Check which crawler instance is currently active
+  if grep -q "crawler01" ./data/nginx/crawler_upstream.conf && ! grep -q "#server crawler01" ./data/nginx/crawler_upstream.conf; then
+    echo "crawler01 is active, updating crawler02..."
+    docker-compose build crawler02
+    docker-compose up -d crawler02
+    sleep 5 # Wait for service to be fully up
+    
+    # Update the upstream configuration
+    cat > ./data/nginx/crawler_upstream.conf << EOF
+upstream crawler_backend {
+    # server crawler01:3001;
+    server crawler02:3001;
+}
+EOF
+    # Reload nginx to apply the new configuration
+    docker-compose exec nginx nginx -s reload
+  else
+    echo "crawler02 is active, updating crawler01..."
+    docker-compose build crawler01
+    docker-compose up -d crawler01
+    sleep 5 # Wait for service to be fully up
+    
+    # Update the upstream configuration
+    cat > ./data/nginx/crawler_upstream.conf << EOF
+upstream crawler_backend {
+    server crawler01:3001;
+    # server crawler02:3001;
+}
+EOF
+    # Reload nginx to apply the new configuration
+    docker-compose exec nginx nginx -s reload
+  fi
 fi
 
 if [ "$REBUILD_PLEBINDEX" = true ]; then
-  echo -e "${YELLOW}Rebuilding and restarting plebindex...${NC}"
+  echo -e "${YELLOW}Rebuilding and restarting plebindex with zero-downtime...${NC}"
   
-  # For zero-downtime deployment (after configuration updates):
-  # Uncomment these lines after implementing blue-green deployment
-  if docker-compose ps | grep -q "plebindex01.*Up"; then
-   echo "plebindex01 is active, updating plebindex02..."
-   docker-compose build plebindex02
-   docker-compose up -d plebindex02
-   sleep 5 # Wait for service to be fully up
-   docker-compose exec nginx nginx -s reload # Switch traffic
+  # Check which plebindex instance is currently active
+  if grep -q "plebindex01" ./data/nginx/upstream.conf && ! grep -q "#server plebindex01" ./data/nginx/upstream.conf; then
+    echo "plebindex01 is active, updating plebindex02..."
+    docker-compose build plebindex02
+    docker-compose up -d plebindex02
+    sleep 5 # Wait for service to be fully up
+    
+    # Update the upstream configuration
+    cat > ./data/nginx/upstream.conf << EOF
+upstream plebindex_backend {
+    # server plebindex01:3000;
+    server plebindex02:3000;
+}
+EOF
+    # Reload nginx to apply the new configuration
+    docker-compose exec nginx nginx -s reload
   else
-   echo "plebindex02 is active, updating plebindex01..."
-   docker-compose build plebindex01
-   docker-compose up -d plebindex01
-   sleep 5 # Wait for service to be fully up
-   docker-compose exec nginx nginx -s reload # Switch traffic
+    echo "plebindex02 is active, updating plebindex01..."
+    docker-compose build plebindex01
+    docker-compose up -d plebindex01
+    sleep 5 # Wait for service to be fully up
+    
+    # Update the upstream configuration
+    cat > ./data/nginx/upstream.conf << EOF
+upstream plebindex_backend {
+    server plebindex01:3000;
+    # server plebindex02:3000;
+}
+EOF
+    # Reload nginx to apply the new configuration
+    docker-compose exec nginx nginx -s reload
   fi
-  
-  # Current implementation (before zero-downtime setup)
-  docker-compose build plebindex
-  docker-compose up -d plebindex
 fi
 
 # If no specific changes were detected, offer to rebuild everything
