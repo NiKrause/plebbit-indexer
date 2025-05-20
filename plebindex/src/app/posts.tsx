@@ -12,6 +12,9 @@ interface Post {
   authorAddress: string;
   authorDisplayName: string;
   timestamp: number;
+  upvoteCount: number;
+  downvoteCount: number;
+  replyCount: number;
 }
 
 interface PaginatedResponse {
@@ -21,10 +24,20 @@ interface PaginatedResponse {
     page: number;
     limit: number;
     pages: number;
-  }
+  };
+  filters: {
+    sort: string;
+    timeFilter: string;
+  };
 }
 
-async function fetchPosts(searchTerm?: string | null, page: number = 1, limit: number = 0) {
+async function fetchPosts(
+  searchTerm?: string | null, 
+  page: number = 1, 
+  limit: number = 0,
+  sort: string = 'new',
+  timeFilter: string = 'all'
+) {
   let apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!apiBaseUrl && process.env.NODE_ENV === 'development') {
     apiBaseUrl = 'http://crawler:3001';
@@ -32,11 +45,27 @@ async function fetchPosts(searchTerm?: string | null, page: number = 1, limit: n
     apiBaseUrl = '';  
   }
   
-  const endpoint = searchTerm 
-    ? `/api/posts/search?q=${encodeURIComponent(searchTerm)}&page=${page}&limit=${limit}` 
-    : `/api/posts?page=${page}&limit=${limit}`;
+  // Build query parameters
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  params.append('limit', limit.toString());
+  
+  // Only add sort if not the default
+  if (sort !== 'new') {
+    params.append('sort', sort);
+  }
+  
+  // Only add time filter if not the default
+  if (timeFilter !== 'all') {
+    params.append('t', timeFilter);
+  }
+  
+  // Create base endpoint
+  const baseEndpoint = searchTerm 
+    ? `/api/posts/search?q=${encodeURIComponent(searchTerm)}&${params.toString()}`
+    : `/api/posts?${params.toString()}`;
     
-  const url = apiBaseUrl ? `${apiBaseUrl}${endpoint}` : endpoint;
+  const url = apiBaseUrl ? `${apiBaseUrl}${baseEndpoint}` : baseEndpoint;
   console.log("url", url);
   
   try {
@@ -55,7 +84,16 @@ async function fetchPosts(searchTerm?: string | null, page: number = 1, limit: n
     const rawData = await response.json();
     const data: PaginatedResponse = {
       posts: rawData.posts || [],
-      pagination: { total: rawData.pagination.total, page, limit, pages: rawData.pagination.pages }
+      pagination: { 
+        total: rawData.pagination.total, 
+        page, 
+        limit, 
+        pages: rawData.pagination.pages 
+      },
+      filters: {
+        sort: rawData.filters?.sort || 'new',
+        timeFilter: rawData.filters?.timeFilter || 'all'
+      }
     };
     
     return data;
@@ -71,10 +109,18 @@ async function fetchPosts(searchTerm?: string | null, page: number = 1, limit: n
           page: 1,
           limit: 20,
           pages: 1
+        },
+        filters: {
+          sort,
+          timeFilter
         }
       };
     }
-    return { posts: [], pagination: { total: 0, page: 1, limit: 20, pages: 0 } };
+    return { 
+      posts: [], 
+      pagination: { total: 0, page: 1, limit: 20, pages: 0 },
+      filters: { sort, timeFilter }
+    };
   }
 }
 
@@ -88,7 +134,10 @@ function getMockPosts(): Post[] {
       subplebbitAddress: 'mock',
       authorAddress: 'mockuser',
       authorDisplayName: 'Mock User',
-      timestamp: Math.floor(Date.now() / 1000) - 3600
+      timestamp: Math.floor(Date.now() / 1000) - 3600,
+      upvoteCount: 15,
+      downvoteCount: 3,
+      replyCount: 7
     },
     {
       id: 'mock2',
@@ -97,7 +146,10 @@ function getMockPosts(): Post[] {
       subplebbitAddress: 'mock',
       authorAddress: 'mockuser2',
       authorDisplayName: 'Developer',
-      timestamp: Math.floor(Date.now() / 1000) - 7200
+      timestamp: Math.floor(Date.now() / 1000) - 7200,
+      upvoteCount: 8,
+      downvoteCount: 1,
+      replyCount: 2
     }
   ];
 }
@@ -107,7 +159,17 @@ function formatTimestamp(timestamp: number) {
 }
 
 // Component for pagination controls
-function Pagination({ pagination, searchTerm }: { pagination: PaginatedResponse['pagination'], searchTerm?: string | null }) {
+function Pagination({ 
+  pagination, 
+  searchTerm,
+  sort,
+  timeFilter 
+}: { 
+  pagination: PaginatedResponse['pagination'], 
+  searchTerm?: string | null,
+  sort: string, 
+  timeFilter: string 
+}) {
   const { page, pages } = pagination;
   
   // Generate array of page numbers to display
@@ -126,10 +188,33 @@ function Pagination({ pagination, searchTerm }: { pagination: PaginatedResponse[
     pageNumbers.push(i);
   }
   
-  // Create base URL
+  // Create base URL with all parameters
   const createPageUrl = (pageNum: number) => {
-    const baseUrl = searchTerm ? `/?q=${encodeURIComponent(searchTerm)}` : '/';
-    return pageNum === 1 ? baseUrl : `${baseUrl}&page=${pageNum}`;
+    // Start with the base params
+    const params = new URLSearchParams();
+    
+    // Add search query if present
+    if (searchTerm) {
+      params.set('q', searchTerm);
+    }
+    
+    // Add page number if not the first page
+    if (pageNum > 1) {
+      params.set('page', pageNum.toString());
+    }
+    
+    // Add sort if not default
+    if (sort !== 'new') {
+      params.set('sort', sort);
+    }
+    
+    // Add time filter if not default
+    if (timeFilter !== 'all') {
+      params.set('t', timeFilter);
+    }
+    
+    const queryString = params.toString();
+    return queryString ? `/?${queryString}` : '/';
   };
   
   // Simple pagination styles
@@ -205,11 +290,31 @@ function Pagination({ pagination, searchTerm }: { pagination: PaginatedResponse[
   );
 }
 
-async function PostsContent({ searchTerm, page = 1 }: { searchTerm?: string | null, page?: number }) {
-  const { posts, pagination } = await fetchPosts(searchTerm, page);
+async function PostsContent({ 
+  searchTerm, 
+  page = 1, 
+  sort = 'new', 
+  timeFilter = 'all' 
+}: { 
+  searchTerm?: string | null, 
+  page?: number,
+  sort?: string,
+  timeFilter?: string 
+}) {
+  const { posts, pagination, filters } = await fetchPosts(searchTerm, page, 0, sort, timeFilter);
+  
   return (
     <div>
       <h2>{searchTerm ? `Search Results for "${searchTerm}"` : 'All Posts'}</h2>
+      
+      {/* Display current filters */}
+      <div style={{ marginBottom: '20px', fontSize: '14px', color: '#666' }}>
+        <span>Sorted by: <strong>{filters.sort}</strong></span>
+        {filters.timeFilter !== 'all' && (
+          <span> • Time: <strong>{filters.timeFilter}</strong></span>
+        )}
+      </div>
+      
       <div>
         {posts.length > 0 ? (
           posts.map(post => (
@@ -246,6 +351,19 @@ async function PostsContent({ searchTerm, page = 1 }: { searchTerm?: string | nu
                 {post.title}
               </a>
               <div style={{ marginTop: 4 }}>{post.content}</div>
+              
+              {/* Post stats - upvotes, downvotes, replies */}
+              <div style={{ marginTop: 8, fontSize: 12, color: '#888', display: 'flex', gap: '12px' }}>
+                <span title="Upvotes">
+                  <span style={{ color: '#4F9956' }}>▲</span> {post.upvoteCount || 0}
+                </span>
+                <span title="Downvotes">
+                  <span style={{ color: '#E25241' }}>▼</span> {post.downvoteCount || 0}
+                </span>
+                <span title="Replies">
+                  <span>💬</span> {post.replyCount || 0} {post.replyCount === 1 ? 'reply' : 'replies'}
+                </span>
+              </div>
             </div>
           ))
         ) : (
@@ -254,20 +372,39 @@ async function PostsContent({ searchTerm, page = 1 }: { searchTerm?: string | nu
       </div>
       
       {pagination.pages > 1 && (
-        <Pagination pagination={pagination} searchTerm={searchTerm} />
+        <Pagination 
+          pagination={pagination} 
+          searchTerm={searchTerm} 
+          sort={filters.sort} 
+          timeFilter={filters.timeFilter} 
+        />
       )}
     </div>
   );
 }
 
-export default async function Posts({ searchParams }: { searchParams?: { q?: string, page?: string } }) {
-  // Get the search parameter and page from URL query
+export default async function Posts({ searchParams }: { 
+  searchParams?: { 
+    q?: string, 
+    page?: string,
+    sort?: string,
+    t?: string
+  } 
+}) {
+  // Get parameters from URL query
   const searchTerm = searchParams?.q || null;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
+  const sort = searchParams?.sort || 'new';
+  const timeFilter = searchParams?.t || 'all';
   
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <PostsContent searchTerm={searchTerm} page={page} />
+      <PostsContent 
+        searchTerm={searchTerm} 
+        page={page} 
+        sort={sort} 
+        timeFilter={timeFilter} 
+      />
     </Suspense>
   );
 }

@@ -33,7 +33,10 @@ export function getDb() {
       content TEXT,
       subplebbitAddress TEXT NOT NULL,
       authorAddress TEXT,
-      authorDisplayName TEXT
+      authorDisplayName TEXT,
+      upvoteCount INTEGER,
+      downvoteCount INTEGER,
+      replyCount INTEGER
     );
     
     -- Indizes für häufige Abfragen

@@ -1,22 +1,22 @@
 export async function indexPosts(db, posts) {
   console.log(`Indexing ${posts.length} posts...`);
-  
   try {
+    //delete all posts from the database
+    // const deleteStmt = db.prepare('DELETE FROM posts');
+    // deleteStmt.run();
+
     const transaction = db.transaction(() => {
-      //const deleteStmt = db.prepare('DELETE FROM posts');
       const insertStmt = db.prepare(`
-        INSERT INTO posts (id, timestamp, title, content, subplebbitAddress, authorAddress, authorDisplayName)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO posts (id, timestamp, title, content, subplebbitAddress, authorAddress, authorDisplayName, upvoteCount, downvoteCount, replyCount)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
-      const getPostStmt = db.prepare('SELECT * FROM posts WHERE id = ?');
-      
-      // deleteStmt.run();
-      // console.log("Deleted all existing posts");
+
       
       let insertedCount = 0;
       let skippedCount = 0;
       
       for (const post of posts) {
+        console.log("insertingpost", post);
         try {
           // Validate required fields
           if (!post.cid) {
@@ -43,6 +43,9 @@ export async function indexPosts(db, posts) {
             continue;
           }
           
+          const deleteStmt = db.prepare('DELETE FROM posts where id = ?');
+          deleteStmt.run(post.cid);
+          console.log("deleted post", post.cid);
           insertStmt.run(
             post.cid,
             post.timestamp ?? 0,
@@ -50,7 +53,10 @@ export async function indexPosts(db, posts) {
             post.content ?? '',
             post.subplebbitAddress ?? '',
             post.author?.address ?? '',
-            post.author?.displayName ?? ''
+            post.author?.displayName ?? '',
+            post.upvoteCount ?? 0,
+            post.downvoteCount ?? 0,
+            post.replyCount ?? 0
           );
           
           insertedCount++;

@@ -104,17 +104,20 @@ export function setupSubplebbitListener(sub, db, address) {
 }
 
 export async function indexSubplebbit(sub, db) {
+  console.log("indexSubplebbit", Object.keys(sub.posts.pageCids).length !== 0);
 
   if (Object.keys(sub.posts.pageCids).length !== 0) { // no need to fetch page cids, just use the preloaded page in else case
     console.log("sub.posts.pageCids", sub.posts.pageCids);
     let postsPage = await sub.posts.getPage(sub.posts.pageCids.new);
     // console.log("postsPage", postsPage);
     let allPosts = [...postsPage.comments];
-    console.log("allPosts", allPosts);
+    // console.log("allPosts", allPosts);
     // const lastPostIndexed = await db.getLastPostIndexed(sub.address);
     while (postsPage.nextCid) {
       try {
         postsPage = await sub.posts.getPage(postsPage.nextCid);
+        // console.log("postsPage", postsPage.comments);
+
         allPosts = allPosts.concat(postsPage.comments);
 
           // if (lastPostIndexed && allPosts.some(post => post.cid === lastPostIndexed)) {
