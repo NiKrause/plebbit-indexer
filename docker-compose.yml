@@ -76,8 +76,6 @@ services:
     command: ["sh", "-c", "/app/plebbit-cli/bin/run daemon --plebbitOptions.dataPath /app/data"]
   nginx:
     image: nginx:1.22.0
-    depends_on:
-      - plebindex
     environment:
       - SERVER_NAME=${SERVER_NAME}
     ports:
