@@ -89,11 +89,11 @@ export function setupSubplebbitListener(sub, db, address) {
   sub.on('update', async () => {
     console.log(`Subplebbit ${address} updated, re-indexing...`);
     try {
-      await withTimeout(
-        sub.update(),
-        10000,
-        `Timeout updating subplebbit at ${address} (on update event)`
-      );
+      // await withTimeout(
+      //   // sub.update(),
+      //   10000,
+      //   `Timeout updating subplebbit at ${address} (on update event)`
+      // );
       await indexSubplebbit(sub, db);
       updateSubplebbitStatus(db, address, 'success');
     } catch (err) {
