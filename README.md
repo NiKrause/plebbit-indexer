@@ -171,10 +171,39 @@ npm run dev
 
 - `GET /api/posts`  
   Returns all indexed posts as JSON.
+  
+  Supports sorting and time filtering:
+  - `?sort=<sort_type>` - Sort by: `new` (default), `top`, `replies`, or `old`
+  - `?t=<time_filter>` - Filter by time: `all` (default), `hour`, `day`, `week`, `month`, `year`
+  - `?page=<page_number>` - For pagination (default: 1)
+  - `?limit=<count>` - Number of results per page (default: 20, set to 0 for all posts)
 
 - `GET /api/posts/search?q=<search_term>`  
   Search posts by title, content, author name, or subplebbit address.
   Returns matching posts as JSON.
+  
+  Also supports the same sorting and filtering options:
+  - `?sort=<sort_type>` - Sort by: `new` (default), `top`, `replies`, or `old`
+  - `?t=<time_filter>` - Filter by time: `all` (default), `hour`, `day`, `week`, `month`, `year`
+  - `?page=<page_number>` - For pagination (default: 1)
+  - `?limit=<count>` - Number of results per page (default: 20, set to 0 for all posts)
+
+  The response includes pagination metadata:
+  ```json
+  {
+    "posts": [...],
+    "pagination": {
+      "total": 123,       // Total number of matching posts
+      "page": 1,          // Current page number
+      "limit": 20,        // Posts per page
+      "pages": 7          // Total number of pages
+    },
+    "filters": {
+      "sort": "new",      // Current sort method
+      "timeFilter": "all" // Current time filter
+    }
+  }
+  ```
 
 ### Protected Endpoints
 The following endpoints require authentication using either:
