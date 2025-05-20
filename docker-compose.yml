@@ -1,11 +1,28 @@
 services:
-  plebindex:
+  plebindex01:
     build:
       context: ./plebindex
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
     ports:
       - "3000:3000"
+    volumes:
+      - ./plebindex:/app
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+      - NEXT_PUBLIC_APP_TITLE=${NEXT_PUBLIC_APP_TITLE}
+      - NEXT_PUBLIC_APP_DESCRIPTION=${NEXT_PUBLIC_APP_DESCRIPTION}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  plebindex02:
+    build:
+      context: ./plebindex
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+    ports:
+      - "3010:3000"
     volumes:
       - ./plebindex:/app
     environment:

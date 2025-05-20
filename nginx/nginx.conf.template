@@ -1,7 +1,15 @@
 map $http_upgrade $connection_upgrade {
-       default upgrade;
-        '' close;
+    default upgrade;
+    '' close;
 }
+
+# Add an upstream block to manage the backend servers
+upstream plebindex_backend {
+    # Initially include only plebindex01, the active deployment script will toggle this
+    server plebindex01:3000;
+    # server plebindex02:3000; # Commented out initially
+}
+
 server {
     listen 80;
     server_name ${domain};
@@ -26,7 +34,7 @@ server {
     keepalive_requests 1000;
 
     location / {
-        proxy_pass http://plebindex:3000;
+        proxy_pass http://plebindex_backend;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
