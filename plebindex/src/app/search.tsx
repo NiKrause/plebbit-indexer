@@ -25,8 +25,8 @@ export default function SearchBar() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Construct URL with all parameters
-    let url = '/';
+    // Construct URL with all parameters using the Google format
+    let url = '/search';
     
     // Add search query if present
     if (query) {
@@ -56,7 +56,7 @@ export default function SearchBar() {
     }
     
     // Update URL with all current parameters
-    let url = '/';
+    let url = '/search';
     const params = new URLSearchParams();
     
     if (query) params.set('q', query);
