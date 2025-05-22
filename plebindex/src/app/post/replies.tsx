@@ -51,7 +51,8 @@ async function fetchPost(postId: string) {
     apiBaseUrl = '';  
   }
   
-  const url = `${apiBaseUrl}/api/posts/${postId}`;
+  const baseEndpoint = `/api/posts/${postId}`;
+  const url = apiBaseUrl ? `${apiBaseUrl}${baseEndpoint}` : baseEndpoint;
   
   try {
     const response = await fetch(url, { 
@@ -97,7 +98,8 @@ async function fetchReplies(
     params.append('sort', sort);
   }
   
-  const url = `${apiBaseUrl}/api/replies/${postId}?${params.toString()}`;
+  const baseEndpoint = `/api/replies/${postId}?${params.toString()}`;
+  const url = apiBaseUrl ? `${apiBaseUrl}${baseEndpoint}` : baseEndpoint;
   
   try {
     const response = await fetch(url, { 
