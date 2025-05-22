@@ -51,8 +51,12 @@ async function fetchPost(postId: string) {
     apiBaseUrl = '';  
   }
   
-  const baseEndpoint = `/api/posts/${postId}`;
-  const url = apiBaseUrl ? `${apiBaseUrl}${baseEndpoint}` : baseEndpoint;
+  // The issue might be with the API URL in production
+  // Let's try using the same URL format that works in posts.tsx
+  const baseEndpoint = 'api/posts/' + postId;
+  const url = apiBaseUrl ? `${apiBaseUrl}/${baseEndpoint}` : baseEndpoint;
+  
+  console.log("Fetching post URL:", url);
   
   try {
     const response = await fetch(url, { 
@@ -98,8 +102,11 @@ async function fetchReplies(
     params.append('sort', sort);
   }
   
-  const baseEndpoint = `/api/replies/${postId}?${params.toString()}`;
-  const url = apiBaseUrl ? `${apiBaseUrl}${baseEndpoint}` : baseEndpoint;
+  // Use the same URL pattern that works in posts.tsx
+  const baseEndpoint = 'api/replies/' + postId + '?' + params.toString();
+  const url = apiBaseUrl ? `${apiBaseUrl}/${baseEndpoint}` : baseEndpoint;
+  
+  console.log("Fetching replies URL:", url);
   
   try {
     const response = await fetch(url, { 
