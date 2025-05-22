@@ -77,6 +77,42 @@ export function getDb() {
     CREATE INDEX IF NOT EXISTS idx_posts_parent_timestamp ON posts(parentCid, timestamp);
   `);
   
+  // Check if title column is NOT NULL and fix if needed
+  const checkTitleNullable = () => {
+    console.log("Checking if title column is nullable...");
+    const tableInfo = dbInstance.prepare("PRAGMA table_info(posts)").all();
+    const titleColumn = tableInfo.find(col => col.name === 'title');
+    
+    if (titleColumn && titleColumn.notnull === 1) {
+      console.log("Title column has NOT NULL constraint. Modifying to be nullable...");
+      
+      // Start a transaction
+      dbInstance.pragma('foreign_keys = OFF');
+      dbInstance.prepare('BEGIN TRANSACTION').run();
+      
+      try {
+        // Make the title column nullable
+        dbInstance.exec('ALTER TABLE posts RENAME COLUMN title TO title_old');
+        dbInstance.exec('ALTER TABLE posts ADD COLUMN title TEXT');
+        dbInstance.exec('UPDATE posts SET title = title_old');
+        dbInstance.exec('ALTER TABLE posts DROP COLUMN title_old');
+        
+        dbInstance.prepare('COMMIT').run();
+        console.log("Successfully made title column nullable");
+      } catch (error) {
+        dbInstance.prepare('ROLLBACK').run();
+        console.error("Error modifying title column:", error.message);
+      } finally {
+        dbInstance.pragma('foreign_keys = ON');
+      }
+    } else {
+      console.log("Title column is already nullable. No changes needed.");
+    }
+  };
+  
+  // Run the title nullable check
+  checkTitleNullable();
+  
   const tablesCheck = {
     posts: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'").get(),
     queue: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='subplebbit_queue'").get()
