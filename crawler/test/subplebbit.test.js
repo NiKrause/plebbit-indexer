@@ -78,6 +78,38 @@ describe('Subplebbit functionality', function () {
     // await db.runAsync('DELETE FROM posts');
    }, 20000);
 
+  it('should get a specific post by ID', async function() {
+    // First, get a list of posts to find a valid ID
+    const postsResponse = await request.get('/api/posts');
+    assert.equal(postsResponse.status, 200);
+    assert(postsResponse.body.posts.length > 0, 'Should have at least one post to test with');
+    
+    // Use the ID of the first post
+    const testPostId = postsResponse.body.posts[0].id;
+    
+    // Test the specific post endpoint
+    const response = await request.get(`/api/posts/${testPostId}`);
+    assert.equal(response.status, 200, 'Should successfully retrieve the post');
+    assert(response.body.post, 'Response should contain a post object');
+    assert.equal(response.body.post.id, testPostId, 'Retrieved post should have the correct ID');
+    
+    // Verify the post has all required fields
+    const post = response.body.post;
+    assert(post.title !== undefined, 'Post should have a title');
+    assert(post.timestamp !== undefined, 'Post should have a timestamp');
+    assert(post.content !== undefined, 'Post should have content');
+    assert(post.subplebbitAddress !== undefined, 'Post should have a subplebbitAddress');
+    assert(post.authorAddress !== undefined, 'Post should have an authorAddress');
+  }, 20000);
+
+  it('should return 404 for non-existent post ID', async function() {
+    // Test with a non-existent ID
+    const nonExistentId = 'QmNonExistentPostId';
+    
+    const response = await request.get(`/api/posts/${nonExistentId}`);
+    assert.equal(response.status, 404, 'Should return 404 for non-existent post');
+    assert(response.body.error, 'Response should contain an error message');
+  }, 20000);
 
   it('should search posts for the word "piracy"', async function() {
     const sub = await plebbit.getSubplebbit("plebpiracy.eth");

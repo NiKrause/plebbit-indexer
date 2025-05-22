@@ -48,7 +48,7 @@ export default function Header() {
       <div style={styles.container}>
         <div className="header-flex-row">
           <div style={styles.logoContainer}>
-            <Link href="https://seedit.app/" target="_blank" rel="noopener noreferrer">
+            <Link href="/" rel="noopener noreferrer">
               <PlebscanLogo />
             </Link>
             <span style={styles.logoText}>Plebscan</span>

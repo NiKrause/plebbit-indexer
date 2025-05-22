@@ -12,12 +12,28 @@ export default function SearchBar() {
   const [timeFilter, setTimeFilter] = useState('all');
 
   useEffect(() => {
+    // First check URL parameters
     const urlQuery = searchParams.get('q') || '';
-    const urlSort = searchParams.get('sort') || 'new';
+    const urlSort = searchParams.get('sort');
     const urlTimeFilter = searchParams.get('t') || 'all';
     
     setQuery(urlQuery);
-    setSort(urlSort);
+    
+    // If sort is specified in URL, use it and save to localStorage
+    if (urlSort) {
+      setSort(urlSort);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('preferredSort', urlSort);
+      }
+    } 
+    // Otherwise try to get from localStorage
+    else {
+      if (typeof window !== 'undefined') {
+        const savedSort = localStorage.getItem('preferredSort');
+        setSort(savedSort || 'new');
+      }
+    }
+    
     setTimeFilter(urlTimeFilter);
   }, [searchParams]);
 
@@ -51,6 +67,10 @@ export default function SearchBar() {
     // Update the local state
     if (type === 'sort') {
       setSort(value);
+      // Save sort preference to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('preferredSort', value);
+      }
     } else {
       setTimeFilter(value);
     }

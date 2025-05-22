@@ -89,11 +89,6 @@ export function setupSubplebbitListener(sub, db, address) {
   sub.on('update', async () => {
     console.log(`Subplebbit ${address} updated, re-indexing...`);
     try {
-      // await withTimeout(
-      //   // sub.update(),
-      //   10000,
-      //   `Timeout updating subplebbit at ${address} (on update event)`
-      // );
       await indexSubplebbit(sub, db);
       updateSubplebbitStatus(db, address, 'success');
     } catch (err) {
@@ -105,37 +100,128 @@ export function setupSubplebbitListener(sub, db, address) {
 
 export async function indexSubplebbit(sub, db) {
   console.log("indexSubplebbit", Object.keys(sub.posts.pageCids).length !== 0);
-
-  if (Object.keys(sub.posts.pageCids).length !== 0) { // no need to fetch page cids, just use the preloaded page in else case
+  
+  // Step 1: Get all top-level posts
+  let allPosts = [];
+  
+  if (Object.keys(sub.posts.pageCids).length !== 0) {
     console.log("sub.posts.pageCids", sub.posts.pageCids);
     let postsPage = await sub.posts.getPage(sub.posts.pageCids.new);
-    // console.log("postsPage", postsPage);
-    let allPosts = [...postsPage.comments];
-    // console.log("allPosts", allPosts);
-    // const lastPostIndexed = await db.getLastPostIndexed(sub.address);
+    allPosts = [...postsPage.comments];
+    
     while (postsPage.nextCid) {
       try {
         postsPage = await sub.posts.getPage(postsPage.nextCid);
-        // console.log("postsPage", postsPage.comments);
-
         allPosts = allPosts.concat(postsPage.comments);
-
-          // if (lastPostIndexed && allPosts.some(post => post.cid === lastPostIndexed)) {
-          //   // no need to keep going and load new pages as we've reached the last post indexed
-          //   // 'new' is sorted by post creation time, so if we've reached the last post indexed, there's no new posts to index
-          //   break;
-          // }
       } catch (err) {
         console.error(`Error loading next page (${postsPage.nextCid}):`, err);
         break;
       }
     }
-    console.log("now indexing ", allPosts.length, " posts");
-    await indexPosts(db, allPosts);
+  } else {
+    allPosts = Object.values(sub.posts.pages)[0].comments;
   }
+
+  //only for testing purposes - remove this
+  const targetAuthorAddress = "12D3KooWQ3aXtQsfk6L8CEjboLuCF6jkY8oizL31qfhy9tSJrLZ6";
+  if (targetAuthorAddress) {
+    allPosts = allPosts.filter(post => post.author?.address === targetAuthorAddress);
+    console.log(`Filtered to ${allPosts.length} posts by author ${targetAuthorAddress}`);
+  }
+   
+  console.log(`Now indexing ${allPosts.length} posts...`);
+  await indexPosts(db, allPosts);
+  
+  // Step 2: Process and index all replies in a flattened structure
+  console.log(`Processing replies for ${allPosts.length} posts...`);
+  for (const post of allPosts) {
+    if (post.replies) {
+      const allReplies = getAllReplies(post, post.cid)   
+      if (allReplies.length > 0) {
+        console.log(`Indexing ${allReplies.length} total replies for post ${post.cid}`);
+        await indexPosts(db, allReplies);
+      }
+    }
+  }
+}
+
+// New helper function that uses the flattening approach
+function getAllReplies(comment, postCid) {
+  const allReplies = [];
+  
+  if (!comment.replies) return allReplies;
+  
+  // Case 1: Handle replies.pages structure
+  if (comment.replies.pages && Object.keys(comment.replies.pages).length > 0) {
+    for (const sortType in comment.replies.pages) {
+      const page = comment.replies.pages[sortType];
+      if (page?.comments?.length) {
+        // Process current page comments
+        const repliesWithReferences = page.comments.map(reply => ({
+          ...reply,
+          parentCid: comment.cid,
+          postCid: postCid
+        }));
+        
+        // Add these replies to our collection
+        allReplies.push(...repliesWithReferences);
+        
+        // Recursively get replies to these replies
+        for (const reply of repliesWithReferences) {
+          const nestedReplies = getAllReplies(reply, postCid);
+          allReplies.push(...nestedReplies);
+        }
+      }
+    }
+  }
+  // Case 2: Direct comments array
+  else if (comment.replies.comments) {
+    const repliesWithReferences = comment.replies.comments.map(reply => ({
+      ...reply,
+      parentCid: comment.cid,
+      postCid: postCid
+    }));
+    
+    allReplies.push(...repliesWithReferences);
+    
+    // Recursively process these comments
+    for (const reply of repliesWithReferences) {
+      if (reply.replies) {
+        const nestedReplies = getAllReplies(reply, postCid);
+        allReplies.push(...nestedReplies);
+      }
+    }
+  }
+  // Case 3: Direct object with sortTypes
   else {
-    await indexPosts(db, Object.values(sub.posts.pages)[0].comments); 
+    for (const sortType in comment.replies) {
+      const page = comment.replies[sortType];
+      if (page?.comments?.length) {
+        const repliesWithReferences = page.comments.map(reply => ({
+          ...reply,
+          parentCid: comment.cid,
+          postCid: postCid
+        }));
+        
+        allReplies.push(...repliesWithReferences);
+        
+        for (const reply of repliesWithReferences) {
+          if (reply.replies) {
+            const nestedReplies = getAllReplies(reply, postCid);
+            allReplies.push(...nestedReplies);
+          }
+        }
+      }
+    }
   }
+  
+  // Remove duplicates by cid
+  const uniqueReplies = {};
+  for (const reply of allReplies) {
+    uniqueReplies[reply.cid] = reply;
+  }
+  
+  return Object.values(uniqueReplies);
 }
 
 /**

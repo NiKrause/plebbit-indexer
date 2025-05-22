@@ -1,5 +1,5 @@
 export async function indexPosts(db, posts) {
-  console.log(`Indexing ${posts.length} posts...`);
+  console.log(`Indexing ${posts.length} posts/comments...`);
   try {
     //delete all posts from the database
     // const deleteStmt = db.prepare('DELETE FROM posts');
@@ -7,8 +7,10 @@ export async function indexPosts(db, posts) {
 
     const transaction = db.transaction(() => {
       const insertStmt = db.prepare(`
-        INSERT INTO posts (id, timestamp, title, content, subplebbitAddress, authorAddress, authorDisplayName, upvoteCount, downvoteCount, replyCount)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO posts (id, timestamp, title, content, subplebbitAddress, 
+                           authorAddress, authorDisplayName, upvoteCount, downvoteCount, 
+                           replyCount, parentCid, postCid, depth)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       
@@ -16,7 +18,6 @@ export async function indexPosts(db, posts) {
       let skippedCount = 0;
       
       for (const post of posts) {
-        console.log("insertingpost", post);
         try {
           // Validate required fields
           if (!post.cid) {
@@ -28,13 +29,14 @@ export async function indexPosts(db, posts) {
           // Validate all required fields before insertion
           const requiredFields = {
             timestamp: post.timestamp,
-            title: post.title,
+            // Title is only required for top-level posts (not for comments)
+            title: post.parentCid ? undefined : post.title,
             subplebbitAddress: post.subplebbitAddress,
           };
           
           // Check if any required field is missing
           const missingFields = Object.entries(requiredFields)
-            .filter(([_, value]) => value === undefined || value === null)
+            .filter(([key, value]) => value === undefined && key !== 'title')
             .map(([key]) => key);
           
           if (missingFields.length > 0) {
@@ -45,24 +47,28 @@ export async function indexPosts(db, posts) {
           
           const deleteStmt = db.prepare('DELETE FROM posts where id = ?');
           deleteStmt.run(post.cid);
-          console.log("deleted post", post.cid);
+          // console.log("deleted post", post.cid);
+          
           insertStmt.run(
             post.cid,
             post.timestamp,
-            post.title,
+            post.title || null, // Title may be null for comments
             post.content,
             post.subplebbitAddress,
             post.author?.address,
             post.author?.displayName,
             post.upvoteCount ?? 0,
             post.downvoteCount ?? 0,
-            post.replyCount ?? 0
+            post.replyCount ?? 0,
+            post.parentCid, 
+            post.postCid,  
+            post.depth         // Depth (0 for posts, >0 for comments)
           );
           
           insertedCount++;
           
           if (insertedCount % 100 === 0 || insertedCount === 1) {
-            console.log(`Indexed ${insertedCount} posts so far...`);
+            console.log(`Indexed ${insertedCount} posts/comments so far...`);
           }
         } catch (error) {
           console.error(`Error processing post ${post?.cid || 'unknown'}:`, error);

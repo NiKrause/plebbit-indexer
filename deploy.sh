@@ -7,6 +7,16 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}Starting deployment process...${NC}"
 
+# Check which docker compose command is available
+if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+  DOCKER_COMPOSE="docker compose"
+elif command -v docker-compose &> /dev/null; then
+  DOCKER_COMPOSE="docker-compose"
+else
+  echo -e "${YELLOW}Neither docker compose nor docker-compose commands found. Please install Docker Compose.${NC}"
+  exit 1
+fi
+
 # 1. Pull the latest changes from GitHub
 echo -e "${YELLOW}Pulling latest changes from GitHub...${NC}"
 git pull
@@ -35,8 +45,8 @@ if [ "$REBUILD_CRAWLER" = true ]; then
   # Check which crawler instance is currently active
   if grep -q "crawler01" ./data/nginx/002-crawler_upstream.conf && ! grep -q "#server crawler01" ./data/nginx/002-crawler_upstream.conf; then
     echo "crawler01 is active, updating crawler02..."
-    docker-compose build crawler02
-    docker-compose up -d crawler02
+    $DOCKER_COMPOSE build crawler02
+    $DOCKER_COMPOSE up -d crawler02
     sleep 5 # Wait for service to be fully up
     
     # Update the upstream configuration
@@ -47,11 +57,11 @@ upstream crawler_backend {
 }
 EOF
     # Reload nginx to apply the new configuration
-    docker-compose exec nginx nginx -s reload
+    $DOCKER_COMPOSE exec nginx nginx -s reload
   else
     echo "crawler02 is active, updating crawler01..."
-    docker-compose build crawler01
-    docker-compose up -d crawler01
+    $DOCKER_COMPOSE build crawler01
+    $DOCKER_COMPOSE up -d crawler01
     sleep 5 # Wait for service to be fully up
     
     # Update the upstream configuration
@@ -62,7 +72,7 @@ upstream crawler_backend {
 }
 EOF
     # Reload nginx to apply the new configuration
-    docker-compose exec nginx nginx -s reload
+    $DOCKER_COMPOSE exec nginx nginx -s reload
   fi
 fi
 
@@ -72,8 +82,8 @@ if [ "$REBUILD_PLEBINDEX" = true ]; then
   # Check which plebindex instance is currently active
   if grep -q "plebindex01" ./data/nginx/001-upstream.conf && ! grep -q "#server plebindex01" ./data/nginx/001-upstream.conf; then
     echo "plebindex01 is active, updating plebindex02..."
-    docker-compose build plebindex02
-    docker-compose up -d plebindex02
+    $DOCKER_COMPOSE build plebindex02
+    $DOCKER_COMPOSE up -d plebindex02
     sleep 5 # Wait for service to be fully up
     
     # Update the upstream configuration
@@ -84,11 +94,11 @@ upstream plebindex_backend {
 }
 EOF
     # Reload nginx to apply the new configuration
-    docker-compose exec nginx nginx -s reload
+    $DOCKER_COMPOSE exec nginx nginx -s reload
   else
     echo "plebindex02 is active, updating plebindex01..."
-    docker-compose build plebindex01
-    docker-compose up -d plebindex01
+    $DOCKER_COMPOSE build plebindex01
+    $DOCKER_COMPOSE up -d plebindex01
     sleep 5 # Wait for service to be fully up
     
     # Update the upstream configuration
@@ -99,7 +109,7 @@ upstream plebindex_backend {
 }
 EOF
     # Reload nginx to apply the new configuration
-    docker-compose exec nginx nginx -s reload
+    $DOCKER_COMPOSE exec nginx nginx -s reload
   fi
 fi
 
@@ -109,8 +119,8 @@ if [ "$REBUILD_CRAWLER" = false ] && [ "$REBUILD_PLEBINDEX" = false ]; then
   read -r answer
   if [ "$answer" = "y" ]; then
     echo -e "${GREEN}Rebuilding and restarting all containers...${NC}"
-    docker-compose build
-    docker-compose up -d
+    $DOCKER_COMPOSE build
+    $DOCKER_COMPOSE up -d
   else
     echo -e "${GREEN}No containers will be rebuilt.${NC}"
   fi

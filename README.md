@@ -216,6 +216,53 @@ The project includes a zero downtime deployment system using dual-instance archi
   }
   ```
 
+- `GET /api/posts/:id`  
+  Returns a specific post by its ID.
+  
+  Response format:
+  ```json
+  {
+    "post": {
+      "id": "QmAbC123...",
+      "title": "Post title",
+      "content": "Post content",
+      "subplebbitAddress": "example.eth",
+      "authorAddress": "12D3KooW...",
+      "authorDisplayName": "Username",
+      "timestamp": 1234567890,
+      "upvoteCount": 10,
+      "downvoteCount": 2,
+      "replyCount": 5
+    }
+  }
+  ```
+  
+  Returns 404 if the post with the given ID doesn't exist.
+
+- `GET /api/replies/:parentCid`  
+  Returns replies to a specific post or comment.
+  
+  Supports pagination and sorting:
+  - `?sort=<sort_type>` - Sort by: `new` (default), `top`, or `old`
+  - `?page=<page_number>` - For pagination (default: 1)
+  - `?limit=<count>` - Number of results per page (default: 20)
+  
+  The response includes pagination metadata:
+  ```json
+  {
+    "replies": [...],
+    "pagination": {
+      "total": 123,       // Total number of replies
+      "page": 1,          // Current page number
+      "limit": 20,        // Replies per page
+      "pages": 7          // Total number of pages
+    },
+    "filters": {
+      "sort": "new"       // Current sort method
+    }
+  }
+  ```
+
 ### Protected Endpoints
 The following endpoints require authentication using either:
 - Bearer token in the Authorization header: `Authorization: Bearer <token>`

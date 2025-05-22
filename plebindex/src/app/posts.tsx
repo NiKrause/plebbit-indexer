@@ -360,9 +360,13 @@ async function PostsContent({
                 <span title="Downvotes">
                   <span style={{ color: '#E25241' }}>▼</span> {post.downvoteCount || 0}
                 </span>
-                <span title="Replies">
+                <Link 
+                  href={`/post/${post.id}`}
+                  title="View Replies" 
+                  style={{ color: '#888', textDecoration: 'none' }}
+                >
                   <span>💬</span> {post.replyCount || 0} {post.replyCount === 1 ? 'reply' : 'replies'}
-                </span>
+                </Link>
               </div>
             </div>
           ))

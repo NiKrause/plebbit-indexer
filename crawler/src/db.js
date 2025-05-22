@@ -29,19 +29,24 @@ export function getDb() {
     CREATE TABLE IF NOT EXISTS posts (
       id TEXT PRIMARY KEY,
       timestamp INTEGER NOT NULL,
-      title TEXT NOT NULL,
+      title TEXT,
       content TEXT,
       subplebbitAddress TEXT NOT NULL,
       authorAddress TEXT,
       authorDisplayName TEXT,
       upvoteCount INTEGER,
       downvoteCount INTEGER,
-      replyCount INTEGER
+      replyCount INTEGER,
+      parentCid TEXT,
+      postCid TEXT,
+      depth INTEGER DEFAULT 0
     );
     
     -- Indizes für häufige Abfragen
     CREATE INDEX IF NOT EXISTS idx_posts_subplebbit ON posts(subplebbitAddress);
     CREATE INDEX IF NOT EXISTS idx_posts_timestamp ON posts(timestamp);
+    CREATE INDEX IF NOT EXISTS idx_posts_parent ON posts(parentCid);
+    CREATE INDEX IF NOT EXISTS idx_posts_post ON posts(postCid);
 
     -- Queue-Tabelle für Subplebbit-Adressen
     CREATE TABLE IF NOT EXISTS subplebbit_queue (
@@ -61,6 +66,15 @@ export function getDb() {
     -- Index für die Queue-Tabelle
     CREATE INDEX IF NOT EXISTS idx_subplebbit_queue_status ON subplebbit_queue(status);
     CREATE INDEX IF NOT EXISTS idx_subplebbit_queue_next_retry ON subplebbit_queue(next_retry_date);
+
+    -- Combined index for timestamp + subplebbitAddress
+    CREATE INDEX IF NOT EXISTS idx_posts_subplebbit_timestamp ON posts(subplebbitAddress, timestamp);
+
+    -- Index on authorAddress for searching user's posts
+    CREATE INDEX IF NOT EXISTS idx_posts_author ON posts(authorAddress);
+
+    -- Combined index for parentCid + timestamp for sorting replies chronologically
+    CREATE INDEX IF NOT EXISTS idx_posts_parent_timestamp ON posts(parentCid, timestamp);
   `);
   
   const tablesCheck = {
