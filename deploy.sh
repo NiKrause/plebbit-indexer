@@ -49,6 +49,11 @@ if [ "$REBUILD_CRAWLER" = true ]; then
     $DOCKER_COMPOSE up -d crawler02
     sleep 5 # Wait for service to be fully up
     
+    # Display testing URL
+    echo -e "${YELLOW}Test the new crawler02 instance at: http://localhost:3001 or using: curl localhost:3001${NC}"
+    echo -e "${YELLOW}Once you've verified it works, press Enter to continue or Ctrl+C to abort${NC}"
+    read -r
+    
     # Update the upstream configuration
     cat > ./data/nginx/002-crawler_upstream.conf << EOF
 upstream crawler_backend {
@@ -63,6 +68,11 @@ EOF
     $DOCKER_COMPOSE build crawler01
     $DOCKER_COMPOSE up -d crawler01
     sleep 5 # Wait for service to be fully up
+    
+    # Display testing URL
+    echo -e "${YELLOW}Test the new crawler01 instance at: http://localhost:3001 or using: curl localhost:3001${NC}"
+    echo -e "${YELLOW}Once you've verified it works, press Enter to continue or Ctrl+C to abort${NC}"
+    read -r
     
     # Update the upstream configuration
     cat > ./data/nginx/002-crawler_upstream.conf << EOF
@@ -86,6 +96,11 @@ if [ "$REBUILD_PLEBINDEX" = true ]; then
     $DOCKER_COMPOSE up -d plebindex02
     sleep 5 # Wait for service to be fully up
     
+    # Display testing URL
+    echo -e "${YELLOW}Test the new plebindex02 instance at: http://localhost:3000 or using: curl localhost:3000${NC}"
+    echo -e "${YELLOW}Once you've verified it works, press Enter to continue or Ctrl+C to abort${NC}"
+    read -r
+    
     # Update the upstream configuration
     cat > ./data/nginx/001-upstream.conf << EOF
 upstream plebindex_backend {
@@ -100,6 +115,11 @@ EOF
     $DOCKER_COMPOSE build plebindex01
     $DOCKER_COMPOSE up -d plebindex01
     sleep 5 # Wait for service to be fully up
+    
+    # Display testing URL
+    echo -e "${YELLOW}Test the new plebindex01 instance at: http://localhost:3000 or using: curl localhost:3000${NC}"
+    echo -e "${YELLOW}Once you've verified it works, press Enter to continue or Ctrl+C to abort${NC}"
+    read -r
     
     # Update the upstream configuration
     cat > ./data/nginx/001-upstream.conf << EOF
