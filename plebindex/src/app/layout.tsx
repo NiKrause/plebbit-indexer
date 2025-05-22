@@ -12,11 +12,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// export const metadata: Metadata = {
-//   title: process.env.NEXT_PUBLIC_APP_TITLE ?? "Plebindex",
-//   description: process.env.NEXT_PUBLIC_APP_DESCRIPTION ?? "",
-// };
-
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: process.env.NEXT_PUBLIC_APP_TITLE ?? "Plebindex",
@@ -27,7 +22,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// ... existing code ...
 export default function RootLayout({
   children,
 }: Readonly<{
