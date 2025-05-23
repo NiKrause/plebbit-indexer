@@ -28,6 +28,7 @@ interface PaginatedResponse {
   filters: {
     sort: string;
     timeFilter: string;
+    includeReplies: boolean;
   };
 }
 
@@ -36,7 +37,8 @@ async function fetchPosts(
   page: number = 1, 
   limit: number = 0,
   sort: string = 'new',
-  timeFilter: string = 'all'
+  timeFilter: string = 'all',
+  includeReplies: boolean = true
 ) {
   let apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!apiBaseUrl && process.env.NODE_ENV === 'development') {
@@ -58,6 +60,11 @@ async function fetchPosts(
   // Only add time filter if not the default
   if (timeFilter !== 'all') {
     params.append('t', timeFilter);
+  }
+  
+  // Only add include-replies if false (since true is default)
+  if (!includeReplies) {
+    params.append('include-replies', 'false');
   }
   
   // Create base endpoint
@@ -92,7 +99,8 @@ async function fetchPosts(
       },
       filters: {
         sort: rawData.filters?.sort || 'new',
-        timeFilter: rawData.filters?.timeFilter || 'all'
+        timeFilter: rawData.filters?.timeFilter || 'all',
+        includeReplies: rawData.filters?.includeReplies !== undefined ? rawData.filters.includeReplies : true
       }
     };
     
@@ -112,14 +120,15 @@ async function fetchPosts(
         },
         filters: {
           sort,
-          timeFilter
+          timeFilter,
+          includeReplies
         }
       };
     }
     return { 
       posts: [], 
       pagination: { total: 0, page: 1, limit: 20, pages: 0 },
-      filters: { sort, timeFilter }
+      filters: { sort, timeFilter, includeReplies }
     };
   }
 }
@@ -163,12 +172,14 @@ function Pagination({
   pagination, 
   searchTerm,
   sort,
-  timeFilter 
+  timeFilter,
+  includeReplies
 }: { 
   pagination: PaginatedResponse['pagination'], 
   searchTerm?: string | null,
   sort: string, 
-  timeFilter: string 
+  timeFilter: string,
+  includeReplies: boolean 
 }) {
   const { page, pages } = pagination;
   
@@ -211,6 +222,11 @@ function Pagination({
     // Add time filter if not default
     if (timeFilter !== 'all') {
       params.set('t', timeFilter);
+    }
+    
+    // Add include-replies if false (since true is default)
+    if (!includeReplies) {
+      params.set('include-replies', 'false');
     }
     
     const queryString = params.toString();
@@ -294,14 +310,16 @@ async function PostsContent({
   searchTerm, 
   page = 1, 
   sort = 'new', 
-  timeFilter = 'all' 
+  timeFilter = 'all',
+  includeReplies = true 
 }: { 
   searchTerm?: string | null, 
   page?: number,
   sort?: string,
-  timeFilter?: string 
+  timeFilter?: string,
+  includeReplies?: boolean 
 }) {
-  const { posts, pagination, filters } = await fetchPosts(searchTerm, page, 0, sort, timeFilter);
+  const { posts, pagination, filters } = await fetchPosts(searchTerm, page, 0, sort, timeFilter, includeReplies);
   
   return (
     <div>
@@ -313,6 +331,7 @@ async function PostsContent({
         {filters.timeFilter !== 'all' && (
           <span> • Time: <strong>{filters.timeFilter}</strong></span>
         )}
+        <span> • Include replies: <strong>{filters.includeReplies ? 'Yes' : 'No'}</strong></span>
       </div>
       
       <div>
@@ -380,7 +399,8 @@ async function PostsContent({
           pagination={pagination} 
           searchTerm={searchTerm} 
           sort={filters.sort} 
-          timeFilter={filters.timeFilter} 
+          timeFilter={filters.timeFilter}
+          includeReplies={filters.includeReplies} 
         />
       )}
     </div>
@@ -392,7 +412,8 @@ export default async function Posts({ searchParams }: {
     q?: string, 
     page?: string,
     sort?: string,
-    t?: string
+    t?: string,
+    'include-replies'?: string
   } 
 }) {
   // Get parameters from URL query
@@ -400,6 +421,7 @@ export default async function Posts({ searchParams }: {
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
   const sort = searchParams?.sort || 'new';
   const timeFilter = searchParams?.t || 'all';
+  const includeReplies = searchParams?.['include-replies'] !== 'false'; // defaults to true
   
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -408,6 +430,7 @@ export default async function Posts({ searchParams }: {
         page={page} 
         sort={sort} 
         timeFilter={timeFilter} 
+        includeReplies={includeReplies}
       />
     </Suspense>
   );

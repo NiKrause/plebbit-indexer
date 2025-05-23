@@ -10,12 +10,14 @@ export default function SearchBar() {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('new');
   const [timeFilter, setTimeFilter] = useState('all');
+  const [includeReplies, setIncludeReplies] = useState(true);
 
   useEffect(() => {
     // First check URL parameters
     const urlQuery = searchParams.get('q') || '';
     const urlSort = searchParams.get('sort');
     const urlTimeFilter = searchParams.get('t') || 'all';
+    const urlIncludeReplies = searchParams.get('include-replies');
     
     setQuery(urlQuery);
     
@@ -35,13 +37,20 @@ export default function SearchBar() {
     }
     
     setTimeFilter(urlTimeFilter);
+    
+    // Handle include-replies parameter - defaults to true
+    if (urlIncludeReplies !== null) {
+      setIncludeReplies(urlIncludeReplies === 'true');
+    } else {
+      setIncludeReplies(true); // Default to true when not specified
+    }
   }, [searchParams]);
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Construct URL with all parameters using the Google format
+    // Construct URL with all parameters
     let url = '/search';
     
     // Add search query if present
@@ -59,20 +68,27 @@ export default function SearchBar() {
       url += url.includes('?') ? `&t=${timeFilter}` : `?t=${timeFilter}`;
     }
     
+    // Add include-replies parameter if not default (default is true)
+    if (!includeReplies) {
+      url += url.includes('?') ? `&include-replies=false` : `?include-replies=false`;
+    }
+    
     router.push(url);
   };
 
   // Function to update a single filter
-  const handleFilterChange = (type: 'sort' | 'time', value: string) => {
+  const handleFilterChange = (type: 'sort' | 'time' | 'includeReplies', value: string | boolean) => {
     // Update the local state
     if (type === 'sort') {
-      setSort(value);
+      setSort(value as string);
       // Save sort preference to localStorage
       if (typeof window !== 'undefined') {
-        localStorage.setItem('preferredSort', value);
+        localStorage.setItem('preferredSort', value as string);
       }
-    } else {
-      setTimeFilter(value);
+    } else if (type === 'time') {
+      setTimeFilter(value as string);
+    } else if (type === 'includeReplies') {
+      setIncludeReplies(value as boolean);
     }
     
     // Update URL with all current parameters
@@ -83,16 +99,23 @@ export default function SearchBar() {
     
     // Set new sort value if changing sort, otherwise use current
     if (type === 'sort') {
-      if (value !== 'new') params.set('sort', value);
+      if (value !== 'new') params.set('sort', value as string);
     } else if (sort !== 'new') {
       params.set('sort', sort);
     }
     
     // Set new time value if changing time, otherwise use current
     if (type === 'time') {
-      if (value !== 'all') params.set('t', value); 
+      if (value !== 'all') params.set('t', value as string); 
     } else if (timeFilter !== 'all') {
       params.set('t', timeFilter);
+    }
+    
+    // Set include-replies value if changing or if it's false (only add when false since true is default)
+    if (type === 'includeReplies') {
+      if (!(value as boolean)) params.set('include-replies', 'false');
+    } else if (!includeReplies) {
+      params.set('include-replies', 'false');
     }
     
     const queryString = params.toString();
@@ -166,6 +189,19 @@ export default function SearchBar() {
       backgroundColor: '#4b5563',
       color: 'white',
       borderColor: '#4b5563'
+    },
+    checkboxContainer: {
+      display: 'flex' as const,
+      alignItems: 'center' as const,
+      gap: '8px',
+      padding: '4px 0'
+    },
+    checkbox: {
+      cursor: 'pointer'
+    },
+    checkboxLabel: {
+      fontSize: '12px',
+      cursor: 'pointer'
     }
   };
 
@@ -206,6 +242,20 @@ export default function SearchBar() {
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
           </button>
+        </div>
+        
+        {/* Include Replies Checkbox */}
+        <div style={searchStyles.checkboxContainer}>
+          <input
+            type="checkbox"
+            id="include-replies"
+            checked={includeReplies}
+            onChange={(e) => handleFilterChange('includeReplies', e.target.checked)}
+            style={searchStyles.checkbox}
+          />
+          <label htmlFor="include-replies" style={searchStyles.checkboxLabel}>
+            Include replies
+          </label>
         </div>
         
         {/* Filter options */}

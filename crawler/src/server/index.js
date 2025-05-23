@@ -35,16 +35,21 @@ export async function startServer(_db) {
       const rawLimit = req.query.limit !== undefined ? parseInt(req.query.limit) : 20;
       const sort = req.query.sort || 'new';
       const timeFilter = req.query.t || 'all';
-      const includeComments = req.query.includeComments === 'true';
       
-      // Only fetch top-level posts (where parentCid is null) unless includeComments is true
-      const postFilter = includeComments ? '' : 'parentCid IS NULL';
+      // Handle include-replies parameter - defaults to true
+      let includeReplies = true; // Default to include replies
+      if (req.query['include-replies'] !== undefined) {
+        includeReplies = req.query['include-replies'] === 'true';
+      }
+      
+      // Only fetch top-level posts (where parentCid is null) unless includeReplies is true
+      const postFilter = includeReplies ? '' : 'parentCid IS NULL';
       
       // Special case: limit=0 means "return all posts"
       const limit = rawLimit === 0 ? null : Math.max(1, rawLimit);
       const offset = limit ? (page - 1) * limit : 0;
       
-      console.log(`Getting posts ${limit ? `page ${page} with limit ${limit}` : 'with no limit'}, sort: ${sort}, timeFilter: ${timeFilter}`);
+      console.log(`Getting posts ${limit ? `page ${page} with limit ${limit}` : 'with no limit'}, sort: ${sort}, timeFilter: ${timeFilter}, includeReplies: ${includeReplies}`);
       
       // Time filter conditions
       let whereClause = '';
@@ -76,14 +81,14 @@ export async function startServer(_db) {
         
         if (timeOffset > 0) {
           whereClause = ' WHERE timestamp > ?';
-          if (!includeComments) {
+          if (!includeReplies) {
             whereClause += ' AND ' + postFilter;
           }
           timeParams.push(now - timeOffset);
-        } else if (!includeComments) {
+        } else if (!includeReplies) {
           whereClause = ' WHERE ' + postFilter;
         }
-      } else if (!includeComments) {
+      } else if (!includeReplies) {
         whereClause = ' WHERE ' + postFilter;
       }
       
@@ -129,7 +134,7 @@ export async function startServer(_db) {
       const pages = limit ? Math.ceil(total / limit) : 1;
       console.log(`Delivered ${rows.length} rows ${limit ? `(page ${page} of ${pages})` : '(all posts)'}`);
       
-      // Return response with metadata
+      // Return response with metadata including includeReplies
       res.json({
         posts: rows,
         pagination: {
@@ -140,7 +145,8 @@ export async function startServer(_db) {
         },
         filters: {
           sort,
-          timeFilter
+          timeFilter,
+          includeReplies
         }
       });
     } catch (err) {
@@ -156,6 +162,12 @@ export async function startServer(_db) {
       const rawLimit = req.query.limit !== undefined ? parseInt(req.query.limit) : 20;
       const sort = req.query.sort || 'new';
       const timeFilter = req.query.t || 'all';
+      
+      // Handle include-replies parameter - defaults to true
+      let includeReplies = true; // Default to include replies
+      if (req.query['include-replies'] !== undefined) {
+        includeReplies = req.query['include-replies'] === 'true';
+      }
       
       // Special case: limit=0 means "return all posts"
       const limit = rawLimit === 0 ? null : Math.max(1, rawLimit);
@@ -201,6 +213,12 @@ export async function startServer(_db) {
         }
       }
       
+      // Add post filter for replies if needed
+      let repliesClause = '';
+      if (!includeReplies) {
+        repliesClause = ' AND parentCid IS NULL';
+      }
+      
       // Determine the sort order
       let orderClause;
       switch (sort) {
@@ -228,7 +246,7 @@ export async function startServer(_db) {
         OR LOWER(authorDisplayName) LIKE LOWER(?)
         OR LOWER(authorAddress) LIKE LOWER(?)
         OR LOWER(subplebbitAddress) LIKE LOWER(?))
-        ${whereClause}
+        ${whereClause}${repliesClause}
       `;
       
       const countStmt = db.prepare(countQuery);
@@ -247,7 +265,7 @@ export async function startServer(_db) {
           OR LOWER(authorDisplayName) LIKE LOWER(?)
           OR LOWER(authorAddress) LIKE LOWER(?)
           OR LOWER(subplebbitAddress) LIKE LOWER(?))
-          ${whereClause}
+          ${whereClause}${repliesClause}
           ${orderClause}
           LIMIT ? OFFSET ?
         `;
@@ -266,7 +284,7 @@ export async function startServer(_db) {
           OR LOWER(authorDisplayName) LIKE LOWER(?)
           OR LOWER(authorAddress) LIKE LOWER(?)
           OR LOWER(subplebbitAddress) LIKE LOWER(?))
-          ${whereClause}
+          ${whereClause}${repliesClause}
           ${orderClause}
         `;
         
@@ -279,7 +297,7 @@ export async function startServer(_db) {
       }
       
       const pages = limit ? Math.ceil(total / limit) : 1;
-      console.log(`Search results for "${q}" ${limit ? `(page ${page})` : '(all results)'} with sort=${sort}, timeFilter=${timeFilter}:`, rows.length);
+      console.log(`Search results for "${q}" ${limit ? `(page ${page})` : '(all results)'} with sort=${sort}, timeFilter=${timeFilter}, includeReplies=${includeReplies}:`, rows.length);
       
       // Return response with metadata including sort and time filter
       res.json({
@@ -293,7 +311,8 @@ export async function startServer(_db) {
         filters: {
           query: q,
           sort,
-          timeFilter
+          timeFilter,
+          includeReplies
         }
       });
     } catch (err) {
