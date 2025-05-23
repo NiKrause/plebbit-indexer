@@ -1,0 +1,111 @@
+.container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  gap: 8px;
+}
+
+.pageLink {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #374151;
+}
+
+.activePage {
+  background-color: #4b5563;
+  color: white;
+  border-color: #4b5563;
+}
+
+.disabledLink {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.postContainer {
+  border-bottom: 2px solid #eaeaea;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+}
+
+.postTitle {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.postMeta {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.postContent {
+  margin-bottom: 16px;
+}
+
+.postStats {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.sortOptions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.sortButton {
+  padding: 4px 8px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sortButtonActive {
+  background: #4b5563;
+  color: white;
+  border-color: #4b5563;
+}
+
+.replyCount {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.repliesContainer {
+  margin-top: 20px;
+}
+
+.replyItem {
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.replyMeta {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.replyContent {
+  margin-bottom: 8px;
+}
+
+.replyStats {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #666;
+} 
