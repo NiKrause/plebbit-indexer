@@ -1,0 +1,102 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    timeout-minutes: 30
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Create required directories
+      run: |
+        mkdir -p data/plebbit
+        mkdir -p data/nginx
+        mkdir -p data/certbot/conf
+        mkdir -p data/certbot/www
+
+    - name: Create environment file
+      run: |
+        cat > .env << EOF
+        NODE_ENV=test
+        NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+        NEXT_PUBLIC_APP_TITLE=Plebbit Indexer Test
+        NEXT_PUBLIC_APP_DESCRIPTION=Test environment for Plebbit Indexer
+        PLEBBIT_WS_URL=ws://localhost:9138
+        SERVER_NAME=localhost
+        EOF
+
+    - name: Start plebbit-cli service
+      run: |
+        echo "Building and starting plebbit-cli..."
+        docker-compose build plebbit-cli
+        docker-compose up -d plebbit-cli
+        
+        # Wait for auth key to be generated
+        echo "Waiting for auth key to be generated..."
+        timeout 120 bash -c 'while [ ! -f data/plebbit/auth-key ]; do echo "Waiting for auth key..."; sleep 3; done'
+        
+        echo "Auth key generated successfully!"
+        cat data/plebbit/auth-key
+
+    - name: Start crawler service
+      run: |
+        echo "Building and starting crawler..."
+        docker-compose build crawler01
+        docker-compose up -d crawler01
+        
+        # Wait for crawler API to be responsive
+        echo "Waiting for crawler API to be ready..."
+        timeout 240 bash -c 'until curl -f http://localhost:3001/api/posts 2>/dev/null; do echo "Waiting for API ($(date))..."; sleep 5; done'
+        
+        echo "Crawler API is ready!"
+
+    - name: Verify services are running
+      run: |
+        echo "=== Docker containers status ==="
+        docker-compose ps
+        
+        echo "=== Testing API endpoint ==="
+        curl -s http://localhost:3001/api/posts | head -20
+        
+        echo "=== Checking auth key ==="
+        ls -la data/plebbit/
+
+    - name: Show service logs before tests
+      run: |
+        echo "=== Recent Plebbit-CLI logs ==="
+        docker-compose logs --tail=30 plebbit-cli
+        echo "=== Recent Crawler logs ==="
+        docker-compose logs --tail=30 crawler01
+
+    - name: Run tests
+      run: |
+        echo "Running Jest tests..."
+        # Run tests inside the crawler container
+        docker-compose exec -T crawler01 npm test
+      timeout-minutes: 15
+
+    - name: Show service logs on failure
+      if: failure()
+      run: |
+        echo "=== Full Plebbit-CLI logs ==="
+        docker-compose logs plebbit-cli
+        echo "=== Full Crawler logs ==="
+        docker-compose logs crawler01
+
+    - name: Clean up
+      if: always()
+      run: |
+        docker-compose down -v
+        docker system prune -f 
