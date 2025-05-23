@@ -9,6 +9,7 @@ A Plebbit crawler, indexer and UI.
 
 ## Table of Contents
 - [Features](#features)
+- [Recent Updates](#recent-updates)
 - [Project Structure](#project-structure)
 - [Quickstart (with Docker Compose)](#quickstart-with-docker-compose)
 - [How it Works](#how-it-works)
@@ -30,10 +31,35 @@ A Plebbit crawler, indexer and UI.
 
 ## Features
 
-- Crawls all known subplebbit addresses and indexes their posts into a local SQLite database.
-- Exposes a REST API (`/api/posts`) to fetch indexed posts.
-- Next.js frontend to search and display posts.
-- Dockerized for easy deployment.
+- **Comprehensive Reply System**: Full reply threading with parent-child relationships and nested reply support
+- **Advanced Search**: Full-text search across posts, replies, authors, and subplebbit addresses with filtering
+- **Multiple Sort Options**: Sort by new, top (score), replies count, or old for both posts and replies
+- **Reply Control**: Toggle to include or exclude replies from search and browse results
+- **Time-based Filtering**: Filter content by hour, day, week, month, year, or all time
+- **Pagination**: Efficient pagination for both posts and replies with customizable limits
+- **Queue Management**: Intelligent subplebbit processing queue with retry logic and error tracking
+- **Parent Context**: Replies show context from their parent posts with author information
+- **Modern Frontend**: Built with Next.js 15 and React 19 for optimal performance
+- **Comprehensive Testing**: Full test suite covering reply threading, search, and API functionality
+- Crawls all known subplebbit addresses and indexes their posts into a local SQLite database
+- Exposes a REST API (`/api/posts`) to fetch indexed posts
+- Dockerized for easy deployment
+
+---
+
+## Recent Updates
+
+### Latest Features (Recent Implementation)
+- ✅ **Include Replies Checkbox**: Users can now toggle whether replies are included in post listings and search results
+- ✅ **Enhanced Reply Threading**: Complete parent-child relationship tracking with context information
+- ✅ **Improved Search**: Search now works across both posts and replies with parent context
+- ✅ **Blue-Green Deployment**: Enhanced zero-downtime deployment with container toggling script
+
+### Technical Improvements
+- **Frontend**: Upgraded to Next.js 15.3.1 with React 19 for cutting-edge performance
+- **Backend**: Enhanced API endpoints with comprehensive reply support and filtering
+- **Testing**: Extensive test coverage including reply functionality, search, and parent information
+- **Infrastructure**: New `toggle_plebindex.sh` script for seamless container management during deployments
 
 ---
 

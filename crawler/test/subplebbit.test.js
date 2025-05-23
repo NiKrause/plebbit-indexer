@@ -69,9 +69,9 @@ describe('Subplebbit functionality', function () {
     // Check required fields for each post
     response.body.posts.forEach((post, index) => {
       console.log("post", post);
-      assert(post.title !== undefined && post.title !== null && post.title !== '', `Post at index ${index} should have a title`);
+      // assert(post.title !== undefined && post.title !== null && post.title !== '', `Post at index ${index} should have a title`); //not all posts have titles
       assert(post.timestamp !== undefined && post.timestamp !== null, `Post at index ${index} should have a timestamp`);
-      assert(post.content !== undefined && post.content !== null, `Post at index ${index} should have content`);
+      // assert(post.content !== undefined && post.content !== null, `Post at index ${index} should have content`); //not all posts have content
       assert(post.subplebbitAddress !== undefined && post.subplebbitAddress !== null && post.subplebbitAddress !== '', `Post at index ${index} should have a subplebbitAddress`);
       assert(post.authorAddress !== undefined && post.authorAddress !== null && post.authorAddress !== '', `Post at index ${index} should have an authorAddress`);
     });
@@ -100,6 +100,23 @@ describe('Subplebbit functionality', function () {
     assert(post.content !== undefined, 'Post should have content');
     assert(post.subplebbitAddress !== undefined, 'Post should have a subplebbitAddress');
     assert(post.authorAddress !== undefined, 'Post should have an authorAddress');
+    
+    // Verify parent information fields are present (they should exist but may be null for top-level posts)
+    assert('parentTitle' in post, 'Post should have parentTitle field');
+    assert('parentAuthorDisplayName' in post, 'Post should have parentAuthorDisplayName field');
+    assert('parentAuthorAddress' in post, 'Post should have parentAuthorAddress field');
+    
+    // If this is a reply (has parentCid), parent fields should not be null
+    if (post.parentCid) {
+      console.log(`Post ${testPostId} is a reply to ${post.parentCid}`);
+      // Note: Parent fields could still be null if parent post doesn't exist or has null values
+    } else {
+      console.log(`Post ${testPostId} is a top-level post`);
+      // For top-level posts, parent fields should be null
+      assert.equal(post.parentTitle, null, 'Top-level post should have null parentTitle');
+      assert.equal(post.parentAuthorDisplayName, null, 'Top-level post should have null parentAuthorDisplayName');
+      assert.equal(post.parentAuthorAddress, null, 'Top-level post should have null parentAuthorAddress');
+    }
   }, 20000);
 
   it('should return 404 for non-existent post ID', async function() {
@@ -155,7 +172,7 @@ describe('Subplebbit functionality', function () {
     assert(Array.isArray(pleblorePostsResponse.body.posts), 'Should return an array of posts');
     
     // Check if the specific comment exists
-    const targetCid = "QmPhfKdhRksQgRpWHyHT7arrSLoUd5kia64TbUfbQu3ZJb";
+    const targetCid = "Qmc6i3fZ9BDTt3xyjZywPaLYkG8BzuRzp9QhVmBcSQpgWp";
     console.log("pleblorePostsResponse.body.posts", pleblorePostsResponse.body.posts);
     const specificPost = pleblorePostsResponse.body.posts.find(post => post.id === targetCid);
     
@@ -176,10 +193,10 @@ describe('Subplebbit functionality', function () {
     await indexSubplebbit(sub, db);
 
     // Verify the subplebbit was indexed by checking API
-    const postsResponse = await request.get('/api/posts');
+    const postsResponse = await request.get('/api/posts/search?q='+address);
     assert.equal(postsResponse.status, 200);
     assert(Array.isArray(postsResponse.body.posts), 'Should return an array of posts');
-    
+    console.log("postsResponse.body.posts", postsResponse.body.posts);
     // Find posts from redditdeath.sol
     const redditdeathPosts = postsResponse.body.posts.filter(post => 
       post.subplebbitAddress === address

@@ -15,6 +15,12 @@ interface Post {
   upvoteCount: number;
   downvoteCount: number;
   replyCount: number;
+  parentCid?: string;  // Add for replies
+  postCid?: string;    // Add for replies
+  // New fields from JOIN
+  parentTitle?: string;
+  parentAuthorDisplayName?: string;
+  parentAuthorAddress?: string;
 }
 
 interface PaginatedResponse {
@@ -89,6 +95,7 @@ async function fetchPosts(
     }
     
     const rawData = await response.json();
+    console.log("fetched data", rawData);
     const data: PaginatedResponse = {
       posts: rawData.posts || [],
       pagination: { 
@@ -103,7 +110,6 @@ async function fetchPosts(
         includeReplies: rawData.filters?.includeReplies !== undefined ? rawData.filters.includeReplies : true
       }
     };
-    
     return data;
   } catch (error) {
     console.error('Error fetching posts:', error);
@@ -360,32 +366,99 @@ async function PostsContent({
                 <span title={new Date(post.timestamp * 1000).toLocaleString()}>
                   {formatTimestamp(post.timestamp)}
                 </span>
+                
+                {/* Show parent post context for replies */}
+                <br/>
+                {!post.title && post.parentCid && post.parentTitle && (
+                  <>
+                    {/* {' • Reply to: '} */}
+                    <Link 
+                      href={`/post/${post.postCid || post.parentCid}`}
+                      style={{ color: '#888', textDecoration: 'underline' }}
+                    >
+                      &quot;{post.parentTitle}&quot;
+                    </Link>
+                    {post.parentAuthorDisplayName || post.parentAuthorAddress && (
+                      <span> by {post.parentAuthorDisplayName?post.parentAuthorDisplayName:post.parentAuthorAddress}</span>
+                    )}
+                  </>
+                )}
               </div>
-              <a
-                href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontWeight: 'bold', fontSize: 18 }}
-              >
-                {post.title}
-              </a>
+              
+              {/* Conditional rendering based on whether it's a reply or post */}
+              {post.title ? (
+                <a
+                  href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontWeight: 'bold', fontSize: 18 }}
+                >
+                  {post.title}
+                </a>
+              ) : (
+                <></>
+                // <div style={{ 
+                //   fontWeight: 'bold', 
+                //   fontSize: 16, 
+                //   fontStyle: 'italic',
+                //   color: '#666'
+                // }}>
+                //   {post.parentTitle ? (
+                //     <>Reply to: &quot;{post.parentTitle}&quot;</>
+                //   ) : (
+                //     <>Reply to post {post.postCid || post.parentCid}</>
+                //   )}
+                // </div>
+              )}
+              
               <div style={{ marginTop: 4 }}>{post.content}</div>
               
-              {/* Post stats - upvotes, downvotes, replies */}
+              {/* Modified stats section */}
               <div style={{ marginTop: 8, fontSize: 12, color: '#888', display: 'flex', gap: '12px' }}>
-                <span title="Upvotes">
-                  <span style={{ color: '#4F9956' }}>▲</span> {post.upvoteCount || 0}
-                </span>
-                <span title="Downvotes">
-                  <span style={{ color: '#E25241' }}>▼</span> {post.downvoteCount || 0}
-                </span>
-                <Link 
-                  href={`/post/${post.id}`}
-                  title="View Replies" 
-                  style={{ color: '#888', textDecoration: 'none' }}
-                >
-                  <span>💬</span> {post.replyCount || 0} {post.replyCount === 1 ? 'reply' : 'replies'}
-                </Link>
+                {post.title ? (
+                  // Original post stats
+                  <>
+                    <span title="Upvotes">
+                      <span style={{ color: '#4F9956' }}>▲</span> {post.upvoteCount || 0}
+                    </span>
+                    <span title="Downvotes">
+                      <span style={{ color: '#E25241' }}>▼</span> {post.downvoteCount || 0}
+                    </span>
+                    <Link 
+                      href={`/post/${post.id}`}
+                      title="View Replies" 
+                      style={{ color: '#888', textDecoration: 'none' }}
+                    >
+                   <span>💬</span> Reply count: {post.replyCount || 0}
+                    </Link>
+                  </>
+                ) : (
+                  // Reply stats - show different information
+                  <>
+                    <span title="Upvotes">
+                      <span style={{ color: '#4F9956' }}>▲</span> {post.upvoteCount || 0}
+                    </span>
+                    <span title="Downvotes">
+                      <span style={{ color: '#E25241' }}>▼</span> {post.downvoteCount || 0}
+                    </span>
+                    <Link 
+                      href={`/post/${post.postCid || post.parentCid}`}
+                      title="View original post" 
+                      style={{ color: '#888', textDecoration: 'none' }}
+                    >
+                      <span>📝</span> 
+                    </Link>
+                    {post.replyCount > 0 && (
+                      <Link 
+                        href={`/post/${post.id}`}
+                        title="View replies to this comment" 
+                        style={{ color: '#888', textDecoration: 'none' }}
+                      >
+                        <span>💬</span> {post.replyCount} {post.replyCount === 1 ? 'reply' : 'replies'}
+                      </Link>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           ))

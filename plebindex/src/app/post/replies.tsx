@@ -122,6 +122,7 @@ async function fetchReplies(
     }
     
     const data = await response.json();
+    console.log("fetched replies data", data);
     return data;
   } catch (error) {
     console.error('Error fetching replies:', error);
@@ -439,7 +440,7 @@ async function RepliesContent({
       
       {/* Reply count */}
       <div style={styles.replyCount}>
-        {pagination.total} {pagination.total === 1 ? 'Reply' : 'Replies'}
+        Reply count: {pagination.total}
       </div>
       
       {/* Replies */}

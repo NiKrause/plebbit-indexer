@@ -75,6 +75,25 @@ export function getDb() {
 
     -- Combined index for parentCid + timestamp for sorting replies chronologically
     CREATE INDEX IF NOT EXISTS idx_posts_parent_timestamp ON posts(parentCid, timestamp);
+
+    -- Composite indexes for sorting performance in posts endpoints
+    CREATE INDEX IF NOT EXISTS idx_posts_votes_timestamp ON posts((upvoteCount - downvoteCount) DESC, timestamp DESC);
+    CREATE INDEX IF NOT EXISTS idx_posts_replies_timestamp ON posts(replyCount DESC, timestamp DESC);
+
+    -- Search performance indexes (case-insensitive)
+    CREATE INDEX IF NOT EXISTS idx_posts_title_lower ON posts(LOWER(title)) WHERE title IS NOT NULL;
+    CREATE INDEX IF NOT EXISTS idx_posts_content_lower ON posts(LOWER(content)) WHERE content IS NOT NULL;
+    CREATE INDEX IF NOT EXISTS idx_posts_author_display_lower ON posts(LOWER(authorDisplayName)) WHERE authorDisplayName IS NOT NULL;
+
+    -- Queue table performance indexes
+    CREATE INDEX IF NOT EXISTS idx_subplebbit_queue_updated_at ON subplebbit_queue(updated_at);
+    CREATE INDEX IF NOT EXISTS idx_subplebbit_queue_failure_updated ON subplebbit_queue(failure_count DESC, updated_at DESC);
+
+    -- Combined index for better time filtering with replies
+    CREATE INDEX IF NOT EXISTS idx_posts_parent_timestamp_filter ON posts(parentCid, timestamp) WHERE parentCid IS NULL;
+
+    -- Additional composite index for queue processing
+    CREATE INDEX IF NOT EXISTS idx_subplebbit_queue_status_retry ON subplebbit_queue(status, next_retry_date);
   `);
   
   // Check if title column is NOT NULL and fix if needed

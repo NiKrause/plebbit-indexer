@@ -139,4 +139,84 @@ describe('Include replies functionality', function () {
     }
   }, 20000);
 
+  it('should include parent post titles for replies in search results', async function() {
+    // Index a subplebbit to ensure we have data with replies
+    const sub = await plebbit.getSubplebbit("plebtoken.eth");
+    await sub.update();
+    await indexSubplebbit(sub, db);
+
+    const response = await request.get('/api/posts/search?q=test&include-replies=true');
+    assert.equal(response.status, 200);
+    assert(Array.isArray(response.body.posts), 'Should return an array of posts');
+
+    // Check if any replies have parent title information
+    const replies = response.body.posts.filter(post => post.parentCid);
+    
+    if (replies.length > 0) {
+      console.log(`Found ${replies.length} replies with parent information`);
+      
+      // At least some replies should have parent titles
+      const repliesWithParentTitles = replies.filter(reply => reply.parentTitle);
+      
+      if (repliesWithParentTitles.length > 0) {
+        console.log(`${repliesWithParentTitles.length} replies have parent titles`);
+        
+        // Verify parent title structure
+        repliesWithParentTitles.forEach(reply => {
+          assert(typeof reply.parentTitle === 'string', 'Parent title should be a string');
+          assert(reply.parentTitle.length > 0, 'Parent title should not be empty');
+          console.log(`Reply to: "${reply.parentTitle}"`);
+        });
+      }
+    }
+  }, 200000);
+
+  it('should include parent information for replies in main posts endpoint', async function() {
+    // Get posts including replies
+    const response = await request.get('/api/posts?include-replies=true&limit=50');
+    assert.equal(response.status, 200);
+    assert(Array.isArray(response.body.posts), 'Should return an array of posts');
+
+    let topLevelPostsChecked = 0;
+    let repliesChecked = 0;
+
+    response.body.posts.forEach((post, index) => {
+      // Verify that parent information fields are present
+      assert('parentTitle' in post, `Post ${index} should have parentTitle field`);
+      assert('parentAuthorDisplayName' in post, `Post ${index} should have parentAuthorDisplayName field`);
+      assert('parentAuthorAddress' in post, `Post ${index} should have parentAuthorAddress field`);
+
+      if (post.parentCid) {
+        // This is a reply
+        repliesChecked++;
+        console.log(`Reply ${post.id}: parentTitle="${post.parentTitle}", parentAuthor="${post.parentAuthorDisplayName}"`);
+        
+        // Parent fields can be null if parent post doesn't exist or has null values,
+        // but they should be defined in the response
+        if (post.parentTitle !== null) {
+          assert(typeof post.parentTitle === 'string', `Reply ${index} parentTitle should be string or null`);
+        }
+        if (post.parentAuthorDisplayName !== null) {
+          assert(typeof post.parentAuthorDisplayName === 'string', `Reply ${index} parentAuthorDisplayName should be string or null`);
+        }
+        if (post.parentAuthorAddress !== null) {
+          assert(typeof post.parentAuthorAddress === 'string', `Reply ${index} parentAuthorAddress should be string or null`);
+        }
+      } else {
+        // This is a top-level post
+        topLevelPostsChecked++;
+        
+        // Top-level posts should have null parent fields
+        assert.equal(post.parentTitle, null, `Top-level post ${index} should have null parentTitle`);
+        assert.equal(post.parentAuthorDisplayName, null, `Top-level post ${index} should have null parentAuthorDisplayName`);
+        assert.equal(post.parentAuthorAddress, null, `Top-level post ${index} should have null parentAuthorAddress`);
+      }
+    });
+
+    console.log(`Verified parent information for ${topLevelPostsChecked} top-level posts and ${repliesChecked} replies`);
+    
+    // We should have checked at least some posts
+    assert(topLevelPostsChecked + repliesChecked > 0, 'Should have verified at least some posts');
+  }, 20000);
+
 }, 20000); 

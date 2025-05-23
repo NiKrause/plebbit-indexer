@@ -43,7 +43,7 @@ export async function startServer(_db) {
       }
       
       // Only fetch top-level posts (where parentCid is null) unless includeReplies is true
-      const postFilter = includeReplies ? '' : 'parentCid IS NULL';
+      const postFilter = includeReplies ? '' : 'p.parentCid IS NULL';
       
       // Special case: limit=0 means "return all posts"
       const limit = rawLimit === 0 ? null : Math.max(1, rawLimit);
@@ -80,7 +80,7 @@ export async function startServer(_db) {
         }
         
         if (timeOffset > 0) {
-          whereClause = ' WHERE timestamp > ?';
+          whereClause = ' WHERE p.timestamp > ?';
           if (!includeReplies) {
             whereClause += ' AND ' + postFilter;
           }
@@ -93,40 +93,57 @@ export async function startServer(_db) {
       }
       
       // Get total count for pagination metadata with time filter
-      const countQuery = `SELECT COUNT(*) as total FROM posts${whereClause}`;
+      const countQuery = `
+        SELECT COUNT(*) as total 
+        FROM posts p
+        LEFT JOIN posts parent ON p.parentCid = parent.id
+        ${whereClause}
+      `;
       const countStmt = db.prepare(countQuery);
       const { total } = countStmt.get(timeParams);
       
-      // Determine the sort order
+      // Determine the sort order with table alias
       let orderClause;
       switch (sort) {
         case 'top':
-          orderClause = 'ORDER BY (upvoteCount - downvoteCount) DESC, timestamp DESC';
+          orderClause = 'ORDER BY (p.upvoteCount - p.downvoteCount) DESC, p.timestamp DESC';
           break;
         case 'replies':
-          orderClause = 'ORDER BY replyCount DESC, timestamp DESC';
+          orderClause = 'ORDER BY p.replyCount DESC, p.timestamp DESC';
           break;
         case 'new':
-          orderClause = 'ORDER BY timestamp DESC';
+          orderClause = 'ORDER BY p.timestamp DESC';
           break;
         case 'old':
-          orderClause = 'ORDER BY timestamp ASC';
+          orderClause = 'ORDER BY p.timestamp ASC';
           break;
         default:
-          orderClause = 'ORDER BY timestamp DESC'; // Default to 'new'
+          orderClause = 'ORDER BY p.timestamp DESC'; // Default to 'new'
       }
       
-      // Get posts - either paginated or all
+      // Enhanced query with JOIN to get parent post information
       let postsQuery;
       let rows;
       
+      const selectClause = `
+        SELECT 
+          p.*,
+          parent.title as parentTitle,
+          parent.authorDisplayName as parentAuthorDisplayName,
+          parent.authorAddress as parentAuthorAddress
+        FROM posts p
+        LEFT JOIN posts parent ON p.parentCid = parent.id
+        ${whereClause}
+        ${orderClause}
+      `;
+      
       if (limit) {
-        postsQuery = `SELECT * FROM posts${whereClause} ${orderClause} LIMIT ? OFFSET ?`;
+        postsQuery = selectClause + ' LIMIT ? OFFSET ?';
         const allParams = [...timeParams, limit, offset];
         const postsStmt = db.prepare(postsQuery);
         rows = postsStmt.all(allParams);
       } else {
-        postsQuery = `SELECT * FROM posts${whereClause} ${orderClause}`;
+        postsQuery = selectClause;
         const postsStmt = db.prepare(postsQuery);
         rows = postsStmt.all(timeParams);
       }
@@ -164,12 +181,11 @@ export async function startServer(_db) {
       const timeFilter = req.query.t || 'all';
       
       // Handle include-replies parameter - defaults to true
-      let includeReplies = true; // Default to include replies
+      let includeReplies = true;
       if (req.query['include-replies'] !== undefined) {
         includeReplies = req.query['include-replies'] === 'true';
       }
       
-      // Special case: limit=0 means "return all posts"
       const limit = rawLimit === 0 ? null : Math.max(1, rawLimit);
       const offset = limit ? (page - 1) * limit : 0;
       
@@ -184,31 +200,20 @@ export async function startServer(_db) {
       const timeParams = [];
       
       if (timeFilter !== 'all') {
-        const now = Math.floor(Date.now() / 1000); // Current time in seconds
+        const now = Math.floor(Date.now() / 1000);
         let timeOffset;
         
         switch (timeFilter) {
-          case 'hour':
-            timeOffset = 60 * 60;
-            break;
-          case 'day':
-            timeOffset = 60 * 60 * 24;
-            break;
-          case 'week':
-            timeOffset = 60 * 60 * 24 * 7;
-            break;
-          case 'month':
-            timeOffset = 60 * 60 * 24 * 30;
-            break;
-          case 'year':
-            timeOffset = 60 * 60 * 24 * 365;
-            break;
-          default:
-            timeOffset = 0;
+          case 'hour': timeOffset = 60 * 60; break;
+          case 'day': timeOffset = 60 * 60 * 24; break;
+          case 'week': timeOffset = 60 * 60 * 24 * 7; break;
+          case 'month': timeOffset = 60 * 60 * 24 * 30; break;
+          case 'year': timeOffset = 60 * 60 * 24 * 365; break;
+          default: timeOffset = 0;
         }
         
         if (timeOffset > 0) {
-          whereClause = ' AND timestamp > ?';
+          whereClause = ' AND p.timestamp > ?';
           timeParams.push(now - timeOffset);
         }
       }
@@ -216,81 +221,89 @@ export async function startServer(_db) {
       // Add post filter for replies if needed
       let repliesClause = '';
       if (!includeReplies) {
-        repliesClause = ' AND parentCid IS NULL';
+        repliesClause = ' AND p.parentCid IS NULL';
       }
       
-      // Determine the sort order
+      // Determine the sort order with table alias
       let orderClause;
       switch (sort) {
         case 'top':
-          orderClause = 'ORDER BY (upvoteCount - downvoteCount) DESC, timestamp DESC';
+          orderClause = 'ORDER BY (p.upvoteCount - p.downvoteCount) DESC, p.timestamp DESC';
           break;
         case 'replies':
-          orderClause = 'ORDER BY replyCount DESC, timestamp DESC';
+          orderClause = 'ORDER BY p.replyCount DESC, p.timestamp DESC';
           break;
         case 'new':
-          orderClause = 'ORDER BY timestamp DESC';
+          orderClause = 'ORDER BY p.timestamp DESC';
           break;
         case 'old':
-          orderClause = 'ORDER BY timestamp ASC';
+          orderClause = 'ORDER BY p.timestamp ASC';
           break;
         default:
-          orderClause = 'ORDER BY timestamp DESC'; // Default to 'new'
+          orderClause = 'ORDER BY p.timestamp DESC';
       }
       
-      // Modified count query with authorAddress and time filter
+      // Enhanced count query with JOIN to get accurate counts
       const countQuery = `
-        SELECT COUNT(*) as total FROM posts
-        WHERE (LOWER(title) LIKE LOWER(?)
-        OR LOWER(content) LIKE LOWER(?)
-        OR LOWER(authorDisplayName) LIKE LOWER(?)
-        OR LOWER(authorAddress) LIKE LOWER(?)
-        OR LOWER(subplebbitAddress) LIKE LOWER(?))
+        SELECT COUNT(*) as total 
+        FROM posts p
+        LEFT JOIN posts parent ON p.parentCid = parent.id
+        WHERE (LOWER(p.title) LIKE LOWER(?)
+        OR LOWER(p.content) LIKE LOWER(?)
+        OR LOWER(p.authorDisplayName) LIKE LOWER(?)
+        OR LOWER(p.authorAddress) LIKE LOWER(?)
+        OR LOWER(p.subplebbitAddress) LIKE LOWER(?)
+        OR LOWER(parent.title) LIKE LOWER(?)
+        OR LOWER(parent.authorDisplayName) LIKE LOWER(?)
+        OR LOWER(parent.authorAddress) LIKE LOWER(?)
+        OR LOWER(p.id) LIKE LOWER(?)
+        OR LOWER(p.parentCid) LIKE LOWER(?))
         ${whereClause}${repliesClause}
       `;
       
       const countStmt = db.prepare(countQuery);
-      const countParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, ...timeParams];
+      const countParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, ...timeParams];
       const { total } = countStmt.get(countParams);
       
-      // Modified search query with sorting and time filter
+      // Enhanced search query with JOIN to get parent post information
       let searchQuery;
       let rows;
       
+      const selectClause = `
+        SELECT 
+          p.*,
+          parent.title as parentTitle,
+          parent.authorDisplayName as parentAuthorDisplayName,
+          parent.authorAddress as parentAuthorAddress
+        FROM posts p
+        LEFT JOIN posts parent ON p.parentCid = parent.id
+        WHERE (LOWER(p.title) LIKE LOWER(?)
+        OR LOWER(p.content) LIKE LOWER(?)
+        OR LOWER(p.authorDisplayName) LIKE LOWER(?)
+        OR LOWER(p.authorAddress) LIKE LOWER(?)
+        OR LOWER(p.subplebbitAddress) LIKE LOWER(?)
+        OR LOWER(parent.title) LIKE LOWER(?)
+        OR LOWER(parent.authorDisplayName) LIKE LOWER(?)
+        OR LOWER(parent.authorAddress) LIKE LOWER(?)
+        OR LOWER(p.id) LIKE LOWER(?)
+        OR LOWER(p.parentCid) LIKE LOWER(?))
+        ${whereClause}${repliesClause}
+        ${orderClause}
+      `;
+      
       if (limit) {
-        searchQuery = `
-          SELECT * FROM posts
-          WHERE (LOWER(title) LIKE LOWER(?)
-          OR LOWER(content) LIKE LOWER(?)
-          OR LOWER(authorDisplayName) LIKE LOWER(?)
-          OR LOWER(authorAddress) LIKE LOWER(?)
-          OR LOWER(subplebbitAddress) LIKE LOWER(?))
-          ${whereClause}${repliesClause}
-          ${orderClause}
-          LIMIT ? OFFSET ?
-        `;
-        
+        searchQuery = selectClause + ' LIMIT ? OFFSET ?';
         const searchStmt = db.prepare(searchQuery);
         const searchParams = [
-          searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, 
+          searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm,
           ...timeParams, limit, offset
         ];
         rows = searchStmt.all(searchParams);
       } else {
-        searchQuery = `
-          SELECT * FROM posts
-          WHERE (LOWER(title) LIKE LOWER(?)
-          OR LOWER(content) LIKE LOWER(?)
-          OR LOWER(authorDisplayName) LIKE LOWER(?)
-          OR LOWER(authorAddress) LIKE LOWER(?)
-          OR LOWER(subplebbitAddress) LIKE LOWER(?))
-          ${whereClause}${repliesClause}
-          ${orderClause}
-        `;
-        
+        searchQuery = selectClause;
         const searchStmt = db.prepare(searchQuery);
         const searchParams = [
-          searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, 
+          searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm,
           ...timeParams
         ];
         rows = searchStmt.all(searchParams);
@@ -299,7 +312,6 @@ export async function startServer(_db) {
       const pages = limit ? Math.ceil(total / limit) : 1;
       console.log(`Search results for "${q}" ${limit ? `(page ${page})` : '(all results)'} with sort=${sort}, timeFilter=${timeFilter}, includeReplies=${includeReplies}:`, rows.length);
       
-      // Return response with metadata including sort and time filter
       res.json({
         posts: rows,
         pagination: {
@@ -326,8 +338,17 @@ export async function startServer(_db) {
       const db = getDb();
       const postId = req.params.id;
       
-      // Query the database for a post with the given ID
-      const postStmt = db.prepare('SELECT * FROM posts WHERE id = ?');
+      // Enhanced query with JOIN to get parent post information
+      const postStmt = db.prepare(`
+        SELECT 
+          p.*,
+          parent.title as parentTitle,
+          parent.authorDisplayName as parentAuthorDisplayName,
+          parent.authorAddress as parentAuthorAddress
+        FROM posts p
+        LEFT JOIN posts parent ON p.parentCid = parent.id
+        WHERE p.id = ?
+      `);
       const post = postStmt.get(postId);
       
       if (!post) {
@@ -484,7 +505,7 @@ export async function startServer(_db) {
       res.status(500).json({ error: err.message });
     }
   });
-
+  
   app.get('/api/queue/errors', requireAuth, async (req, res) => {
     try {
       const db = getDb();
@@ -554,30 +575,36 @@ export async function startServer(_db) {
       const sort = req.query.sort || 'new';
       const offset = (page - 1) * limit;
       
-      // Determine the sort order
+      // Determine the sort order with table alias
       let orderClause;
       switch (sort) {
         case 'top':
-          orderClause = 'ORDER BY (upvoteCount - downvoteCount) DESC, timestamp DESC';
+          orderClause = 'ORDER BY (r.upvoteCount - r.downvoteCount) DESC, r.timestamp DESC';
           break;
         case 'new':
-          orderClause = 'ORDER BY timestamp DESC';
+          orderClause = 'ORDER BY r.timestamp DESC';
           break;
         case 'old':
-          orderClause = 'ORDER BY timestamp ASC';
+          orderClause = 'ORDER BY r.timestamp ASC';
           break;
         default:
-          orderClause = 'ORDER BY timestamp DESC';
+          orderClause = 'ORDER BY r.timestamp DESC';
       }
       
       // Count total replies
       const countStmt = db.prepare('SELECT COUNT(*) as total FROM posts WHERE parentCid = ?');
       const { total } = countStmt.get(parentCid);
       
-      // Get replies
+      // Enhanced query with JOIN to get parent post information for each reply
       const repliesStmt = db.prepare(`
-        SELECT * FROM posts 
-        WHERE parentCid = ? 
+        SELECT 
+          r.*,
+          parent.title as parentTitle,
+          parent.authorDisplayName as parentAuthorDisplayName,
+          parent.authorAddress as parentAuthorAddress
+        FROM posts r
+        LEFT JOIN posts parent ON r.parentCid = parent.id
+        WHERE r.parentCid = ? 
         ${orderClause} 
         LIMIT ? OFFSET ?
       `);
