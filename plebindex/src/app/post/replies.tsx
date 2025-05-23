@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { fetchPost, fetchReplies } from '../../api/posts';
 import { Post, Reply } from '../../types';
 import { formatTimestamp } from '../../utils/formatting';
