@@ -82,9 +82,13 @@ jobs:
 
     - name: Run tests
       run: |
-        echo "Running Jest tests..."
-        # Run tests inside the crawler container
-        docker compose exec -T crawler01 npm test
+        echo "Reading auth key from container..."
+        AUTH_KEY=$(docker compose exec -T crawler01 cat /app/data/auth-key)
+        echo "Auth key found: $AUTH_KEY"
+        
+        echo "Running Jest tests with correct WebSocket URL..."
+        # Run tests inside the crawler container with the proper auth key URL
+        docker compose exec -T -e PLEBBIT_WS_URL=ws://plebbit-cli:9138/$AUTH_KEY crawler01 npm test
       timeout-minutes: 15
 
     - name: Show service logs on failure
