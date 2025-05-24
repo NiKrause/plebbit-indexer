@@ -40,8 +40,8 @@ jobs:
     - name: Start plebbit-cli service
       run: |
         echo "Building and starting plebbit-cli..."
-        docker-compose build plebbit-cli
-        docker-compose up -d plebbit-cli
+        docker compose build plebbit-cli
+        docker compose up -d plebbit-cli
         
         # Wait for auth key to be generated
         echo "Waiting for auth key to be generated..."
@@ -53,8 +53,8 @@ jobs:
     - name: Start crawler service
       run: |
         echo "Building and starting crawler..."
-        docker-compose build crawler01
-        docker-compose up -d crawler01
+        docker compose build crawler01
+        docker compose up -d crawler01
         
         # Wait for crawler API to be responsive
         echo "Waiting for crawler API to be ready..."
@@ -65,7 +65,7 @@ jobs:
     - name: Verify services are running
       run: |
         echo "=== Docker containers status ==="
-        docker-compose ps
+        docker compose ps
         
         echo "=== Testing API endpoint ==="
         curl -s http://localhost:3001/api/posts | head -20
@@ -76,27 +76,27 @@ jobs:
     - name: Show service logs before tests
       run: |
         echo "=== Recent Plebbit-CLI logs ==="
-        docker-compose logs --tail=30 plebbit-cli
+        docker compose logs --tail=30 plebbit-cli
         echo "=== Recent Crawler logs ==="
-        docker-compose logs --tail=30 crawler01
+        docker compose logs --tail=30 crawler01
 
     - name: Run tests
       run: |
         echo "Running Jest tests..."
         # Run tests inside the crawler container
-        docker-compose exec -T crawler01 npm test
+        docker compose exec -T crawler01 npm test
       timeout-minutes: 15
 
     - name: Show service logs on failure
       if: failure()
       run: |
         echo "=== Full Plebbit-CLI logs ==="
-        docker-compose logs plebbit-cli
+        docker compose logs plebbit-cli
         echo "=== Full Crawler logs ==="
-        docker-compose logs crawler01
+        docker compose logs crawler01
 
     - name: Clean up
       if: always()
       run: |
-        docker-compose down -v
+        docker compose down -v
         docker system prune -f 
