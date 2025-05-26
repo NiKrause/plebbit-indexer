@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
-import { fetchPost, fetchReplies } from '../../api/posts';
-import { Post, Reply } from '../../types';
-import { formatTimestamp } from '../../utils/formatting';
-import Pagination from '../../components/Pagination';
-import SortOptions from '../../components/SortOptions';
-import styles from '../../styles/shared.module.css';
-import PostItem from '../../components/PostItem';
+import { fetchPost, fetchReplies } from '../../../../../api/posts';
+import { Post, Reply } from '../../../../../types';
+import { formatTimestamp } from '../../../../../utils/formatting';
+import Pagination from '../../../../../components/Pagination';
+import SortOptions from '../../../../../components/SortOptions';
+import styles from '../../../../../styles/shared.module.css';
+import PostItem from '../../../../../components/PostItem';
 
 async function RepliesContent({ 
   postId, 
@@ -18,7 +18,7 @@ async function RepliesContent({
   page?: number,
   sort?: string
 }) {
-  const { replies, pagination, filters } = await fetchReplies(postId, page, 20, sort);
+  const { replies, pagination, filters } = await fetchReplies(postId, page, 25, sort);
   
   if (!post) {
     return <div>Post not found or error loading post</div>;

@@ -52,7 +52,7 @@ async function PostsContent({
   let result: PaginatedResponse;
   
   try {
-    result = await fetchPosts(searchTerm, page, 0, sort, timeFilter, includeReplies);
+    result = await fetchPosts(searchTerm, page, 25, sort, timeFilter, includeReplies);
   } catch (error) {
     console.error('Error in PostsContent:', error);
     // Provide fallback data
@@ -62,7 +62,7 @@ async function PostsContent({
       pagination: {
         total: mockPosts.length,
         page: 1,
-        limit: 20,
+        limit: 25,
         pages: 1
       },
       filters: {

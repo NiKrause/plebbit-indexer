@@ -4,6 +4,11 @@ export function formatTimestamp(timestamp: number): string {
   return moment(timestamp * 1000).fromNow();
 }
 
+export function createPostUrl(subplebbitAddress: string, cid: string, searchParams?: URLSearchParams): string {
+  const queryString = searchParams?.toString();
+  return `/p/${subplebbitAddress}/c/${cid}${queryString ? `?${queryString}` : ''}`;
+}
+
 export function createPageUrl(
   pageNum: number,
   options: {
@@ -12,6 +17,7 @@ export function createPageUrl(
     timeFilter?: string;
     includeReplies?: boolean;
     postId?: string;
+    subplebbitAddress?: string;
   }
 ): string {
   const params = new URLSearchParams();
@@ -43,8 +49,8 @@ export function createPageUrl(
   
   const queryString = params.toString();
   
-  if (options.postId) {
-    return `/post/${options.postId}${queryString ? `?${queryString}` : ''}`;
+  if (options.postId && options.subplebbitAddress) {
+    return `/p/${options.subplebbitAddress}/c/${options.postId}${queryString ? `?${queryString}` : ''}`;
   }
   
   return queryString ? `/?${queryString}` : '/';
@@ -55,6 +61,7 @@ export function createSortUrl(
   options: {
     page?: number;
     postId?: string;
+    subplebbitAddress?: string;
   }
 ): string {
   const params = new URLSearchParams();
@@ -66,8 +73,8 @@ export function createSortUrl(
   }
   const queryString = params.toString();
   
-  if (options.postId) {
-    return `/post/${options.postId}${queryString ? `?${queryString}` : ''}`;
+  if (options.postId && options.subplebbitAddress) {
+    return `/p/${options.subplebbitAddress}/c/${options.postId}${queryString ? `?${queryString}` : ''}`;
   }
   
   return queryString ? `/?${queryString}` : '/';

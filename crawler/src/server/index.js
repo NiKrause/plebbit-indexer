@@ -2,15 +2,18 @@
 import 'dotenv/config'; 
 import express from 'express';
 import cors from 'cors';
-import { getDb, updateSubplebbitStatus, queueSubplebbit } from '../db.js';
+import { getDb, updateSubplebbitStatus, queueSubplebbit, takeModerationAction } from '../db.js';
 import { refreshSubplebbitQueue, processSubplebbitQueue } from '../subplebbit.js';
 import { getPlebbitClient } from '../plebbitClient.js';
+import { initializeFlaggedPostsTable, flagPost } from '../contentModeration.js';
 
 export async function startServer(_db) {
   const db = getDb(); 
   const app = express();
   const PORT = 3001;
   app.use(cors());
+
+
 
   try {
     const tableStmt = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'");
@@ -24,6 +27,9 @@ export async function startServer(_db) {
     const countStmt = db.prepare('SELECT COUNT(*) as count FROM posts');
     const result = countStmt.get();
     console.log(`Posts table exists with ${result.count} records`);
+    
+    // Initialize flagged_posts table
+    initializeFlaggedPostsTable(db);
   } catch (err) {
     console.error('Error checking posts table:', err);
   }
@@ -32,7 +38,7 @@ export async function startServer(_db) {
     try {
       const db = getDb();
       const page = Math.max(1, parseInt(req.query.page) || 1);
-      const rawLimit = req.query.limit !== undefined ? parseInt(req.query.limit) : 20;
+      const rawLimit = req.query.limit !== undefined ? parseInt(req.query.limit) : 25;
       const sort = req.query.sort || 'new';
       const timeFilter = req.query.t || 'all';
       
@@ -176,7 +182,7 @@ export async function startServer(_db) {
       const db = getDb();
       const { q } = req.query;
       const page = Math.max(1, parseInt(req.query.page) || 1);
-      const rawLimit = req.query.limit !== undefined ? parseInt(req.query.limit) : 20;
+      const rawLimit = req.query.limit !== undefined ? parseInt(req.query.limit) : 25;
       const sort = req.query.sort || 'new';
       const timeFilter = req.query.t || 'all';
       
@@ -494,7 +500,7 @@ export async function startServer(_db) {
       const db = getDb();
       const plebbit = await getPlebbitClient();
       
-      // Asynchron verarbeiten, damit die API-Antwort nicht blockiert wird
+      // Process asynchronously to avoid blocking the API response
       processSubplebbitQueue(plebbit, db, batchSize)
         .then(subs => console.log(`Processed ${subs.length} subplebbits from queue`))
         .catch(err => console.error('Error processing queue:', err));
@@ -571,7 +577,7 @@ export async function startServer(_db) {
       const db = getDb();
       const parentCid = req.params.parentCid;
       const page = Math.max(1, parseInt(req.query.page) || 1);
-      const limit = Math.max(1, parseInt(req.query.limit) || 20);
+      const limit = Math.max(1, parseInt(req.query.limit) || 25);
       const sort = req.query.sort || 'new';
       const offset = (page - 1) * limit;
       
@@ -625,6 +631,228 @@ export async function startServer(_db) {
         }
       });
     } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/admin/moderate/:id', express.json(), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { action, auth } = req.body;
+      
+      // Check auth
+      if (!auth || auth !== process.env.PLEBBIT_AUTH_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      if (!action || !['ignore', 'deindex_comment', 'deindex_author', 'deindex_subplebbit'].includes(action)) {
+        return res.status(400).json({ error: 'Invalid action' });
+      }
+      
+      const db = getDb();
+      const success = takeModerationAction(db, id, action, 'admin');
+      console.log("takeModerationAction success", success);
+      if (success) {
+        const actionMessage = `Action ${action} taken on post ${id}`
+        res.json({ success: true, message: actionMessage });
+      } else {
+        res.status(404).json({ error: 'Flagged post not found' });
+      }
+    } catch (err) {
+      console.error('Error taking moderation action:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // API endpoint for flagged posts
+  app.get('/api/flagged-posts', requireAuth, async (req, res) => {
+    try {
+      const db = getDb();
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const limit = parseInt(req.query.limit) || 25;
+      const offset = (page - 1) * limit;
+      const flagReason = req.query.reason; // Optional filter by flag reason
+      
+      // Simplified queries without JOIN
+      let countQuery = 'SELECT COUNT(*) as total FROM flagged_posts';
+      let postsQuery = 'SELECT * FROM flagged_posts';
+      
+      const queryParams = [];
+      
+      if (flagReason) {
+        countQuery += ' WHERE reason = ?';
+        postsQuery += ' WHERE reason = ?';
+        queryParams.push(flagReason);
+      }
+      
+      // Add sorting
+      postsQuery += ' ORDER BY flagged_at DESC LIMIT ? OFFSET ?';
+      
+      // Get total count
+      const countStmt = db.prepare(countQuery);
+      const { total } = flagReason
+        ? countStmt.get(flagReason)
+        : countStmt.get();
+      
+      // Get flagged posts
+      const postsStmt = db.prepare(postsQuery);
+      const posts = postsStmt.all(...queryParams, limit, offset);
+      
+      const pages = Math.ceil(total / limit);
+      
+      res.json({
+        flagged_posts: posts,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages
+        },
+        filters: {
+          reason: flagReason || 'all'
+        }
+      });
+    } catch (err) {
+      console.error('Error fetching flagged posts:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  // API endpoint for flagged posts statistics
+  app.get('/api/flagged-posts/stats', requireAuth, async (req, res) => {
+    try {
+      const db = getDb();
+      
+      const statsQuery = `
+        SELECT
+          reason,
+          COUNT(*) as count
+        FROM flagged_posts
+        GROUP BY reason
+      `;
+      
+      const stmt = db.prepare(statsQuery);
+      const stats = stmt.all();
+      
+      const totalQuery = 'SELECT COUNT(*) as total FROM flagged_posts';
+      const totalStmt = db.prepare(totalQuery);
+      const { total } = totalStmt.get();
+      
+      res.json({
+        total,
+        stats
+      });
+    } catch (err) {
+      console.error('Error fetching flagged posts stats:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  /**
+   * Flag a post for content moderation
+   * 
+   * @route POST /api/posts/:id/flag
+   * @description Flags a post with a specific reason for content moderation review.
+   * The flagged post will be added to the moderation queue for admin review.
+   * 
+   * @param {string} id - The unique identifier of the post to flag (URL parameter)
+   * @param {Object} req.body - Request body containing flag details
+   * @param {string} req.body.reason - The reason for flagging the post (required)
+   * 
+   * @returns {Object} 200 - Success response
+   * @returns {boolean} returns.success - Indicates if the operation was successful
+   * @returns {string} returns.message - Success message with post ID and reason
+   * 
+   * @returns {Object} 400 - Bad Request - Missing or invalid reason
+   * @returns {string} returns.error - Error message indicating missing reason
+   * 
+   * @returns {Object} 404 - Not Found - Post doesn't exist or flagging failed
+   * @returns {string} returns.error - Error message indicating post not found
+   * 
+   * @returns {Object} 500 - Internal Server Error
+   * @returns {string} returns.error - Error message describing the server error
+   * 
+   * @example
+   * // Flag a post for spam
+   * curl -X POST http://localhost:3001/api/posts/QmExamplePostId123/flag \
+   *   -H "Content-Type: application/json" \
+   *   -d '{"reason": "spam"}'
+   * 
+   * @example
+   * // Flag a post for inappropriate content
+   * curl -X POST http://localhost:3001/api/posts/QmAnotherPostId456/flag \
+   *   -H "Content-Type: application/json" \
+   *   -d '{"reason": "inappropriate content"}'
+   * 
+   * @example
+   * // Success response
+   * {
+   *   "success": true,
+   *   "message": "Post QmExamplePostId123 flagged with reason: spam"
+   * }
+   * 
+   * @example
+   * // Error response - missing reason
+   * {
+   *   "error": "Flag reason is required"
+   * }
+   * 
+   * @example
+   * // Error response - post not found
+   * {
+   *   "error": "Post not found or flagging failed"
+   * }
+   * 
+   * @since 1.0.0
+   * @author Plebbit Indexer Team
+   */
+  // app.post('/api/posts/:id/flag', requireAuth, express.json(), async (req, res) => {
+    app.post('/api/posts/:id/flag', express.json(), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+      
+      if (!reason) {
+        return res.status(400).json({ error: 'Flag reason is required' });
+      }
+      
+      const db = getDb();
+      const success = await flagPost(db, id, reason);
+      
+      if (success) {
+        res.json({ success: true, message: `Post ${id} flagged with reason: ${reason}` });
+      } else {
+        res.status(404).json({ error: 'Post not found or flagging failed' });
+      }
+    } catch (err) {
+      console.error('Error flagging post:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Delete a post endpoint  
+  app.delete('/api/posts/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const db = getDb();
+      
+      // Check if post exists
+      const post = db.prepare('SELECT id FROM posts WHERE id = ?').get(id);
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+      
+      // Delete the post
+      const deleteStmt = db.prepare('DELETE FROM posts WHERE id = ?');
+      const result = deleteStmt.run(id);
+      
+      if (result.changes > 0) {
+        res.json({ success: true, message: `Post ${id} deleted successfully` });
+      } else {
+        res.status(500).json({ error: 'Failed to delete post' });
+      }
+    } catch (err) {
+      console.error('Error deleting post:', err);
       res.status(500).json({ error: err.message });
     }
   });

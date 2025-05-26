@@ -1,6 +1,6 @@
 import { indexPosts } from './indexer.js';
 import { withTimeout } from './utils.js';
-import { queueMultipleSubplebbits, getNextSubplebbitsFromQueue, updateSubplebbitStatus } from './db.js';
+import { queueMultipleSubplebbits, getNextSubplebbitsFromQueue, updateSubplebbitStatus, isSubplebbitBlacklisted, isAuthorBlacklisted } from './db.js';
 
 /**
  * Fetches subplebbit addresses from GitHub and adds them to the queue
@@ -101,6 +101,12 @@ export function setupSubplebbitListener(sub, db, address) {
 export async function indexSubplebbit(sub, db) {
   console.log("indexSubplebbit", Object.keys(sub.posts.pageCids).length !== 0);
   
+  // Check if subplebbit is blacklisted
+  if (isSubplebbitBlacklisted(db, sub.address)) {
+    console.log(`Subplebbit ${sub.address} is blacklisted, skipping indexing`);
+    return;
+  }
+  
   // Step 1: Get all top-level posts
   let allPosts = [];
   
@@ -122,12 +128,19 @@ export async function indexSubplebbit(sub, db) {
     allPosts = Object.values(sub.posts.pages)[0].comments;
   }
 
-  // //only for testing purposes - remove this
-  // const targetAuthorAddress = "12D3KooWQ3aXtQsfk6L8CEjboLuCF6jkY8oizL31qfhy9tSJrLZ6";
-  // if (targetAuthorAddress) {
-  //   allPosts = allPosts.filter(post => post.author?.address === targetAuthorAddress);
-  //   console.log(`Filtered to ${allPosts.length} posts by author ${targetAuthorAddress}`);
-  // }
+  // Filter out posts from blacklisted authors
+  const originalPostCount = allPosts.length;
+  allPosts = allPosts.filter(post => {
+    if (post.author?.address && isAuthorBlacklisted(db, post.author.address)) {
+      console.log(`Skipping post from blacklisted author: ${post.author.address}`);
+      return false;
+    }
+    return true;
+  });
+  
+  if (originalPostCount !== allPosts.length) {
+    console.log(`Filtered ${originalPostCount - allPosts.length} posts from blacklisted authors`);
+  }
    
   console.log(`Now indexing ${allPosts.length} posts...`);
   await indexPosts(db, allPosts);
@@ -136,10 +149,20 @@ export async function indexSubplebbit(sub, db) {
   console.log(`Processing replies for ${allPosts.length} posts...`);
   for (const post of allPosts) {
     if (post.replies) {
-      const allReplies = getAllReplies(post, post.cid)   
-      if (allReplies.length > 0) {
-        console.log(`Indexing ${allReplies.length} total replies for post ${post.cid}`);
-        await indexPosts(db, allReplies);
+      const allReplies = getAllReplies(post, post.cid);
+      
+      // Filter out replies from blacklisted authors
+      const filteredReplies = allReplies.filter(reply => {
+        if (reply.author?.address && isAuthorBlacklisted(db, reply.author.address)) {
+          console.log(`Skipping reply from blacklisted author: ${reply.author.address}`);
+          return false;
+        }
+        return true;
+      });
+      
+      if (filteredReplies.length > 0) {
+        console.log(`Indexing ${filteredReplies.length} total replies for post ${post.cid} (filtered ${allReplies.length - filteredReplies.length} from blacklisted authors)`);
+        await indexPosts(db, filteredReplies);
       }
     }
   }

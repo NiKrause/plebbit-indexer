@@ -67,6 +67,31 @@ export function getDb() {
     CREATE INDEX IF NOT EXISTS idx_subplebbit_queue_status ON subplebbit_queue(status);
     CREATE INDEX IF NOT EXISTS idx_subplebbit_queue_next_retry ON subplebbit_queue(next_retry_date);
 
+    -- Flagged posts table for content moderation
+    CREATE TABLE IF NOT EXISTS flagged_posts (
+      id TEXT PRIMARY KEY,
+      timestamp INTEGER NOT NULL,
+      title TEXT,
+      content TEXT,
+      subplebbitAddress TEXT NOT NULL,
+      authorAddress TEXT,
+      authorDisplayName TEXT,
+      upvoteCount INTEGER,
+      downvoteCount INTEGER,
+      replyCount INTEGER,
+      parentCid TEXT,
+      postCid TEXT,
+      depth INTEGER DEFAULT 0,
+      harm INTEGER,
+      reason TEXT,
+      category TEXT,
+      flagged_at INTEGER NOT NULL,
+      status TEXT DEFAULT 'pending',  -- 'pending', 'ignored', 'deindexed_comment', 'deindexed_author', 'deindexed_subplebbit'
+      moderation_action TEXT,         -- null, 'ignore', 'deindex_comment', 'deindex_author', 'deindex_subplebbit'
+      moderated_at INTEGER,           -- timestamp when moderation action was taken
+      moderated_by TEXT               -- identifier of who took the action (for audit trail)
+    );
+
     -- Combined index for timestamp + subplebbitAddress
     CREATE INDEX IF NOT EXISTS idx_posts_subplebbit_timestamp ON posts(subplebbitAddress, timestamp);
 
@@ -94,6 +119,15 @@ export function getDb() {
 
     -- Additional composite index for queue processing
     CREATE INDEX IF NOT EXISTS idx_subplebbit_queue_status_retry ON subplebbit_queue(status, next_retry_date);
+
+    -- Indexes for flagged posts
+    CREATE INDEX IF NOT EXISTS idx_flagged_posts_reason ON flagged_posts(reason);
+    CREATE INDEX IF NOT EXISTS idx_flagged_posts_timestamp ON flagged_posts(timestamp);
+    CREATE INDEX IF NOT EXISTS idx_flagged_posts_flagged_at ON flagged_posts(flagged_at);
+    CREATE INDEX IF NOT EXISTS idx_flagged_posts_status ON flagged_posts(status);
+    CREATE INDEX IF NOT EXISTS idx_flagged_posts_moderation_action ON flagged_posts(moderation_action);
+    CREATE INDEX IF NOT EXISTS idx_flagged_posts_subplebbit ON flagged_posts(subplebbitAddress);
+    CREATE INDEX IF NOT EXISTS idx_flagged_posts_author ON flagged_posts(authorAddress);
   `);
   
   // Check if title column is NOT NULL and fix if needed
@@ -134,7 +168,8 @@ export function getDb() {
   
   const tablesCheck = {
     posts: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'").get(),
-    queue: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='subplebbit_queue'").get()
+    queue: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='subplebbit_queue'").get(),
+    flagged_posts: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='flagged_posts'").get()
   };
   
   if (!tablesCheck.posts) {
@@ -147,6 +182,12 @@ export function getDb() {
     throw new Error('Failed to create subplebbit_queue table');
   } else {
     console.log("subplebbit_queue table is available");
+  }
+  
+  if (!tablesCheck.flagged_posts) {
+    throw new Error('Failed to create flagged_posts table');
+  } else {
+    console.log("flagged_posts table is available");
   }
   
   return dbInstance;
@@ -233,4 +274,110 @@ export function queueMultipleSubplebbits(db, addresses) {
   });
   
   transaction(addresses);
+}
+
+/**
+ * Check if a subplebbit is blacklisted
+ */
+export function isSubplebbitBlacklisted(db, subplebbitAddress) {
+  const stmt = db.prepare(`
+    SELECT COUNT(*) as count FROM flagged_posts 
+    WHERE subplebbitAddress = ? AND moderation_action = 'deindex_subplebbit'
+  `);
+  const result = stmt.get(subplebbitAddress);
+  return result.count > 0;
+}
+
+/**
+ * Check if an author is blacklisted
+ */
+export function isAuthorBlacklisted(db, authorAddress) {
+  const stmt = db.prepare(`
+    SELECT COUNT(*) as count FROM flagged_posts 
+    WHERE authorAddress = ? AND moderation_action = 'deindex_author'
+  `);
+  const result = stmt.get(authorAddress);
+  return result.count > 0;
+}
+
+
+
+/**
+ * Check if a specific comment is deindexed (should not be re-indexed)
+ */
+export function isCommentDeindexed(db, postId) {
+  const stmt = db.prepare(`
+    SELECT COUNT(*) as count FROM flagged_posts 
+    WHERE id = ? AND moderation_action IN ('deindex_comment', 'deindex_author', 'deindex_subplebbit')
+  `);
+  const result = stmt.get(postId);
+  return result.count > 0;
+}
+
+/**
+ * Take moderation action on a flagged post
+ */
+export function takeModerationAction(db, flaggedPostId, action, moderatedBy = 'system') {
+  console.log("takeModerationAction", flaggedPostId, action, moderatedBy);
+  const now = Date.now();
+  
+  const transaction = db.transaction(() => {
+    // First, get the flagged post info
+    //console log all flagged_posts
+    const flaggedPosts = db.prepare('SELECT * FROM flagged_posts').all();
+    console.log("flaggedPosts", flaggedPosts);
+    const flaggedPost = db.prepare('SELECT * FROM flagged_posts WHERE id = ?').get(flaggedPostId);
+    if (!flaggedPost) {
+      const deleteStmt = db.prepare(`
+        DELETE FROM flagged_posts 
+        WHERE id = null
+      `);
+      deleteStmt.run();
+      return false;
+    }
+    console.log("flaggedPost found", flaggedPost);
+    
+    // Update the flagged_posts table with the action
+    const statusMap = {
+      'ignore': 'ignored',
+      'deindex_comment': 'deindexed_comment',
+      'deindex_author': 'deindexed_author',
+      'deindex_subplebbit': 'deindexed_subplebbit'
+    };
+    
+    const status = statusMap[action] || 'pending';
+
+    const updateStmt = db.prepare(`
+      UPDATE flagged_posts 
+      SET status = ?, moderation_action = ?, moderated_at = ?, moderated_by = ?
+      WHERE id = ?
+    `);
+    updateStmt.run(status, action, now, moderatedBy, flaggedPostId);
+    console.log("flagged_posts table updated", status, action, now, moderatedBy, flaggedPostId);
+    
+    // Now handle the deletion actions
+    if (action === 'deindex_comment') {
+      // Delete this specific post
+      const deleteStmt = db.prepare('DELETE FROM posts WHERE id = ?');
+      deleteStmt.run(flaggedPostId);
+      console.log(`Deleted post ${flaggedPostId}`);
+      
+    } else if (action === 'deindex_author') {
+      // Delete all posts from this author
+      const deleteStmt = db.prepare('DELETE FROM posts WHERE authorAddress = ?');
+      const result = deleteStmt.run(flaggedPost.authorAddress);
+      console.log(`Deleted ${result.changes} posts from author ${flaggedPost.authorAddress}`);
+      
+    } else if (action === 'deindex_subplebbit') {
+      // Delete all posts from this subplebbit
+      const deleteStmt = db.prepare('DELETE FROM posts WHERE subplebbitAddress = ?');
+      const result = deleteStmt.run(flaggedPost.subplebbitAddress);
+      console.log(`Deleted ${result.changes} posts from subplebbit ${flaggedPost.subplebbitAddress}`);
+    }
+    // 'ignore' action does nothing to the posts table
+    
+    return true;
+  });
+  
+  return transaction();
 }

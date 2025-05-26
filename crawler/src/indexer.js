@@ -1,3 +1,5 @@
+import { isAuthorBlacklisted, isSubplebbitBlacklisted } from './db.js';
+
 export async function indexPosts(db, posts) {
   console.log(`Indexing ${posts.length} posts/comments...`);
   try {
@@ -41,6 +43,33 @@ export async function indexPosts(db, posts) {
           
           if (missingFields.length > 0) {
             console.error(`Skipping post ${post.cid}: Missing required fields: ${missingFields.join(', ')}`);
+            skippedCount++;
+            continue;
+          }
+          
+          // Check if post is deindexed (we still want to index pending/ignored reports)
+          const stmt = db.prepare(`
+            SELECT COUNT(*) as count FROM flagged_posts 
+            WHERE id = ? AND moderation_action IN ('deindex_comment', 'deindex_author', 'deindex_subplebbit')
+          `);
+          const isDeindexed = stmt.get(post.cid).count > 0;
+          
+          if (isDeindexed) {
+            console.log(`Skipping deindexed post: ${post.cid}`);
+            skippedCount++;
+            continue;
+          }
+
+          // Check if author is blacklisted
+          if (post.author?.address && isAuthorBlacklisted(db, post.author.address)) {
+            console.log(`Skipping post from blacklisted author: ${post.author.address}`);
+            skippedCount++;
+            continue;
+          }
+
+          // Check if subplebbit is blacklisted
+          if (isSubplebbitBlacklisted(db, post.subplebbitAddress)) {
+            console.log(`Skipping post from blacklisted subplebbit: ${post.subplebbitAddress}`);
             skippedCount++;
             continue;
           }

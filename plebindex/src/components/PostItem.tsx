@@ -39,13 +39,24 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
         <span title={new Date(post.timestamp * 1000).toLocaleString()}>
           {formatTimestamp(post.timestamp)}
         </span>
+        {' • '}
+        <Link
+          href={`/report/${post.id}`}
+          style={{
+            color: '#888',
+            textDecoration: 'underline',
+            fontSize: 12
+          }}
+        >
+          report
+        </Link>
         
         {/* Show parent post context for replies */}
         <br/>
         {!post.title && post.parentCid && post.parentTitle && (
           <>
             <Link 
-              href={`/post/${post.postCid || post.parentCid}`}
+              href={`/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
               style={{ color: '#888', textDecoration: 'underline' }}
             >
               &quot;{post.parentTitle}&quot;
@@ -68,7 +79,15 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
           {post.title}
         </a>
       ) : (
-        <></>
+        // Show parent title for replies in the same style as post titles
+        post.parentCid && post.parentTitle && (
+          <Link 
+            href={`/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
+            style={{ fontWeight: 'bold', fontSize: 18, textDecoration: 'none' }}
+          >
+            {post.parentTitle}
+          </Link>
+        )
       )}
       
       <div style={{ marginTop: 4 }}>{post.content}</div>
@@ -79,6 +98,7 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
           downvoteCount={post.downvoteCount}
           replyCount={post.replyCount}
           postId={post.id}
+          subplebbitAddress={post.subplebbitAddress}
           isReply={!post.title}
           postCid={post.postCid}
           parentCid={post.parentCid}

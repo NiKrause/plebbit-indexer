@@ -2,11 +2,12 @@ import { Post, PaginatedResponse, PaginatedRepliesResponse } from '../types';
 
 function getApiBaseUrl(): string {
   let apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!apiBaseUrl && process.env.NODE_ENV === 'development') {
-    apiBaseUrl = 'http://crawler:3001';
-  } else if (!apiBaseUrl) {
-    apiBaseUrl = '';  
-  }
+  console.log("apiBaseUrl", apiBaseUrl);
+  if (apiBaseUrl && process.env.NODE_ENV === 'development') {
+    if(typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      apiBaseUrl = 'http://localhost:3001';
+    }
+  } 
   return apiBaseUrl;
 }
 
@@ -41,7 +42,7 @@ export async function fetchPost(postId: string): Promise<Post | null> {
 export async function fetchPosts(
   searchTerm?: string | null, 
   page: number = 1, 
-  limit: number = 0,
+  limit: number = 25,
   sort: string = 'new',
   timeFilter: string = 'all',
   includeReplies: boolean = true
@@ -110,7 +111,7 @@ export async function fetchPosts(
     console.error('Error fetching posts:', error);
     return { 
       posts: [], 
-      pagination: { total: 0, page: 1, limit: 20, pages: 0 },
+      pagination: { total: 0, page: 1, limit: 25, pages: 0 },
       filters: { sort, timeFilter, includeReplies }
     };
   }
@@ -119,7 +120,7 @@ export async function fetchPosts(
 export async function fetchReplies(
   postId: string, 
   page: number = 1, 
-  limit: number = 20,
+  limit: number = 25,
   sort: string = 'new'
 ): Promise<PaginatedRepliesResponse> {
   const apiBaseUrl = getApiBaseUrl();
@@ -160,8 +161,35 @@ export async function fetchReplies(
     console.error('Error fetching replies:', error);
     return { 
       replies: [], 
-      pagination: { total: 0, page: 1, limit: 20, pages: 0 },
+      pagination: { total: 0, page: 1, limit: 25, pages: 0 },
       filters: { sort }
     };
+  }
+}
+
+export async function submitReport(postId: string, reason: string): Promise<{ success: boolean; error?: string }> {
+  const apiBaseUrl = getApiBaseUrl();
+  console.log("submitting report to", apiBaseUrl);
+  const baseEndpoint = `api/posts/${postId}/flag`;
+  console.log("baseEndpoint", baseEndpoint);
+  const url = apiBaseUrl ? `${apiBaseUrl}/${baseEndpoint}` : baseEndpoint;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ reason }),
+    });
+    
+    if (response.ok) {
+      return { success: true };
+    } else {
+      return { success: false, error: 'submit-failed' };
+    }
+  } catch (error) {
+    console.error('Error submitting report:', error);
+    return { success: false, error: 'network-error' };
   }
 } 

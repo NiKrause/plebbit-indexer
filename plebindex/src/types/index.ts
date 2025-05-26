@@ -73,3 +73,37 @@ export interface PaginationProps {
   includeReplies?: boolean;
   postId?: string;
 }
+
+// Admin types
+export interface FlaggedPost {
+  id: string;
+  title?: string;
+  content: string;
+  subplebbitAddress: string;
+  authorAddress: string;
+  authorDisplayName: string;
+  timestamp: number;
+  upvoteCount: number;
+  downvoteCount: number;
+  replyCount: number;
+  parentCid?: string;
+  postCid?: string;
+  reason: string;
+  status: 'pending' | 'resolved';
+  flagged_at: string;
+  parentTitle?: string;
+  parentAuthorDisplayName?: string;
+  parentAuthorAddress?: string;
+}
+
+export interface AdminStats {
+  total: number;
+  stats: Array<{
+    flag_reason: string;
+    count: number;
+  }>;
+}
+
+export interface ModerationAction {
+  action: 'ignore' | 'deindex_comment' | 'deindex_author' | 'deindex_subplebbit';
+}

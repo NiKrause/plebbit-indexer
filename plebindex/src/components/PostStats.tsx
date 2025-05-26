@@ -5,6 +5,7 @@ interface PostStatsProps {
   downvoteCount: number;
   replyCount: number;
   postId: string;
+  subplebbitAddress: string;
   isReply?: boolean;
   postCid?: string;
   parentCid?: string;
@@ -15,6 +16,7 @@ export default function PostStats({
   downvoteCount, 
   replyCount, 
   postId,
+  subplebbitAddress,
   isReply = false,
   postCid,
   parentCid 
@@ -31,7 +33,7 @@ export default function PostStats({
       {isReply ? (
         <>
           <Link 
-            href={`/post/${postCid || parentCid}`}
+            href={`/p/${subplebbitAddress}/c/${postCid || parentCid}`}
             title="View original post" 
             style={{ color: '#888', textDecoration: 'none' }}
           >
@@ -39,7 +41,7 @@ export default function PostStats({
           </Link>
           {replyCount > 0 && (
             <Link 
-              href={`/post/${postId}`}
+              href={`/p/${subplebbitAddress}/c/${postId}`}
               title="View replies to this comment" 
               style={{ color: '#888', textDecoration: 'none' }}
             >
@@ -50,7 +52,7 @@ export default function PostStats({
       ) : (
         <>
           <Link 
-            href={`/post/${postId}`}
+            href={`/p/${subplebbitAddress}/c/${postId}`}
             title="View Replies" 
             style={{ color: '#888', textDecoration: 'none' }}
           >
