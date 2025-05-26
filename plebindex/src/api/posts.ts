@@ -1,6 +1,6 @@
 import { Post, PaginatedResponse, PaginatedRepliesResponse } from '../types';
 
-function getApiBaseUrl(): string {
+function getApiBaseUrl(): string | undefined {
   let apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   console.log("apiBaseUrl", apiBaseUrl);
   if (apiBaseUrl && process.env.NODE_ENV === 'development') {

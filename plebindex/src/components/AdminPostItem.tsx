@@ -66,7 +66,7 @@ export default function AdminPostItem({ post }: AdminPostItemProps) {
           {formatDate(post.timestamp)} | Flagged: {formatDate(parseInt(post.flagged_at))}
         </div>
         <div style={{ fontSize: '0.8em', color: '#888', marginTop: '3px', fontFamily: 'monospace' }}>
-          ID: {post.id} | Post CID: {post.postId} {post.parentId && `| Parent CID: ${post.parentId}`}
+          ID: {post.id} | Post CID: {post.id} {post.postCid && `| Parent CID: ${post.parentCid}`}
         </div>
       </div>
 
