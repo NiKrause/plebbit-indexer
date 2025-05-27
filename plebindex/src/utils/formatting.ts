@@ -53,6 +53,11 @@ export function createPageUrl(
     return `/p/${options.subplebbitAddress}/c/${options.postId}${queryString ? `?${queryString}` : ''}`;
   }
   
+  // If there's a search term, always use /search path
+  if (options.searchTerm) {
+    return `/search${queryString ? `?${queryString}` : ''}`;
+  }
+  
   return queryString ? `/?${queryString}` : '/';
 }
 
