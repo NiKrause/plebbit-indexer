@@ -137,14 +137,14 @@ async function analyzeContent(content) {
     const resultB = await getModelResponse(modelB);
     
     // If Model B failed due to rate limit, wait and retry
-    if (!resultB.success && resultB.isRateLimit) {
-      const waitTime = resultB.retryAfter - Date.now();
-      if (waitTime > 0) {
-        console.log(`Waiting ${waitTime}ms before retrying Model B due to rate limit`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        return analyzeContent(content); // Retry the entire process
-      }
-    }
+    // if (!resultB.success && resultB.isRateLimit) {
+    //   const waitTime = resultB.retryAfter - Date.now();
+    //   if (waitTime > 0) {
+    //     console.log(`Waiting ${waitTime}ms before retrying Model B due to rate limit`);
+    //     await new Promise(resolve => setTimeout(resolve, waitTime));
+    //     return analyzeContent(content); // Retry the entire process
+    //   }
+    // }
     
     // If Model B also failed, try Model C
     if (!resultB.success) {
@@ -152,14 +152,14 @@ async function analyzeContent(content) {
       const resultC = await getModelResponse(modelC);
       
       // If Model C failed due to rate limit, wait and retry
-      if (!resultC.success && resultC.isRateLimit) {
-        const waitTime = resultC.retryAfter - Date.now();
-        if (waitTime > 0) {
-          console.log(`Waiting ${waitTime}ms before retrying Model C due to rate limit`);
-          await new Promise(resolve => setTimeout(resolve, waitTime));
-          return analyzeContent(content); // Retry the entire process
-        }
-      }
+      // if (!resultC.success && resultC.isRateLimit) {
+      //   const waitTime = resultC.retryAfter - Date.now();
+      //   if (waitTime > 0) {
+      //     console.log(`Waiting ${waitTime}ms before retrying Model C due to rate limit`);
+      //     await new Promise(resolve => setTimeout(resolve, waitTime));
+      //     return analyzeContent(content); // Retry the entire process
+      //   }
+      // }
       
       if (resultC.success) {
         console.log(`Using result from Model C: ${resultC.response}`);
