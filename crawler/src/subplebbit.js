@@ -87,9 +87,9 @@ export function setupSubplebbitListener(sub, db, address) {
 
   // Listen for updates
   sub.on('update', async () => {
-    console.log(`Subplebbit ${address} updated, re-indexing...`);
+    console.log(`Subplebbit ${address} updated, re-indexing first 'new' page...`);
     try {
-      await indexSubplebbit(sub, db);
+      await indexSubplebbit(sub, db, true); // Pass true to indicate this is an update event
       updateSubplebbitStatus(db, address, 'success');
     } catch (err) {
       console.error(`Error updating/indexing subplebbit at ${address} (on update event):`, err);
@@ -98,7 +98,7 @@ export function setupSubplebbitListener(sub, db, address) {
   });
 }
 
-export async function indexSubplebbit(sub, db) {
+export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
   console.log("indexSubplebbit", Object.keys(sub.posts.pageCids).length !== 0);
   
   // Check if subplebbit is blacklisted
@@ -112,20 +112,38 @@ export async function indexSubplebbit(sub, db) {
   
   if (Object.keys(sub.posts.pageCids).length !== 0) {
     console.log("sub.posts.pageCids", sub.posts.pageCids);
+    console.log("isUpdateEvent:", isUpdateEvent);
     let postsPage = await sub.posts.getPage(sub.posts.pageCids.new);
-    allPosts = [...postsPage.comments];
+    console.log("Initial postsPage comments length:", postsPage.comments.length);
     
-    while (postsPage.nextCid) {
-      try {
-        postsPage = await sub.posts.getPage(postsPage.nextCid);
-        allPosts = allPosts.concat(postsPage.comments);
-      } catch (err) {
-        console.error(`Error loading next page (${postsPage.nextCid}):`, err);
-        break;
+    // If it's an update event, only take the first comment
+    allPosts = isUpdateEvent ? [postsPage.comments[0]] : [...postsPage.comments];
+    console.log("After initial assignment - allPosts length:", allPosts.length);
+    console.log("isUpdateEvent:", isUpdateEvent, "allPosts:", allPosts.map(p => p.cid));
+    
+    // Only process additional pages if it's not an update event
+    if (!isUpdateEvent) {
+      console.log("Processing additional pages (non-update event)");
+      while (postsPage.nextCid) {
+        try {
+          console.log("Fetching next page with CID:", postsPage.nextCid);
+          postsPage = await sub.posts.getPage(postsPage.nextCid);
+          console.log("Next page comments length:", postsPage.comments.length);
+          allPosts = allPosts.concat(postsPage.comments);
+          console.log("Updated allPosts length:", allPosts.length);
+        } catch (err) {
+          console.error(`Error loading next page (${postsPage.nextCid}):`, err);
+          break;
+        }
       }
+    } else {
+      console.log("Skipping additional pages (update event)");
     }
   } else {
-    allPosts = Object.values(sub.posts.pages)[0].comments;
+    console.log("No pageCids found, using direct pages access");
+    console.log("isUpdateEvent:", isUpdateEvent);
+    allPosts = isUpdateEvent ? [] : Object.values(sub.posts.pages)[0].comments;
+    console.log("Final allPosts length:", allPosts.length);
   }
 
   // Filter out posts from blacklisted authors
