@@ -1,9 +1,12 @@
+import { Suspense } from 'react';
 import Header from '../header';
 
 export default function ImprintPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Header />
+      </Suspense>
       
       <main className="flex-grow container mx-auto px-4 py-6">
         <div className="max-w-3xl mx-auto">
@@ -46,7 +49,7 @@ export default function ImprintPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-4">Service Description:</h2>
             <p className="mb-4">
-              This service provides a search engine for content within the decentralized peer-to-peer community "Plebbit", which operates on the IPFS (InterPlanetary File System) network. The service indexes publicly accessible content from independently operated subforums (so-called "SubPlebbit communities") and makes it searchable.
+              This service provides a search engine for content within the decentralized peer-to-peer community &quot;Plebbit&quot;, which operates on the IPFS (InterPlanetary File System) network. The service indexes publicly accessible content from independently operated subforums (so-called &quot;SubPlebbit communities&quot;) and makes it searchable.
             </p>
             <p className="mb-4">
               We do not host or operate any communities ourselves and are not responsible for the content posted within them. Each SubPlebbit community is responsible for its own content, managed by its respective users or moderators.
@@ -59,7 +62,7 @@ export default function ImprintPage() {
               As a service provider, we are responsible for our own content on this search engine in accordance with general legislation (§ 7 (1) TMG). However, pursuant to §§ 8 to 10 TMG, we are not obligated to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.
             </p>
             <p className="mb-4">
-              Once we become aware of specific legal violations, such content will be promptly removed from our index. A <strong>reporting feature</strong> is available ("Report" button) for notifying us of potentially illegal or questionable content. Each report is reviewed by us, and if a legal or policy violation is confirmed, the respective entry is removed from the index. The associated author or community (SubPlebbit) may also be excluded from future indexing.
+              Once we become aware of specific legal violations, such content will be promptly removed from our index. A <strong>reporting feature</strong> is available (&quot;Report&quot; button) for notifying us of potentially illegal or questionable content. Each report is reviewed by us, and if a legal or policy violation is confirmed, the respective entry is removed from the index. The associated author or community (SubPlebbit) may also be excluded from future indexing.
             </p>
           </section>
 
