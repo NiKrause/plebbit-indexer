@@ -238,9 +238,10 @@ export async function moderatePosts(batchSize = 100) {
   const stats = { processed: 0, flagged: 0 };
   
   try {
-    // Get posts to analyze
+    // Get posts to analyze - only fetch unmoderated posts
     const posts = db.prepare(`
       SELECT id, content, title FROM posts 
+      WHERE moderated_at IS NULL
       ORDER BY timestamp DESC 
       LIMIT ?
     `).all(batchSize);
@@ -252,6 +253,8 @@ export async function moderatePosts(batchSize = 100) {
       
       // Skip posts with no content
       if (!post.content && !post.title) {
+        // Mark empty posts as moderated to avoid rechecking them
+        db.prepare('UPDATE posts SET moderated_at = ? WHERE id = ?').run(Date.now(), post.id);
         continue;
       }
       
@@ -268,6 +271,9 @@ export async function moderatePosts(batchSize = 100) {
         await flagPost(db, post.id, result);
         stats.flagged++;
       }
+      
+      // Mark the post as moderated
+      db.prepare('UPDATE posts SET moderated_at = ? WHERE id = ?').run(Date.now(), post.id);
       
       // Log progress
       if (stats.processed % 10 === 0) {
@@ -289,12 +295,12 @@ export async function moderatePosts(batchSize = 100) {
  */
 export function startContentModerationScheduler(intervalMinutes = 30) {
   // Run immediately on startup
-  moderatePosts().catch(err => console.error('Error in initial moderation run:', err));
+  moderatePosts(50).catch(err => console.error('Error in initial moderation run:', err));
   
   // Schedule regular runs
   const intervalMs = intervalMinutes * 60 * 1000;
   setInterval(() => {
-    moderatePosts().catch(err => console.error('Error in scheduled moderation run:', err));
+    moderatePosts(50).catch(err => console.error('Error in scheduled moderation run:', err));
   }, intervalMs);
   
   console.log(`Content moderation scheduler started, running every ${intervalMinutes} minutes`);

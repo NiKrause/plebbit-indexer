@@ -39,8 +39,8 @@ async function main() {
   }, refreshIntervalHours * 60 * 60 * 1000);
   
   // Start content moderation scheduler
-  // const moderationInterval = parseInt(process.env.CONTENT_MODERATION_INTERVAL || '30', 10);
-  // startContentModerationScheduler(moderationInterval);
+  const moderationInterval = parseInt(process.env.CONTENT_MODERATION_INTERVAL || '30', 10);
+  startContentModerationScheduler(moderationInterval);
   
   console.log("Crawler is running. Press Ctrl+C to stop.");
   process.stdin.resume();

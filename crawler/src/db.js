@@ -39,7 +39,8 @@ export function getDb() {
       replyCount INTEGER,
       parentCid TEXT,
       postCid TEXT,
-      depth INTEGER DEFAULT 0
+      depth INTEGER DEFAULT 0,
+      moderated_at INTEGER
     );
     
     -- Indizes für häufige Abfragen
