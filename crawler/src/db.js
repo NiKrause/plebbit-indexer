@@ -167,6 +167,39 @@ export function getDb() {
   // Run the title nullable check
   checkTitleNullable();
   
+  // Check if moderated_at column exists and add if missing
+  const checkModeratedAtColumn = () => {
+    console.log("Checking if moderated_at column exists...");
+    const tableInfo = dbInstance.prepare("PRAGMA table_info(posts)").all();
+    const moderatedAtColumn = tableInfo.find(col => col.name === 'moderated_at');
+    
+    if (!moderatedAtColumn) {
+      console.log("moderated_at column missing. Adding column...");
+      
+      // Start a transaction
+      dbInstance.pragma('foreign_keys = OFF');
+      dbInstance.prepare('BEGIN TRANSACTION').run();
+      
+      try {
+        // Add the moderated_at column
+        dbInstance.exec('ALTER TABLE posts ADD COLUMN moderated_at INTEGER');
+        
+        dbInstance.prepare('COMMIT').run();
+        console.log("Successfully added moderated_at column");
+      } catch (error) {
+        dbInstance.prepare('ROLLBACK').run();
+        console.error("Error adding moderated_at column:", error.message);
+      } finally {
+        dbInstance.pragma('foreign_keys = ON');
+      }
+    } else {
+      console.log("moderated_at column exists. No changes needed.");
+    }
+  };
+  
+  // Run the moderated_at column check
+  checkModeratedAtColumn();
+  
   const tablesCheck = {
     posts: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'").get(),
     queue: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='subplebbit_queue'").get(),
