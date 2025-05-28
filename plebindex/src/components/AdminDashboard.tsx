@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FlaggedPost, AdminStats } from '../types';
 import { fetchFlaggedPosts, getFlaggedPostsStats } from '../api/admin';
 import AdminPostItem from './AdminPostItem';
@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'pending' | 'moderated'>('pending');
   const postsPerPage = 10;
 
-  const loadData = async (page: number, reason: string = 'all') => {
+  const loadData = useCallback(async (page: number, reason: string = 'all') => {
     const authToken = localStorage.getItem('plebbit_admin_auth');
     if (!authToken) {
       setError('No auth token found');
@@ -46,14 +46,14 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, postsPerPage]);
 
   useEffect(() => {
     const authToken = localStorage.getItem('plebbit_admin_auth');
     if (authToken) {
       loadData(currentPage, selectedReason);
     }
-  }, [currentPage, selectedReason, activeTab]);
+  }, [currentPage, selectedReason, activeTab, loadData]);
 
   if (error) {
     return <div style={{ color: 'red', padding: '20px' }}>Error: {error}</div>;

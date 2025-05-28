@@ -75,7 +75,7 @@ export interface FlaggedPost {
   parentCid?: string;
   postCid?: string;
   reason: string;
-  status: 'pending' | 'resolved';
+  status: 'pending' | 'ignored' | 'deindexed_comment' | 'deindexed_author' | 'deindexed_subplebbit';  // Update this line
   flagged_at: string;
   parentTitle?: string;
   parentAuthorDisplayName?: string;
@@ -87,7 +87,7 @@ export interface AdminStats {
   pending: number;
   moderated: number;
   stats: {
-    flag_reason: string;
+    reason: string;
     count: number;
   }[];
 }
