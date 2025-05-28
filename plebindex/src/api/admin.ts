@@ -26,7 +26,8 @@ interface PaginationInfo {
 export async function fetchFlaggedPosts(
   page: number = 1, 
   limit: number = 25,
-  reason?: string
+  reason?: string,
+  status: 'pending' | 'moderated' = 'pending'
 ): Promise<{ flagged_posts: FlaggedPost[], pagination: PaginationInfo } | null> {
   const apiBaseUrl = getApiBaseUrl();
   const authToken = getAuthToken();
@@ -42,6 +43,7 @@ export async function fetchFlaggedPosts(
   if (reason) {
     params.append('reason', reason);
   }
+  params.append('status', status);
   
   const baseEndpoint = `api/flagged-posts?${params.toString()}`;
   const url = apiBaseUrl ? `${apiBaseUrl}/${baseEndpoint}` : baseEndpoint;

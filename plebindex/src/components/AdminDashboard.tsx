@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedReason, setSelectedReason] = useState('all');
+  const [activeTab, setActiveTab] = useState<'pending' | 'moderated'>('pending');
   const postsPerPage = 10;
 
   const loadData = async (page: number, reason: string = 'all') => {
@@ -26,7 +27,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       const [postsData, statsData] = await Promise.all([
-        fetchFlaggedPosts(page, postsPerPage, reason !== 'all' ? reason : undefined),
+        fetchFlaggedPosts(page, postsPerPage, reason !== 'all' ? reason : undefined, activeTab),
         getFlaggedPostsStats()
       ]);
       
@@ -52,7 +53,7 @@ export default function AdminDashboard() {
     if (authToken) {
       loadData(currentPage, selectedReason);
     }
-  }, [currentPage, selectedReason]);
+  }, [currentPage, selectedReason, activeTab]);
 
   if (error) {
     return <div style={{ color: 'red', padding: '20px' }}>Error: {error}</div>;
@@ -69,6 +70,40 @@ export default function AdminDashboard() {
         <h1 style={{ color: '#333' }}>Content Moderation Admin</h1>
       </div>
       
+      {/* Tabs */}
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', gap: '10px', borderBottom: '1px solid #ddd' }}>
+          <button
+            onClick={() => setActiveTab('pending')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              background: 'none',
+              borderBottom: activeTab === 'pending' ? '2px solid #007bff' : 'none',
+              color: activeTab === 'pending' ? '#007bff' : '#666',
+              cursor: 'pointer',
+              fontWeight: activeTab === 'pending' ? 'bold' : 'normal'
+            }}
+          >
+            Pending ({stats?.pending || 0})
+          </button>
+          <button
+            onClick={() => setActiveTab('moderated')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              background: 'none',
+              borderBottom: activeTab === 'moderated' ? '2px solid #007bff' : 'none',
+              color: activeTab === 'moderated' ? '#007bff' : '#666',
+              cursor: 'pointer',
+              fontWeight: activeTab === 'moderated' ? 'bold' : 'normal'
+            }}
+          >
+            Moderated ({stats?.moderated || 0})
+          </button>
+        </div>
+      </div>
+      
       <div style={{
         background: '#f9f9f9',
         padding: '20px',
@@ -76,7 +111,7 @@ export default function AdminDashboard() {
         borderRadius: '4px'
       }}>
         <div style={{ marginBottom: '15px' }}>
-          <strong>Pending Reports: {stats?.total || 0}</strong>
+          <strong>Total Reports: {stats?.total || 0}</strong>
         </div>
         
         {stats && stats.stats.length > 0 && (
@@ -101,21 +136,21 @@ export default function AdminDashboard() {
               </button>
               {stats.stats.map((stat, index) => (
                 <button
-                  key={`${stat.flag_reason}-${index}`}
+                  key={`${stat.reason}-${index}`}
                   onClick={() => {
-                    setSelectedReason(stat.flag_reason);
+                    setSelectedReason(stat.reason);
                     setCurrentPage(1);
                   }}
                   style={{
                     padding: '5px 10px',
                     borderRadius: '15px',
                     border: 'none',
-                    background: selectedReason === stat.flag_reason ? '#007bff' : '#e9ecef',
-                    color: selectedReason === stat.flag_reason ? 'white' : '#333',
+                    background: selectedReason === stat.reason ? '#007bff' : '#e9ecef',
+                    color: selectedReason === stat.reason ? 'white' : '#333',
                     cursor: 'pointer'
                   }}
                 >
-                  {stat.flag_reason} ({stat.count})
+                  {stat.reason} ({stat.count})
                 </button>
               ))}
             </div>
@@ -129,7 +164,7 @@ export default function AdminDashboard() {
         <>
           <div>
             {flaggedPosts.length === 0 ? (
-              <p>No pending reports.</p>
+              <p>No {activeTab} reports.</p>
             ) : (
               flaggedPosts.map(post => (
                 <AdminPostItem key={post.id} post={post} />

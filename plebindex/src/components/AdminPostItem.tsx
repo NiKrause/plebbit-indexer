@@ -12,6 +12,40 @@ export default function AdminPostItem({ post }: AdminPostItemProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
 
+  // Helper function to get status color and label
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case 'ignored':
+        return { color: '#4CAF50', label: 'Ignored' };
+      case 'deindexed_comment':
+        return { color: '#ff9800', label: 'Post Removed' };
+      case 'deindexed_author':
+        return { color: '#f44336', label: 'Author Banned' };
+      case 'deindexed_subplebbit':
+        return { color: '#9c27b0', label: 'Subplebbit Banned' };
+      default:
+        return { color: '#ff4444', label: 'Pending' };
+    }
+  };
+
+  const statusInfo = getStatusInfo(post.status);
+
+  // Helper function to check if an action is available
+  const isActionAvailable = (action: string) => {
+    switch (action) {
+      case 'ignore':
+        return post.status !== 'ignored';
+      case 'deindex_comment':
+        return post.status !== 'deindexed_comment';
+      case 'deindex_author':
+        return post.status !== 'deindexed_author';
+      case 'deindex_subplebbit':
+        return post.status !== 'deindexed_subplebbit';
+      default:
+        return true;
+    }
+  };
+
   const handleModerationAction = async (postId: string, action: string) => {
     console.log("handleModerationAction", postId, action);
     try {
@@ -49,15 +83,28 @@ export default function AdminPostItem({ post }: AdminPostItemProps) {
           <h3 style={{ margin: '0', color: '#333' }}>
             {post.title || 'No Title'}
           </h3>
-          <span style={{ 
-            padding: '3px 8px', 
-            borderRadius: '12px', 
-            backgroundColor: '#ff4444', 
-            color: 'white', 
-            fontSize: '0.8em' 
-          }}>
-            {post.reason}
-          </span>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ 
+              padding: '3px 8px', 
+              borderRadius: '12px', 
+              backgroundColor: '#ff4444', 
+              color: 'white', 
+              fontSize: '0.8em' 
+            }}>
+              {post.reason}
+            </span>
+            {post.status !== 'pending' && (
+              <span style={{ 
+                padding: '3px 8px', 
+                borderRadius: '12px', 
+                backgroundColor: statusInfo.color, 
+                color: 'white', 
+                fontSize: '0.8em' 
+              }}>
+                {statusInfo.label}
+              </span>
+            )}
+          </div>
         </div>
         <div style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
           Posted by {post.authorDisplayName} ({post.authorAddress}) in {post.subplebbitAddress}
@@ -122,60 +169,60 @@ export default function AdminPostItem({ post }: AdminPostItemProps) {
       }}>
         <button
           onClick={() => handleModerationAction(post.id, 'ignore')}
-          disabled={isProcessing}
+          disabled={isProcessing || !isActionAvailable('ignore')}
           style={{
             padding: '8px 16px',
             background: '#4CAF50',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: isProcessing ? 'not-allowed' : 'pointer',
-            opacity: isProcessing ? 0.7 : 1
+            cursor: isProcessing || !isActionAvailable('ignore') ? 'not-allowed' : 'pointer',
+            opacity: isProcessing || !isActionAvailable('ignore') ? 0.7 : 1
           }}
         >
           Ignore
         </button>
         <button
           onClick={() => handleModerationAction(post.id, 'deindex_comment')}
-          disabled={isProcessing}
+          disabled={isProcessing || !isActionAvailable('deindex_comment')}
           style={{
             padding: '8px 16px',
             background: '#ff9800',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: isProcessing ? 'not-allowed' : 'pointer',
-            opacity: isProcessing ? 0.7 : 1
+            cursor: isProcessing || !isActionAvailable('deindex_comment') ? 'not-allowed' : 'pointer',
+            opacity: isProcessing || !isActionAvailable('deindex_comment') ? 0.7 : 1
           }}
         >
           Remove Post
         </button>
         <button
           onClick={() => handleModerationAction(post.id, 'deindex_author')}
-          disabled={isProcessing}
+          disabled={isProcessing || !isActionAvailable('deindex_author')}
           style={{
             padding: '8px 16px',
             background: '#f44336',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: isProcessing ? 'not-allowed' : 'pointer',
-            opacity: isProcessing ? 0.7 : 1
+            cursor: isProcessing || !isActionAvailable('deindex_author') ? 'not-allowed' : 'pointer',
+            opacity: isProcessing || !isActionAvailable('deindex_author') ? 0.7 : 1
           }}
         >
           Ban Author
         </button>
         <button
           onClick={() => handleModerationAction(post.id, 'deindex_subplebbit')}
-          disabled={isProcessing}
+          disabled={isProcessing || !isActionAvailable('deindex_subplebbit')}
           style={{
             padding: '8px 16px',
             background: '#9c27b0',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: isProcessing ? 'not-allowed' : 'pointer',
-            opacity: isProcessing ? 0.7 : 1
+            cursor: isProcessing || !isActionAvailable('deindex_subplebbit') ? 'not-allowed' : 'pointer',
+            opacity: isProcessing || !isActionAvailable('deindex_subplebbit') ? 0.7 : 1
           }}
         >
           Ban Subplebbit

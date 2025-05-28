@@ -676,27 +676,35 @@ export async function startServer(_db) {
       const limit = parseInt(req.query.limit) || 25;
       const offset = (page - 1) * limit;
       const flagReason = req.query.reason; // Optional filter by flag reason
+      const status = req.query.status || 'pending'; // New status filter
       
-      // Simplified queries without JOIN
-      let countQuery = 'SELECT COUNT(*) as total FROM flagged_posts';
-      let postsQuery = 'SELECT * FROM flagged_posts';
-      
+      // Build WHERE clause based on filters
+      let whereClause = '';
       const queryParams = [];
       
+      if (status === 'pending') {
+        whereClause = 'WHERE status = ?';
+        queryParams.push('pending');
+      } else if (status === 'moderated') {
+        whereClause = 'WHERE status IN (?, ?, ?, ?)';
+        queryParams.push('ignored', 'deindexed_comment', 'deindexed_author', 'deindexed_subplebbit');
+      }
+      
       if (flagReason) {
-        countQuery += ' WHERE reason = ?';
-        postsQuery += ' WHERE reason = ?';
+        whereClause += whereClause ? ' AND reason = ?' : 'WHERE reason = ?';
         queryParams.push(flagReason);
       }
+      
+      // Build queries with WHERE clause
+      let countQuery = `SELECT COUNT(*) as total FROM flagged_posts ${whereClause}`;
+      let postsQuery = `SELECT * FROM flagged_posts ${whereClause}`;
       
       // Add sorting
       postsQuery += ' ORDER BY flagged_at DESC LIMIT ? OFFSET ?';
       
       // Get total count
       const countStmt = db.prepare(countQuery);
-      const { total } = flagReason
-        ? countStmt.get(flagReason)
-        : countStmt.get();
+      const { total } = countStmt.get(...queryParams);
       
       // Get flagged posts
       const postsStmt = db.prepare(postsQuery);
@@ -713,7 +721,8 @@ export async function startServer(_db) {
           pages
         },
         filters: {
-          reason: flagReason || 'all'
+          reason: flagReason || 'all',
+          status
         }
       });
     } catch (err) {
@@ -727,6 +736,22 @@ export async function startServer(_db) {
     try {
       const db = getDb();
       
+      // Get counts for pending and moderated posts
+      const pendingCountQuery = `
+        SELECT COUNT(*) as count 
+        FROM flagged_posts 
+        WHERE status = 'pending'
+      `;
+      const pendingCount = db.prepare(pendingCountQuery).get().count;
+      
+      const moderatedCountQuery = `
+        SELECT COUNT(*) as count 
+        FROM flagged_posts 
+        WHERE status IN ('ignored', 'deindexed_comment', 'deindexed_author', 'deindexed_subplebbit')
+      `;
+      const moderatedCount = db.prepare(moderatedCountQuery).get().count;
+      
+      // Get stats by reason
       const statsQuery = `
         SELECT
           reason,
@@ -744,6 +769,8 @@ export async function startServer(_db) {
       
       res.json({
         total,
+        pending: pendingCount,
+        moderated: moderatedCount,
         stats
       });
     } catch (err) {

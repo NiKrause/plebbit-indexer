@@ -1,21 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminAuth() {
   const [authKey, setAuthKey] = useState('');
   const [error, setError] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    const storedAuth = localStorage.getItem('plebbit_admin_auth');
-    if (storedAuth) {
-      setIsAuthenticated(true);
-      router.refresh();
-    }
-  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,22 +17,10 @@ export default function AdminAuth() {
     }
 
     localStorage.setItem('plebbit_admin_auth', authKey);
-    setIsAuthenticated(true);
-    router.refresh();
+    // Dispatch a custom event when auth state changes
+    window.dispatchEvent(new Event('authStateChange'));
+    router.push('/admin');
   };
-
-  if (isAuthenticated) {
-    return (
-      <div style={{
-        maxWidth: '500px',
-        margin: '40px auto',
-        padding: '20px',
-        fontFamily: 'Arial, sans-serif'
-      }}>
-        <h2>Already Authenticated</h2>
-      </div>
-    );
-  }
 
   return (
     <div style={{

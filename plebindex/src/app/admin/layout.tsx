@@ -11,15 +11,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check localStorage when component mounts
+  const checkAuth = () => {
     const token = localStorage.getItem('plebbit_admin_auth');
     setAuthToken(token);
     setIsLoading(false);
+  };
+
+  useEffect(() => {
+    // Check localStorage when component mounts
+    checkAuth();
+
+    // Listen for auth state changes
+    window.addEventListener('authStateChange', checkAuth);
+
+    return () => {
+      window.removeEventListener('authStateChange', checkAuth);
+    };
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>; // Or a proper loading spinner
+    return <div>Loading...</div>;
   }
 
   if (!authToken) {

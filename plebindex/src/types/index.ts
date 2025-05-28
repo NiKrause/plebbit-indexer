@@ -84,10 +84,12 @@ export interface FlaggedPost {
 
 export interface AdminStats {
   total: number;
-  stats: Array<{
+  pending: number;
+  moderated: number;
+  stats: {
     flag_reason: string;
     count: number;
-  }>;
+  }[];
 }
 
 export interface ModerationAction {
