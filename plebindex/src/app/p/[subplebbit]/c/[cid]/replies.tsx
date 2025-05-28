@@ -90,7 +90,7 @@ async function RepliesContent({
       
       {/* Reply count as a heading */}
       <h2 style={{ fontSize: 20, fontWeight: 600, margin: '24px 0 12px 0' }}>
-        {pagination.total} direct {pagination.total === 1 ? 'Reply' : 'Replies'}
+        {pagination.total} direct {pagination.total === 1 ? 'reply' : 'replies'}
       </h2> 
       
       {/* Replies */}

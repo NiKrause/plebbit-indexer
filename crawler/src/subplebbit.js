@@ -163,6 +163,30 @@ export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
   console.log(`Now indexing ${allPosts.length} posts...`);
   await indexPosts(db, allPosts);
   
+  // If this is an update event, run content moderation on the new posts
+  if (isUpdateEvent && allPosts.length > 0) {
+    console.log(`Running content moderation on ${allPosts.length} new posts from update event...`);
+    for (const post of allPosts) {
+      // Skip posts with no content
+      if (!post.content && !post.title) {
+        continue;
+      }
+      
+      // Analyze the content (combine title and content if both exist)
+      const contentToAnalyze = post.title 
+        ? `${post.title}\n\n${post.content || ''}`
+        : post.content;
+      
+      const result = await analyzeContent(contentToAnalyze);
+      console.log(`Post ${post.cid} analyzed: ${result}`);
+    
+      // Flag posts with problematic content
+      if (result !== 'SAFE' && result !== '**SAFE**' && result !== 'ERROR' && result !== 'UNKNOWN') {
+        await flagPost(db, post.cid, result);
+      }
+    }
+  }
+  
   // Step 2: Process and index all replies in a flattened structure
   console.log(`Processing replies for ${allPosts.length} posts...`);
   for (const post of allPosts) {
