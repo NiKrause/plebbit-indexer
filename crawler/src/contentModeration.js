@@ -81,12 +81,33 @@ async function analyzeContent(content) {
       const category = normalizeResponse(response.category);
       if (validResponses.includes(response.category)) {
         console.log(`Valid response from model ${modelName}: ${response}`);
-        return { success: true, response: category, harm: response.harm , reason: response.reason, category: response.category};
+        return { success: true, response: category, harm: response.harm, reason: response.reason, category: response.category};
       } else {
         console.error(`Unexpected response from model ${modelName}: ${response}`);
         return { success: false, error: `Invalid response: ${response}` };
       }
     } catch (error) {
+      // Check if it's a rate limit error
+      if (error.status === 429 || error.message?.includes('rate limit')) {
+        // Extract retry information from headers or error response
+        const retryAfter = error.headers?.['retry-after'] || 
+                          error.response?.headers?.['retry-after'] || 
+                          error.retryAfter;
+        
+        const retryTimestamp = retryAfter ? 
+          (typeof retryAfter === 'string' ? parseInt(retryAfter) : retryAfter) * 1000 + Date.now() : 
+          Date.now() + 60000; // Default to 1 minute if no retry info
+        
+        console.error(`Rate limit exceeded for model ${modelName}. Retry after: ${new Date(retryTimestamp).toISOString()}`);
+        
+        return { 
+          success: false, 
+          error: error.message,
+          isRateLimit: true,
+          retryAfter: retryTimestamp
+        };
+      }
+      
       console.error(`Error with model ${modelName}: ${error.message}`);
       return { success: false, error: error.message };
     }
@@ -100,15 +121,45 @@ async function analyzeContent(content) {
   // Step 1: Get response from Model A
   const resultA = await getModelResponse(modelA);
   
-  // If Model A failed, try Model B
+  // If Model A failed due to rate limit, wait and retry
+  if (!resultA.success && resultA.isRateLimit) {
+    const waitTime = resultA.retryAfter - Date.now();
+    if (waitTime > 0) {
+      console.log(`Waiting ${waitTime}ms before retrying Model A due to rate limit`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      return analyzeContent(content); // Retry the entire process
+    }
+  }
+  
+  // If Model A failed for other reasons, try Model B
   if (!resultA.success) {
     console.log(`Model A (${modelA}) failed, trying Model B (${modelB})`);
     const resultB = await getModelResponse(modelB);
+    
+    // If Model B failed due to rate limit, wait and retry
+    if (!resultB.success && resultB.isRateLimit) {
+      const waitTime = resultB.retryAfter - Date.now();
+      if (waitTime > 0) {
+        console.log(`Waiting ${waitTime}ms before retrying Model B due to rate limit`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        return analyzeContent(content); // Retry the entire process
+      }
+    }
     
     // If Model B also failed, try Model C
     if (!resultB.success) {
       console.log(`Model B (${modelB}) also failed, trying Model C (${modelC})`);
       const resultC = await getModelResponse(modelC);
+      
+      // If Model C failed due to rate limit, wait and retry
+      if (!resultC.success && resultC.isRateLimit) {
+        const waitTime = resultC.retryAfter - Date.now();
+        if (waitTime > 0) {
+          console.log(`Waiting ${waitTime}ms before retrying Model C due to rate limit`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          return analyzeContent(content); // Retry the entire process
+        }
+      }
       
       if (resultC.success) {
         console.log(`Using result from Model C: ${resultC.response}`);
@@ -140,12 +191,6 @@ async function analyzeContent(content) {
       console.log(`Model C (${modelC}) also failed, using result from Model A: ${resultA.response}`);
       return resultA.response;
     }
-  }
-  
-  // If Model A and B both succeeded, check if they agree
-  if (resultA.response === resultB.response) {
-    console.log(`Models A and B agree on: ${resultA.response}`);
-    return resultA.response;
   }
   
   // If Models A and B disagree, use Model C as tiebreaker
