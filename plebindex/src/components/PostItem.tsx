@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Post } from '../types';
 import { formatTimestamp } from '../utils/formatting';
 import PostStats from './PostStats';
+import ReportButton from './ReportButton';
 
 interface PostItemProps {
   post: Post;
@@ -69,16 +70,7 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
           Reply count {post.parentReplyCount} 
         </span>
         {' • '}
-        <Link
-          href={`/report/${post.id}`}
-          style={{
-            color: '#888',
-            textDecoration: 'underline',
-            fontSize: 12,
-          }}
-        >
-          report
-        </Link>
+        <ReportButton postId={post.id} />
       </div>
 
       {/* Show parent post context for replies */}
