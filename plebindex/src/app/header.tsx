@@ -60,6 +60,13 @@ export default function Header() {
           
           <div style={styles.socialContainer}>
             <Link
+              href="/imprint"
+              title="Imprint"
+              style={styles.iconLink}
+            >
+              Imprint
+            </Link>
+            <Link
               href="https://github.com/NiKrause/plebbit-indexer/"
               target="_blank"
               rel="noopener noreferrer"
