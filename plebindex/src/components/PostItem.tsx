@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { Post } from '../types';
 import { formatTimestamp } from '../utils/formatting';
 import PostStats from './PostStats';

@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
 import { fetchPost, fetchReplies } from '../../../../../api/posts';
-import { Post, Reply } from '../../../../../types';
+import { Post } from '../../../../../types';
 import { formatTimestamp } from '../../../../../utils/formatting';
 import Pagination from '../../../../../components/Pagination';
-import SortOptions from '../../../../../components/SortOptions';
+// import SortOptions from '../../../../../components/SortOptions';
 import styles from '../../../../../styles/shared.module.css';
 import PostItem from '../../../../../components/PostItem';
 
@@ -96,7 +96,7 @@ async function RepliesContent({
       {/* Replies */}
       <div className={styles.repliesContainer}>
         {replies.length > 0 ? (
-          replies.map((reply: Reply) => (
+          replies.map((reply: Post) => (
             <PostItem 
               key={reply.id} 
               post={reply as Post} // Type assertion since Reply is compatible with Post

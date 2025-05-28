@@ -52,11 +52,14 @@ function Notification({ type, message, onClose }: NotificationProps) {
   );
 }
 
-export default function ReportPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+interface PageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default function ReportPage({ params }: PageProps) {
+  const [postId, setPostId] = useState<string>('');
   const searchParams = useSearchParams();
   const router = useRouter();
   const isModal = searchParams.get('modal') === 'true';
@@ -66,6 +69,13 @@ export default function ReportPage({
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+
+  // Handle the async params
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setPostId(resolvedParams.id);
+    });
+  }, [params]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +91,7 @@ export default function ReportPage({
     setIsSubmitting(true);
 
     try {
-      const result = await submitReport(params.id, reason);
+      const result = await submitReport(postId, reason);
       
       if (result.success) {
         setNotification({
@@ -89,7 +99,6 @@ export default function ReportPage({
           message: 'Report submitted successfully!'
         });
         
-        // Close modal or redirect after 2 seconds
         setTimeout(() => {
           if (isModal) {
             router.back();
