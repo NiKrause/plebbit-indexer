@@ -9,15 +9,40 @@ interface PostItemProps {
 }
 
 export default function PostItem({ post, showAsReply = false }: PostItemProps) {
+  const isReply = !post.title && post.parentCid && post.parentTitle;
+
   return (
-    <div style={{ 
-      borderBottom: '1px solid #ccc', 
-      marginBottom: 16, 
-      paddingBottom: 8,
-      marginLeft: showAsReply ? 20 : 0, // Indent replies
-      borderLeft: showAsReply ? '3px solid #ddd' : 'none' // Visual indicator for replies
-    }}>
-      <div style={{ fontSize: 12, color: '#888' }}>
+    <div
+      style={{
+        borderBottom: '1px solid #ccc',
+        marginBottom: 16,
+        paddingBottom: 8,
+        marginLeft: showAsReply ? 40 : 0,
+        borderLeft: showAsReply ? '4px solid #b3d4fc' : 'none',
+        background: showAsReply ? '#f7fbff' : 'none',
+        borderRadius: showAsReply ? 6 : 0,
+        paddingTop: showAsReply ? 8 : 0,
+        paddingRight: 8,
+        paddingLeft: showAsReply ? 12 : 0,
+      }}
+    >
+      <div style={{ fontSize: 12, color: '#888', marginBottom: 2 }}>
+        {isReply && (
+          <span
+            style={{
+              background: '#e3f2fd',
+              color: '#1976d2',
+              fontWeight: 600,
+              fontSize: 11,
+              padding: '2px 6px',
+              borderRadius: 4,
+              marginRight: 8,
+              letterSpacing: 0.5,
+            }}
+          >
+            Reply
+          </span>
+        )}
         <a
           href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
           target="_blank"
@@ -31,7 +56,7 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
           href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: '#888', textDecoration: 'underline' }}
+          style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
         >
           {post.authorDisplayName || post.authorAddress}
         </a>
@@ -40,34 +65,44 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
           {formatTimestamp(post.timestamp)}
         </span>
         {' • '}
+        <span>
+          Reply count {post.parentReplyCount} 
+        </span>
+        {' • '}
         <Link
           href={`/report/${post.id}`}
           style={{
             color: '#888',
             textDecoration: 'underline',
-            fontSize: 12
+            fontSize: 12,
           }}
         >
           report
         </Link>
-        
-        {/* Show parent post context for replies */}
-        <br/>
-        {!post.title && post.parentCid && post.parentTitle && (
-          <>
-            <Link 
-              href={`/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
-              style={{ color: '#888', textDecoration: 'underline' }}
-            >
-              &quot;{post.parentTitle}&quot;
-            </Link>
-            {(post.parentAuthorDisplayName || post.parentAuthorAddress) && (
-              <span> by {post.parentAuthorDisplayName || post.parentAuthorAddress}</span>
-            )}
-          </>
-        )}
       </div>
-      
+
+      {/* Show parent post context for replies */}
+      {/* {isReply && (
+        <div style={{ fontSize: 12, color: '#1976d2', marginBottom: 4 }}>
+          In reply to:{' '}
+          <Link
+            href={`/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
+            style={{ color: '#1976d2', textDecoration: 'underline', fontWeight: 500 }}
+          >
+            &quot;{post.parentTitle}&quot;
+          </Link>
+          {(post.parentAuthorDisplayName || post.parentAuthorAddress) && (
+            <span>
+              {' '}
+              by{' '}
+              <span style={{ fontWeight: 500 }}>
+                {post.parentAuthorDisplayName || post.parentAuthorAddress}
+              </span>
+            </span>
+          )}
+        </div>
+      )} */}
+
       {/* Conditional rendering based on whether it's a reply or post */}
       {post.title ? (
         <a
@@ -80,18 +115,27 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
         </a>
       ) : (
         // Show parent title for replies in the same style as post titles
-        post.parentCid && post.parentTitle && (
-          <Link 
-            href={`/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
-            style={{ fontWeight: 'bold', fontSize: 18, textDecoration: 'none' }}
-          >
-            {post.parentTitle}
-          </Link>
+        post.parentCid &&
+        post.parentTitle && (
+          <a
+          href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontWeight: 'bold', fontSize: 18 }}
+        >
+          {post.title}
+        </a>
+          // <Link
+          //   href={`/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
+          //   style={{ fontWeight: 'bold', fontSize: 18, textDecoration: 'none' }}
+          // >
+          //   {post.parentTitle}
+          // </Link>
         )
       )}
-      
+
       <div style={{ marginTop: 4 }}>{post.content}</div>
-      
+
       <div style={{ marginTop: 8 }}>
         <PostStats
           upvoteCount={post.upvoteCount}

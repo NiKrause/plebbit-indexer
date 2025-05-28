@@ -136,7 +136,8 @@ export async function startServer(_db) {
           p.*,
           parent.title as parentTitle,
           parent.authorDisplayName as parentAuthorDisplayName,
-          parent.authorAddress as parentAuthorAddress
+          parent.authorAddress as parentAuthorAddress,
+          parent.replyCount as parentReplyCount
         FROM posts p
         LEFT JOIN posts parent ON p.parentCid = parent.id
         ${whereClause}
@@ -280,7 +281,8 @@ export async function startServer(_db) {
           p.*,
           parent.title as parentTitle,
           parent.authorDisplayName as parentAuthorDisplayName,
-          parent.authorAddress as parentAuthorAddress
+          parent.authorAddress as parentAuthorAddress,
+          parent.replyCount as parentReplyCount
         FROM posts p
         LEFT JOIN posts parent ON p.parentCid = parent.id
         WHERE (LOWER(p.title) LIKE LOWER(?)
@@ -350,7 +352,8 @@ export async function startServer(_db) {
           p.*,
           parent.title as parentTitle,
           parent.authorDisplayName as parentAuthorDisplayName,
-          parent.authorAddress as parentAuthorAddress
+          parent.authorAddress as parentAuthorAddress,
+          parent.replyCount as parentReplyCount
         FROM posts p
         LEFT JOIN posts parent ON p.parentCid = parent.id
         WHERE p.id = ?
@@ -607,7 +610,8 @@ export async function startServer(_db) {
           r.*,
           parent.title as parentTitle,
           parent.authorDisplayName as parentAuthorDisplayName,
-          parent.authorAddress as parentAuthorAddress
+          parent.authorAddress as parentAuthorAddress,
+          parent.replyCount as parentReplyCount
         FROM posts r
         LEFT JOIN posts parent ON r.parentCid = parent.id
         WHERE r.parentCid = ? 

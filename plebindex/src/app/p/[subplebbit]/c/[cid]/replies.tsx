@@ -75,22 +75,23 @@ async function RepliesContent({
             <span style={{ color: '#E25241' }}>▼</span> {post.downvoteCount || 0}
           </span>
           <span title="Replies">
-            <span>💬</span> {post.replyCount || 0} {post.replyCount === 1 ? 'reply' : 'replies'}
+            Total Reply count: <span>💬</span> {post.replyCount || 0} 
+            {/* {post.replyCount === 1 ? 'reply' : 'replies'} */}
           </span>
         </div>
       </div>
       
-      {/* Sort options for replies */}
+      {/* Sort options for replies
       <SortOptions 
         currentSort={filters.sort} 
         page={page} 
         postId={postId} 
-      />
+      /> */}
       
-      {/* Reply count */}
-      <div className={styles.replyCount}>
-        Reply count: {pagination.total}
-      </div>
+      {/* Reply count as a heading */}
+      <h2 style={{ fontSize: 20, fontWeight: 600, margin: '24px 0 12px 0' }}>
+        {pagination.total} direct {pagination.total === 1 ? 'Reply' : 'Replies'}
+      </h2> 
       
       {/* Replies */}
       <div className={styles.repliesContainer}>

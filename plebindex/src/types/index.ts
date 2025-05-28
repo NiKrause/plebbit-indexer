@@ -15,21 +15,7 @@ export interface Post {
   parentTitle?: string;
   parentAuthorDisplayName?: string;
   parentAuthorAddress?: string;
-}
-
-export interface Reply {
-  id: string;
-  title?: string;
-  content: string;
-  subplebbitAddress: string;
-  authorAddress: string;
-  authorDisplayName: string;
-  timestamp: number;
-  upvoteCount: number;
-  downvoteCount: number;
-  replyCount: number;
-  parentCid: string;
-  postCid: string;
+  parentReplyCount?: number; 
 }
 
 export interface PaginatedResponse {
@@ -48,7 +34,7 @@ export interface PaginatedResponse {
 }
 
 export interface PaginatedRepliesResponse {
-  replies: Reply[];
+  replies: Post[];
   pagination: {
     total: number;
     page: number;
