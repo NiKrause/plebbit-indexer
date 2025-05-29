@@ -67,7 +67,7 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
         </span>
         {' • '}
         <span>
-          Reply count {post.parentReplyCount} 
+          Reply count {post.parentReplyCount || post.replyCount} 
         </span>
         {' • '}
         <ReportButton postId={post.id} />
