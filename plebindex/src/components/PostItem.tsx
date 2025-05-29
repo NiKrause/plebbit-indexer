@@ -2,6 +2,7 @@ import { Post } from '../types';
 import { formatTimestamp } from '../utils/formatting';
 import PostStats from './PostStats';
 import ReportButton from './ReportButton';
+import Link from 'next/link';
 
 interface PostItemProps {
   post: Post;
@@ -73,26 +74,44 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
       </div>
 
       {/* Show parent post context for replies */}
-      {/* {isReply && (
+      {isReply && (
         <div style={{ fontSize: 12, color: '#1976d2', marginBottom: 4 }}>
-          In reply to:{' '}
-          <Link
-            href={`/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
+          {/* In reply to:{' '} */}
+          <a
+          href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontWeight: 'bold', fontSize: 18 }}
+        >
+          {post.parentTitle}
+        </a>
+          {/* <Link
+            href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
             style={{ color: '#1976d2', textDecoration: 'underline', fontWeight: 500 }}
           >
             &quot;{post.parentTitle}&quot;
-          </Link>
+          </Link> */}
           {(post.parentAuthorDisplayName || post.parentAuthorAddress) && (
-            <span>
-              {' '}
-              by{' '}
-              <span style={{ fontWeight: 500 }}>
-                {post.parentAuthorDisplayName || post.parentAuthorAddress}
-              </span>
-            </span>
+            // <span>
+            //   {' '}
+            //   by{' '}
+            //   <span style={{ fontWeight: 500 }}>
+            //     {post.parentAuthorDisplayName || post.parentAuthorAddress}
+            //   </span>
+            // </span>
+            <span> by{' '} 
+            <a
+            href={`https://seedit.app/#/u/${post.parentAuthorAddress}/c/${post.postCid || post.parentCid}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
+          >
+            {post.parentAuthorDisplayName || post.parentAuthorAddress}
+          </a>
+          </span>
           )}
         </div>
-      )} */}
+      )}
 
       {/* Conditional rendering based on whether it's a reply or post */}
       {post.title ? (

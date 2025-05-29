@@ -3,7 +3,7 @@ import Header from '../header';
 
 export default function ImprintPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="!px-10 !py-10 !mx-10 !my-10 flex flex-col min-h-screen bg-gray-50">
       <Suspense fallback={<div>Loading...</div>}>
         <Header />
       </Suspense>
@@ -14,7 +14,7 @@ export default function ImprintPage() {
             <div className="w-24 h-1 bg-blue-600 mx-auto"></div>
           </div>
 
-          <div className="space-y-16">
+          <div className="!px-10 !py-10 !mx-10 !my-10">
             <section>
               <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Information according to § 5 TMG</h2>
               <div className="grid md:grid-cols-2 gap-8">
