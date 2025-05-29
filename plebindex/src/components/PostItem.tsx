@@ -2,7 +2,7 @@ import { Post } from '../types';
 import { formatTimestamp } from '../utils/formatting';
 import PostStats from './PostStats';
 import ReportButton from './ReportButton';
-import Link from 'next/link';
+// import Link from 'next/link';
 
 interface PostItemProps {
   post: Post;
