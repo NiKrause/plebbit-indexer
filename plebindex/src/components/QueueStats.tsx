@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '../api/admin';
 
 interface QueueStats {
   total: number;
@@ -30,6 +31,7 @@ export default function QueueStats() {
   const [recentActivity, setRecentActivity] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const loadData = async () => {
     try {
@@ -38,20 +40,22 @@ export default function QueueStats() {
       if (!authToken) {
         throw new Error('No auth token found');
       }
-
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-      
+      const apiBaseUrl = getApiBaseUrl();
+      console.log("apiBaseUrl queue stats   ", apiBaseUrl);
       // Fetch queue stats
       const statsResponse = await fetch(`${apiBaseUrl}/api/queue/stats?auth=${authToken}`);
       if (!statsResponse.ok) throw new Error('Failed to fetch queue stats');
       const statsData = await statsResponse.json();
       setStats(statsData);
 
-      // Fetch recent queue activity
-      const activityResponse = await fetch(`${apiBaseUrl}/api/queue?auth=${authToken}`);
+      // Fetch recent queue activity with status filter
+      const activityUrl = statusFilter 
+        ? `${apiBaseUrl}/api/queue?auth=${authToken}&status=${statusFilter}`
+        : `${apiBaseUrl}/api/queue?auth=${authToken}`;
+      const activityResponse = await fetch(activityUrl);
       if (!activityResponse.ok) throw new Error('Failed to fetch queue activity');
       const activityData = await activityResponse.json();
-      setRecentActivity(activityData.slice(0, 10)); // Get last 10 items
+      setRecentActivity(activityData.slice(0, 10));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load queue data');
     } finally {
@@ -64,10 +68,14 @@ export default function QueueStats() {
     // Refresh data every minute
     const interval = setInterval(loadData, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [statusFilter]);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
+  };
+
+  const handleStatusClick = (status: string) => {
+    setStatusFilter(statusFilter === status ? null : status);
   };
 
   if (error) {
@@ -92,13 +100,20 @@ export default function QueueStats() {
         <h3 style={{ marginBottom: '10px', color: '#666' }}>Overall Status</h3>
         <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           {stats?.stats.map((stat) => (
-            <div key={stat.status} style={{
-              background: 'white',
-              padding: '15px',
-              borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              minWidth: '200px'
-            }}>
+            <div 
+              key={stat.status} 
+              onClick={() => handleStatusClick(stat.status)}
+              style={{
+                background: 'white',
+                padding: '15px',
+                borderRadius: '4px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                minWidth: '200px',
+                cursor: 'pointer',
+                border: statusFilter === stat.status ? '2px solid #2196F3' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
               <div style={{ 
                 color: stat.status === 'success' ? '#4CAF50' : 
                        stat.status === 'failed' ? '#f44336' : 
@@ -119,7 +134,9 @@ export default function QueueStats() {
 
       {/* Recent Activity */}
       <div>
-        <h3 style={{ marginBottom: '10px', color: '#666' }}>Recent Activity</h3>
+        <h3 style={{ marginBottom: '10px', color: '#666' }}>
+          Recent Activity {statusFilter && `- ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}`}
+        </h3>
         <div style={{ 
           background: 'white',
           borderRadius: '4px',
