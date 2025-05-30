@@ -100,7 +100,6 @@ async function RepliesContent({
             <PostItem 
               key={reply.id} 
               post={reply as Post} // Type assertion since Reply is compatible with Post
-              showAsReply={true}
             />
           ))
         ) : (

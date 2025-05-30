@@ -1,151 +1,105 @@
 import { Post } from '../types';
-import { formatTimestamp } from '../utils/formatting';
 import PostStats from './PostStats';
 import ReportButton from './ReportButton';
+import TimestampDisplay from './TimeStampDisplay';
 // import Link from 'next/link';
 
 interface PostItemProps {
   post: Post;
-  showAsReply?: boolean;
 }
 
-export default function PostItem({ post, showAsReply = false }: PostItemProps) {
+export default function PostItem({ post }: PostItemProps) {
   const isReply = !post.title && post.parentCid && post.parentTitle;
 
-  return (
-    <div
-      style={{
+  // Main post (Thread)
+  if (!isReply) {
+    return (
+      <div style={{
         borderBottom: '1px solid #ccc',
         marginBottom: 16,
         paddingBottom: 8,
-        marginLeft: showAsReply ? 40 : 0,
-        borderLeft: showAsReply ? '4px solid #b3d4fc' : 'none',
-        background: showAsReply ? '#f7fbff' : 'none',
-        borderRadius: showAsReply ? 6 : 0,
-        paddingTop: showAsReply ? 8 : 0,
-        paddingRight: 8,
-        paddingLeft: showAsReply ? 12 : 0,
-      }}
-    >
-      <div style={{ fontSize: 12, color: '#888', marginBottom: 2 }}>
-        {isReply && (
-          <span
-            style={{
-              background: '#e3f2fd',
-              color: '#1976d2',
-              fontWeight: 600,
-              fontSize: 11,
-              padding: '2px 6px',
-              borderRadius: 4,
-              marginRight: 8,
-              letterSpacing: 0.5,
-            }}
-          >
-            Reply
-          </span>
-        )}
-        <a
-          href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: '#888', textDecoration: 'underline' }}
-        >
-          r/{post.subplebbitAddress}
-        </a>
-        {' • Posted by '}
-        <a
-          href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
-        >
-          {post.authorDisplayName || post.authorAddress}
-        </a>
-        {' • '}
-        <span title={new Date(post.timestamp * 1000).toLocaleString()}>
-          {formatTimestamp(post.timestamp)}
-        </span>
-        {' • '}
-        <span>
-          Reply count {post.parentReplyCount || post.replyCount} 
-        </span>
-        {' • '}
-        <ReportButton postId={post.id} />
-      </div>
-
-      {/* Show parent post context for replies */}
-      {isReply && (
-        <div style={{ fontSize: 12, color: '#1976d2', marginBottom: 4 }}>
-          {/* In reply to:{' '} */}
-          <a
-          href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ fontWeight: 'bold', fontSize: 18 }}
-        >
-          {post.parentTitle}
-        </a>
-          {/* <Link
-            href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
-            style={{ color: '#1976d2', textDecoration: 'underline', fontWeight: 500 }}
-          >
-            &quot;{post.parentTitle}&quot;
-          </Link> */}
-          {(post.parentAuthorDisplayName || post.parentAuthorAddress) && (
-            // <span>
-            //   {' '}
-            //   by{' '}
-            //   <span style={{ fontWeight: 500 }}>
-            //     {post.parentAuthorDisplayName || post.parentAuthorAddress}
-            //   </span>
-            // </span>
-            <span> by{' '} 
+        background: '#f8f9fa',
+        borderRadius: 6,
+        padding: 16,
+      }}>
+        {/* Thread title */}
+        <div style={{ fontWeight: 'bold', fontSize: 18, color: '#1976d2', marginBottom: 4 }}>
+          Thread: {post.title}
+        </div>
+        {/* Meta info */}
+        <div style={{ fontSize: 12, color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span>
+            by{' '}
             <a
-            href={`https://seedit.app/#/u/${post.parentAuthorAddress}/c/${post.postCid || post.parentCid}`}
+              href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
+            >
+              {post.authorDisplayName || post.authorAddress}
+            </a>
+            {' | '}
+            <TimestampDisplay timestamp={post.timestamp} />
+            {' | '}
+            {post.parentReplyCount || post.replyCount} posts 
+          </span>
+          <ReportButton postId={post.id} />
+        </div>
+        {/* Content */}
+        <div style={{ marginBottom: 8 }}>{post.content}</div>
+        {/* Post stats and report */}
+        <div style={{ marginTop: 8 }}>
+          <PostStats
+            upvoteCount={post.upvoteCount}
+            downvoteCount={post.downvoteCount}
+            replyCount={post.parentReplyCount || post.replyCount}
+            postId={post.id}
+            subplebbitAddress={post.subplebbitAddress}
+            isReply={false}
+            postCid={post.postCid}
+            parentCid={post.parentCid}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Reply
+  return (
+    <div style={{
+      borderBottom: '1px solid #ccc',
+      marginBottom: 16,
+      paddingBottom: 8,
+      marginLeft: 40,
+      borderLeft: '4px solid #b3d4fc',
+      background: '#f7fbff',
+      borderRadius: 6,
+      padding: 16,
+    }}>
+      {/* Thread title (repeated for reply) */}
+      <div style={{ fontWeight: 'bold', fontSize: 16, color: '#1976d2', marginBottom: 2 }}>
+        Thread: {post.parentTitle}
+      </div>
+      {/* Meta info for reply */}
+      <div style={{ fontSize: 12, color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span>
+          by{' '}
+          <a
+            href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
           >
-            {post.parentAuthorDisplayName || post.parentAuthorAddress}
+            {post.authorDisplayName || post.authorAddress}
           </a>
-          </span>
-          )}
-        </div>
-      )}
-
-      {/* Conditional rendering based on whether it's a reply or post */}
-      {post.title ? (
-        <a
-          href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ fontWeight: 'bold', fontSize: 18 }}
-        >
-          {post.title}
-        </a>
-      ) : (
-        // Show parent title for replies in the same style as post titles
-        post.parentCid &&
-        post.parentTitle && (
-          <a
-          href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ fontWeight: 'bold', fontSize: 18 }}
-        >
-          {post.title}
-        </a>
-          // <Link
-          //   href={`/p/${post.subplebbitAddress}/c/${post.postCid || post.parentCid}`}
-          //   style={{ fontWeight: 'bold', fontSize: 18, textDecoration: 'none' }}
-          // >
-          //   {post.parentTitle}
-          // </Link>
-        )
-      )}
-
-      <div style={{ marginTop: 4 }}>{post.content}</div>
-
+          {' | '}
+          <TimestampDisplay timestamp={post.timestamp} />
+        </span>
+        <ReportButton postId={post.id} />
+      </div>
+      {/* Content */}
+      <div style={{ marginBottom: 8 }}>{post.content}</div>
+      {/* Post stats and report */}
       <div style={{ marginTop: 8 }}>
         <PostStats
           upvoteCount={post.upvoteCount}
@@ -153,7 +107,7 @@ export default function PostItem({ post, showAsReply = false }: PostItemProps) {
           replyCount={post.replyCount}
           postId={post.id}
           subplebbitAddress={post.subplebbitAddress}
-          isReply={!post.title}
+          isReply={true}
           postCid={post.postCid}
           parentCid={post.parentCid}
         />

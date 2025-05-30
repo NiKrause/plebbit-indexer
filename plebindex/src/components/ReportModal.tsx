@@ -73,10 +73,16 @@ export default function ReportModal({ postId, isOpen, onClose }: ReportModalProp
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
       style={{
-        background: 'rgba(26, 26, 27, 0.7)', // Reddit's modal overlay is a bit darker
+        background: 'rgba(26, 26, 27, 0.7)',
         backdropFilter: 'blur(2px)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        isolation: 'isolate',
       }}
     >
       <div
@@ -87,6 +93,8 @@ export default function ReportModal({ postId, isOpen, onClose }: ReportModalProp
           boxShadow: '0 4px 32px rgba(0,0,0,0.25), 0 0 0 1px #edeff1',
           border: '1px solid #edeff1',
           padding: 0,
+          position: 'relative',
+          zIndex: 10000,
         }}
       >
         {/* Modal Header */}
