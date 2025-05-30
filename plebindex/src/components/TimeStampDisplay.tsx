@@ -24,7 +24,7 @@ export default function TimestampDisplay({ timestamp }: { timestamp: number }) {
   }, [timestamp, showExactTime]);
   
   const handleTimestampClick = () => {
-    setShowExactTime((prev) => {
+    setShowExactTime((prev: boolean) => {
       const newValue = !prev;
       // Save to localStorage
       if (typeof window !== 'undefined') {
