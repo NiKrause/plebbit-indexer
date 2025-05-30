@@ -26,12 +26,32 @@ interface QueueItem {
   updated_at: number;
 }
 
+interface QueueError {
+  address: string;
+  errors: {
+    status: string;
+    error_message: string;
+    failure_count: number;
+    success_count: number;
+    total_runs: number;
+    updated_at: number;
+  }[];
+  total_failures: number;
+  total_successes: number;
+  total_runs: number;
+}
+
 export default function QueueStats() {
   const [stats, setStats] = useState<QueueStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [queueErrors, setQueueErrors] = useState<QueueError[]>([]);
+  const [newAddress, setNewAddress] = useState('');
+  const [batchSize, setBatchSize] = useState(5);
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
+  const [processingAction, setProcessingAction] = useState(false);
 
   const loadData = async () => {
     try {
@@ -41,7 +61,7 @@ export default function QueueStats() {
         throw new Error('No auth token found');
       }
       const apiBaseUrl = getApiBaseUrl();
-      console.log("apiBaseUrl queue stats   ", apiBaseUrl);
+
       // Fetch queue stats
       const statsResponse = await fetch(`${apiBaseUrl}/api/queue/stats?auth=${authToken}`);
       if (!statsResponse.ok) throw new Error('Failed to fetch queue stats');
@@ -56,10 +76,126 @@ export default function QueueStats() {
       if (!activityResponse.ok) throw new Error('Failed to fetch queue activity');
       const activityData = await activityResponse.json();
       setRecentActivity(activityData.slice(0, 10));
+
+      // Fetch queue errors
+      const errorsResponse = await fetch(`${apiBaseUrl}/api/queue/errors?auth=${authToken}`);
+      if (!errorsResponse.ok) throw new Error('Failed to fetch queue errors');
+      const errorsData = await errorsResponse.json();
+      setQueueErrors(errorsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load queue data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddToQueue = async () => {
+    if (!newAddress.trim()) {
+      setError('Please enter an address');
+      return;
+    }
+
+    try {
+      setProcessingAction(true);
+      const authToken = localStorage.getItem('plebbit_admin_auth');
+      if (!authToken) {
+        throw new Error('No auth token found');
+      }
+      const apiBaseUrl = getApiBaseUrl();
+      
+      const response = await fetch(`${apiBaseUrl}/api/queue/add?auth=${authToken}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address: newAddress }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to add address to queue');
+      
+      setNewAddress('');
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add address to queue');
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  const handleRetryAddress = async (address: string) => {
+    try {
+      setProcessingAction(true);
+      const authToken = localStorage.getItem('plebbit_admin_auth');
+      if (!authToken) {
+        throw new Error('No auth token found');
+      }
+      const apiBaseUrl = getApiBaseUrl();
+      
+      const response = await fetch(`${apiBaseUrl}/api/queue/retry?auth=${authToken}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to retry address');
+      
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to retry address');
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  const handleRefreshQueue = async () => {
+    try {
+      setProcessingAction(true);
+      const authToken = localStorage.getItem('plebbit_admin_auth');
+      if (!authToken) {
+        throw new Error('No auth token found');
+      }
+      const apiBaseUrl = getApiBaseUrl();
+      
+      const response = await fetch(`${apiBaseUrl}/api/queue/refresh?auth=${authToken}`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) throw new Error('Failed to refresh queue');
+      
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to refresh queue');
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  const handleProcessQueue = async () => {
+    try {
+      setProcessingAction(true);
+      const authToken = localStorage.getItem('plebbit_admin_auth');
+      if (!authToken) {
+        throw new Error('No auth token found');
+      }
+      const apiBaseUrl = getApiBaseUrl();
+      
+      const response = await fetch(`${apiBaseUrl}/api/queue/process?auth=${authToken}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ limit: batchSize }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to process queue');
+      
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to process queue');
+    } finally {
+      setProcessingAction(false);
     }
   };
 
@@ -95,6 +231,87 @@ export default function QueueStats() {
     }}>
       <h2 style={{ marginBottom: '20px', color: '#333' }}>Queue Statistics</h2>
       
+      {/* Queue Management */}
+      <div style={{ marginBottom: '20px' }}>
+        <h3 style={{ marginBottom: '10px', color: '#666' }}>Queue Management</h3>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <input
+              type="text"
+              value={newAddress}
+              onChange={(e) => setNewAddress(e.target.value)}
+              placeholder="Enter address to add"
+              style={{ 
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid #ddd',
+                minWidth: '200px'
+              }}
+            />
+            <button
+              onClick={handleAddToQueue}
+              disabled={processingAction}
+              style={{
+                padding: '8px 16px',
+                background: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: processingAction ? 'not-allowed' : 'pointer',
+                opacity: processingAction ? 0.7 : 1
+              }}
+            >
+              Add to Queue
+            </button>
+          </div>
+          <button
+            onClick={handleRefreshQueue}
+            disabled={processingAction}
+            style={{
+              padding: '8px 16px',
+              background: '#2196F3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: processingAction ? 'not-allowed' : 'pointer',
+              opacity: processingAction ? 0.7 : 1
+            }}
+          >
+            Refresh Queue
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input
+              type="number"
+              value={batchSize}
+              onChange={(e) => setBatchSize(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+              min="1"
+              max="50"
+              style={{ 
+                width: '60px',
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid #ddd'
+              }}
+            />
+            <button
+              onClick={handleProcessQueue}
+              disabled={processingAction}
+              style={{
+                padding: '8px 16px',
+                background: '#FF9800',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: processingAction ? 'not-allowed' : 'pointer',
+                opacity: processingAction ? 0.7 : 1
+              }}
+            >
+              Process Queue
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Overall Stats */}
       <div style={{ marginBottom: '20px' }}>
         <h3 style={{ marginBottom: '10px', color: '#666' }}>Overall Status</h3>
@@ -152,6 +369,7 @@ export default function QueueStats() {
                 <th style={{ padding: '12px', textAlign: 'left' }}>Last Failure</th>
                 <th style={{ padding: '12px', textAlign: 'left' }}>Stats</th>
                 <th style={{ padding: '12px', textAlign: 'left' }}>Updated</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -183,11 +401,97 @@ export default function QueueStats() {
                     <div>Total: {item.total_runs}</div>
                   </td>
                   <td style={{ padding: '12px' }}>{formatDate(item.updated_at)}</td>
+                  <td style={{ padding: '12px' }}>
+                    {item.status === 'failed' && (
+                      <button
+                        onClick={() => handleRetryAddress(item.address)}
+                        disabled={processingAction}
+                        style={{
+                          padding: '4px 8px',
+                          background: '#2196F3',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: processingAction ? 'not-allowed' : 'pointer',
+                          opacity: processingAction ? 0.7 : 1
+                        }}
+                      >
+                        Retry
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Error Details */}
+      <div style={{ marginTop: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <h3 style={{ color: '#666' }}>Error Details</h3>
+          <button
+            onClick={() => setShowErrorDetails(!showErrorDetails)}
+            style={{
+              padding: '4px 8px',
+              background: showErrorDetails ? '#f44336' : '#2196F3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            {showErrorDetails ? 'Hide Details' : 'Show Details'}
+          </button>
+        </div>
+        {showErrorDetails && (
+          <div style={{ 
+            background: 'white',
+            borderRadius: '4px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            overflow: 'hidden'
+          }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#f5f5f5' }}>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Address</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Total Failures</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Total Successes</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Total Runs</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {queueErrors.map((error) => (
+                  <tr key={error.address} style={{ borderTop: '1px solid #eee' }}>
+                    <td style={{ padding: '12px' }}>{error.address}</td>
+                    <td style={{ padding: '12px' }}>{error.total_failures}</td>
+                    <td style={{ padding: '12px' }}>{error.total_successes}</td>
+                    <td style={{ padding: '12px' }}>{error.total_runs}</td>
+                    <td style={{ padding: '12px' }}>
+                      <button
+                        onClick={() => handleRetryAddress(error.address)}
+                        disabled={processingAction}
+                        style={{
+                          padding: '4px 8px',
+                          background: '#2196F3',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: processingAction ? 'not-allowed' : 'pointer',
+                          opacity: processingAction ? 0.7 : 1
+                        }}
+                      >
+                        Retry
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
