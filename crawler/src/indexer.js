@@ -112,6 +112,10 @@ export async function indexPosts(db, posts) {
     // Transaktion ausführen
     transaction();
     
+    console.log(`[DB] Starting to index ${posts.length} posts...`);
+    console.log(`[DB] Successfully inserted ${insertedCount} posts`);
+    console.log(`[DB] Skipped ${skippedCount} posts`);
+    
     return true;
   } catch (error) {
     console.error("Transaction failed:", error);

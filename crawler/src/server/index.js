@@ -495,10 +495,11 @@ export async function startServer(_db) {
     }
   });
   
-  app.post('/api/queue/process', requireAuth, async (req, res) => {
+  app.post('/api/queue/process', requireAuth, express.json(), async (req, res) => {
     try {
       const { limit } = req.body || {};
-      const batchSize = limit ? parseInt(limit) : 5;
+      // Ensure limit is a positive number between 1 and 50
+      const batchSize = limit ? Math.max(1, Math.min(50, parseInt(limit) || 1)) : 5;
       
       const db = getDb();
       const plebbit = await getPlebbitClient();

@@ -21,6 +21,15 @@ export async function getSubplebbitAddresses() {
  * Initializes the queue with addresses from GitHub
  */
 export async function initializeSubplebbitQueue(db) {
+  // Reset any stuck processing items back to queued
+  const resetStmt = db.prepare(`
+    UPDATE subplebbit_queue 
+    SET status = 'queued', 
+        updated_at = ? 
+    WHERE status = 'processing'
+  `);
+  resetStmt.run(Date.now());
+
   const addresses = await getSubplebbitAddresses();
   if (addresses.length > 0) {
     console.log(`Queueing ${addresses.length} subplebbit addresses...`);
@@ -33,8 +42,16 @@ export async function initializeSubplebbitQueue(db) {
  * Processes the next subplebbits from the queue
  */
 export async function processSubplebbitQueue(plebbit, db, batchSize = 10) {
+  // Add a lock check to prevent simultaneous processing
+  const isProcessing = db.prepare('SELECT COUNT(*) as count FROM subplebbit_queue WHERE status = ?').get('processing').count > 0;
+  if (isProcessing) {
+    console.log('[Queue Processor] Queue is already being processed, skipping...');
+    return [];
+  }
+
   const queueItems = getNextSubplebbitsFromQueue(db, batchSize);
-  console.log(`Processing ${queueItems.length} subplebbits from queue...`);
+  console.log(`[Queue Processor] Starting to process ${queueItems.length} subplebbits from queue...`);
+  console.log(`[Queue Processor] Queue items:`, queueItems.map(item => ({ address: item.address, status: item.status })));
   
   const subs = [];
   for (const item of queueItems) {
@@ -43,17 +60,23 @@ export async function processSubplebbitQueue(plebbit, db, batchSize = 10) {
       // Mark as "in progress"
       updateSubplebbitStatus(db, address, 'processing');
       
+      console.log(`[Queue Processor] Getting subplebbit instance for ${address}`);
+      
       const sub = await withTimeout(
         plebbit.getSubplebbit(address),
         10000,
         `Timeout getting subplebbit at ${address}`
       );
       
+      console.log(`[Queue Processor] Updating subplebbit ${address}`);
+      
       await withTimeout(
         sub.update(),
         10000,
         `Timeout updating subplebbit at ${address}`
       );
+      
+      console.log(`[Queue Processor] Starting indexing for ${address}`);
       
       console.log(`Indexing subplebbit at ${address}`);
       await indexSubplebbit(sub, db);
@@ -63,6 +86,8 @@ export async function processSubplebbitQueue(plebbit, db, batchSize = 10) {
       
       // Set up listener for updates
       setupSubplebbitListener(sub, db, address);
+      
+      console.log(`[Queue Processor] Successfully indexed ${address}`);
       
       subs.push(sub);
     } catch (err) {
@@ -99,7 +124,7 @@ export function setupSubplebbitListener(sub, db, address) {
 }
 
 export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
-  console.log("indexSubplebbit", Object.keys(sub.posts.pageCids).length !== 0);
+  console.log(`[Indexer] Starting indexing for subplebbit ${sub.address} (isUpdateEvent: ${isUpdateEvent})`);
   
   // Check if subplebbit is blacklisted
   if (isSubplebbitBlacklisted(db, sub.address)) {
@@ -111,17 +136,22 @@ export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
   let allPosts = [];
   
   if (Object.keys(sub.posts.pageCids).length !== 0) {
-    console.log("sub.posts.pageCids", sub.posts.pageCids);
-    console.log("isUpdateEvent:", isUpdateEvent);
+    console.log(`[Indexer] Found pageCids for ${sub.address}:`, Object.keys(sub.posts.pageCids));
+    console.log(`[Indexer] Initial postsPage comments length: ${sub.posts.pageCids.new.comments.length}`);
     let postsPage = await sub.posts.getPage(sub.posts.pageCids.new);
-    console.log("Initial postsPage comments length:", postsPage.comments.length);
+    console.log(`[Indexer] Processing page ${postsPage.nextCid} for ${sub.address}`);
+    console.log(`[Indexer] Found ${postsPage.comments.length} comments on this page`);
     
-    // If it's an update event, only take the first comment
+    // For update events (when a subplebbit is updated), we only index the first new post
+    // This is a performance optimization since we only need the newest content
+    // For regular indexing, we fetch and index all posts from all pages
     allPosts = isUpdateEvent ? [postsPage.comments[0]] : [...postsPage.comments];
     console.log("After initial assignment - allPosts length:", allPosts.length);
     console.log("isUpdateEvent:", isUpdateEvent, "allPosts:", allPosts.map(p => p.cid));
     
     // Only process additional pages if it's not an update event
+    // During regular indexing, we recursively fetch all pages using nextCid
+    // to ensure we have the complete post history
     if (!isUpdateEvent) {
       console.log("Processing additional pages (non-update event)");
       while (postsPage.nextCid) {
@@ -160,7 +190,7 @@ export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
     console.log(`Filtered ${originalPostCount - allPosts.length} posts from blacklisted authors`);
   }
    
-  console.log(`Now indexing ${allPosts.length} posts...`);
+  console.log(`[Indexer] Now indexing ${allPosts.length} posts for ${sub.address}...`);
   await indexPosts(db, allPosts);
   
   // If this is an update event, run content moderation on the new posts
@@ -188,7 +218,7 @@ export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
   }
   
   // Step 2: Process and index all replies in a flattened structure
-  console.log(`Processing replies for ${allPosts.length} posts...`);
+  console.log(`[Indexer] Processing replies for ${allPosts.length} posts in ${sub.address}...`);
   for (const post of allPosts) {
     if (post.replies) {
       const allReplies = getAllReplies(post, post.cid);
@@ -208,6 +238,8 @@ export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
       }
     }
   }
+  
+  console.log(`[Indexer] Successfully indexed ${allPosts.length} posts for ${sub.address}`);
 }
 
 // New helper function that uses the flattening approach
@@ -306,13 +338,13 @@ export async function setupSubplebbitListeners(plebbit, addresses, db) {
 export function startQueueProcessor(plebbit, db, intervalMinutes = 15) {
   console.log(`Starting queue processor with interval of ${intervalMinutes} minutes`);
   
-  // Process the queue immediately once
-  processSubplebbitQueue(plebbit, db);
+  // Process the queue immediately once with a smaller batch size
+  processSubplebbitQueue(plebbit, db, 5);
   
-  // Then check the queue regularly
+  // Then check the queue regularly with a smaller batch size
   const intervalMs = intervalMinutes * 60 * 1000;
   const intervalId = setInterval(() => {
-    processSubplebbitQueue(plebbit, db);
+    processSubplebbitQueue(plebbit, db, 5);
   }, intervalMs);
   
   return intervalId;

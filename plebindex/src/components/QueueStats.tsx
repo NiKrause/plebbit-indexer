@@ -456,6 +456,7 @@ export default function QueueStats() {
               <thead>
                 <tr style={{ background: '#f5f5f5' }}>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Address</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Error Message</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Total Failures</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Total Successes</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Total Runs</th>
@@ -466,6 +467,16 @@ export default function QueueStats() {
                 {queueErrors.map((error) => (
                   <tr key={error.address} style={{ borderTop: '1px solid #eee' }}>
                     <td style={{ padding: '12px' }}>{error.address}</td>
+                    <td style={{ padding: '12px' }}>
+                      {error.errors.map((err, index) => (
+                        <div key={index} style={{ marginBottom: index < error.errors.length - 1 ? '8px' : 0 }}>
+                          <div style={{ color: '#f44336' }}>{err.error_message}</div>
+                          <div style={{ fontSize: '0.8em', color: '#666' }}>
+                            Last updated: {formatDate(err.updated_at)}
+                          </div>
+                        </div>
+                      ))}
+                    </td>
                     <td style={{ padding: '12px' }}>{error.total_failures}</td>
                     <td style={{ padding: '12px' }}>{error.total_successes}</td>
                     <td style={{ padding: '12px' }}>{error.total_runs}</td>

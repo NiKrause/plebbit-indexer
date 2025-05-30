@@ -239,7 +239,6 @@ export function queueSubplebbit(db, address) {
       status = 'queued',
       updated_at = ?,
       next_retry_date = ?
-      WHERE status = 'failed'
   `);
   
   stmt.run(address, now, now, now, now, now);
@@ -303,6 +302,10 @@ export function getNextSubplebbitsFromQueue(db, limit = 10) {
 export function queueMultipleSubplebbits(db, addresses) {
   const transaction = db.transaction((addressList) => {
     for (const address of addressList) {
+      if (isSubplebbitBlacklisted(db, address)) {
+        console.log(`Subplebbit ${address} is blacklisted, skipping indexing`);
+        continue;
+      }
       queueSubplebbit(db, address);
     }
   });
