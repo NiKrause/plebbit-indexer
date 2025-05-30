@@ -140,7 +140,7 @@ export default function ImprintPage() {
                   <ul className="list-disc pl-6 space-y-2 mt-2">
                     <li>Right to access your personal data</li>
                     <li>Right to rectification of inaccurate data</li>
-                    <li>Right to erasure ("right to be forgotten")</li>
+                    <li>Right to erasure (&quot;right to be forgotten&quot;)</li>
                     <li>Right to restriction of processing</li>
                     <li>Right to data portability</li>
                     <li>Right to object to processing</li>
@@ -153,7 +153,7 @@ export default function ImprintPage() {
                   <p>We process the following categories of data:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-2">
                     <li>IP addresses (temporarily stored in access logs)</li>
-                    <li>Search preferences (stored locally in your browser)</li>
+                    <li>Search preferences are stored locally in your browser&apos;s localStorage</li>
                     <li>Content you report for moderation</li>
                   </ul>
                 </div>
@@ -197,7 +197,7 @@ export default function ImprintPage() {
                 </p>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>We do not use cookies for tracking or user identification</li>
-                  <li>Search preferences are stored locally in your browser's localStorage</li>
+                  <li>Search preferences are stored locally in your browser&apos;s localStorage</li>
                   <li>No user accounts or session cookies are required</li>
                   <li>We do not track user behavior or search patterns</li>
                   <li>IP addresses are temporarily stored in standard access logs for security purposes only</li>
