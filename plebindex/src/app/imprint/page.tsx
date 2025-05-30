@@ -110,6 +110,135 @@ export default function ImprintPage() {
                 </p>
               </div>
             </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Data Protection (GDPR)</h2>
+              <div className="space-y-4 text-gray-700">
+                <p>
+                  In accordance with the General Data Protection Regulation (GDPR), we provide the following information about data processing:
+                </p>
+                
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Data Controller</h3>
+                  <div className="space-y-2">
+                    <div>Le Space UG (haftungsbeschränkt)</div>
+                    <div>Lichtenberg 44</div>
+                    <div>84307 Eggenfelden</div>
+                    <div>Germany</div>
+                    <div>
+                      Email: <a href="mailto:plebscan@le-space.de" className="text-blue-600 hover:text-blue-800 transition-colors">plebscan@le-space.de</a>
+                    </div>
+                    <div>
+                      Phone: <a href="tel:+49872112896000" className="text-blue-600 hover:text-blue-800 transition-colors">+49 8721 12896000</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Rights</h3>
+                  <p>Under the GDPR, you have the following rights:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-2">
+                    <li>Right to access your personal data</li>
+                    <li>Right to rectification of inaccurate data</li>
+                    <li>Right to erasure ("right to be forgotten")</li>
+                    <li>Right to restriction of processing</li>
+                    <li>Right to data portability</li>
+                    <li>Right to object to processing</li>
+                    <li>Right to withdraw consent</li>
+                  </ul>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Data Processing</h3>
+                  <p>We process the following categories of data:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-2">
+                    <li>IP addresses (temporarily stored in access logs)</li>
+                    <li>Search preferences (stored locally in your browser)</li>
+                    <li>Content you report for moderation</li>
+                  </ul>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Data Storage and Security</h3>
+                  <p>
+                    We implement appropriate technical and organizational measures to protect your data. Our data processing is based on:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2 mt-2">
+                    <li>Legitimate interest in providing and improving our service</li>
+                    <li>Legal obligations (e.g., maintaining access logs for security)</li>
+                    <li>Your consent (where applicable)</li>
+                  </ul>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Contact for Data Protection</h3>
+                  <p>
+                    For any questions regarding data protection or to exercise your rights, please contact:
+                  </p>
+                  <div className="mt-2">
+                    <div>Nico Krause</div>
+                    <div>Le Space UG (haftungsbeschränkt)</div>
+                    <div>Lichtenberg 44</div>
+                    <div>84307 Eggenfelden</div>
+                    <div>Germany</div>
+                    <div>
+                      Email: <a href="mailto:nico.krause@le-space.de" className="text-blue-600 hover:text-blue-800 transition-colors">nico.krause@le-space.de</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Privacy and Data Usage</h2>
+              <div className="space-y-4 text-gray-700">
+                <p>
+                  Our service is designed with privacy in mind:
+                </p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>We do not use cookies for tracking or user identification</li>
+                  <li>Search preferences are stored locally in your browser's localStorage</li>
+                  <li>No user accounts or session cookies are required</li>
+                  <li>We do not track user behavior or search patterns</li>
+                  <li>IP addresses are temporarily stored in standard access logs for security purposes only</li>
+                </ul>
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">API Usage</h2>
+              <div className="space-y-4 text-gray-700">
+                <p>
+                  Our search API is currently available for free use. We reserve the right to modify this policy in the future, with appropriate notice to users.
+                </p>
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Content Moderation</h2>
+              <div className="space-y-4 text-gray-700">
+                <p>
+                  We employ a dual approach to content moderation:
+                </p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>
+                    <strong>User Reporting:</strong> A reporting feature is available for users to flag potentially problematic content. Each report is reviewed by our team.
+                  </li>
+                  <li>
+                    <strong>AI Moderation:</strong> We use AI technology to automatically scan content for:
+                    <ul className="list-disc pl-6 mt-2">
+                      <li>Hate speech and discriminatory content</li>
+                      <li>Violent or harmful content</li>
+                      <li>Copyright violations</li>
+                      <li>Other forms of malicious content</li>
+                    </ul>
+                  </li>
+                </ul>
+                <p>
+                  When content is flagged, either through user reports or AI detection, it undergoes review. If violations are confirmed, the content may be removed from our index, and in some cases, the associated author or community may be excluded from future indexing.
+                </p>
+              </div>
+            </section>
           </div>
         </div>
       </main>
