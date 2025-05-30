@@ -23,7 +23,7 @@ export default function PostItem({ post }: PostItemProps) {
       }}>
         {/* Thread title */}
         <div style={{ fontWeight: 'bold', fontSize: 18, color: '#1976d2', marginBottom: 4 }}>
-          Thread:{' '}
+          {' '}
           <a
             href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
             target="_blank"
@@ -94,7 +94,7 @@ export default function PostItem({ post }: PostItemProps) {
     }}>
       {/* Thread title (repeated for reply) */}
       <div style={{ fontWeight: 'bold', fontSize: 16, color: '#1976d2', marginBottom: 2 }}>
-        Thread:{' '}
+        {' '}
         <a
           href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
           target="_blank"
