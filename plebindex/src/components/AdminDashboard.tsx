@@ -5,6 +5,7 @@ import { FlaggedPost, AdminStats } from '../types';
 import { fetchFlaggedPosts, getFlaggedPostsStats } from '../api/admin';
 import AdminPostItem from './AdminPostItem';
 import Pagination from './Pagination';
+import QueueStats from './QueueStats';
 
 export default function AdminDashboard() {
   const [flaggedPosts, setFlaggedPosts] = useState<FlaggedPost[]>([]);
@@ -69,6 +70,8 @@ export default function AdminDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h1 style={{ color: '#333' }}>Content Moderation Admin</h1>
       </div>
+      
+      <QueueStats />
       
       {/* Tabs */}
       <div style={{ marginBottom: '20px' }}>
