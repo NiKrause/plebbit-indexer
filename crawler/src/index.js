@@ -38,9 +38,14 @@ async function main() {
       .catch(err => console.error('Error refreshing queue:', err));
   }, refreshIntervalHours * 60 * 60 * 1000);
   
-  // Start content moderation scheduler
-  const moderationInterval = parseInt(process.env.CONTENT_MODERATION_INTERVAL || '30', 10);
-  startContentModerationScheduler(moderationInterval);
+  // Start content moderation scheduler if enabled
+  if (process.env.ENABLE_CONTENT_MODERATION === 'true') {
+    const moderationInterval = parseInt(process.env.CONTENT_MODERATION_INTERVAL || '30', 10);
+    startContentModerationScheduler(moderationInterval);
+    console.log('Content moderation enabled, running every', moderationInterval, 'minutes');
+  } else {
+    console.log('Content moderation is disabled');
+  }
   
   console.log("Crawler is running. Press Ctrl+C to stop.");
   process.stdin.resume();

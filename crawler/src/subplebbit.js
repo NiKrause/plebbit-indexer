@@ -164,7 +164,7 @@ export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
   await indexPosts(db, allPosts);
   
   // If this is an update event, run content moderation on the new posts
-  if (isUpdateEvent && allPosts.length > 0) {
+  if (process.env.ENABLE_CONTENT_MODERATION === 'true' && isUpdateEvent && allPosts.length > 0) {
     console.log(`Running content moderation on ${allPosts.length} new posts from update event...`);
     for (const post of allPosts) {
       // Skip posts with no content

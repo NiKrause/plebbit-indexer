@@ -4,7 +4,14 @@ import { useState, useEffect } from 'react';
 import { formatTimestamp } from '../utils/formatting';
 
 export default function TimestampDisplay({ timestamp }: { timestamp: number }) {
-  const [showExactTime, setShowExactTime] = useState(false);
+  const [showExactTime, setShowExactTime] = useState(() => {
+    // Initialize from localStorage if available
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('showExactTime');
+      return saved ? JSON.parse(saved) : false;
+    }
+    return false;
+  });
   const [formattedTime, setFormattedTime] = useState('');
   
   useEffect(() => {
@@ -16,7 +23,16 @@ export default function TimestampDisplay({ timestamp }: { timestamp: number }) {
     );
   }, [timestamp, showExactTime]);
   
-  const handleTimestampClick = () => setShowExactTime((prev) => !prev);
+  const handleTimestampClick = () => {
+    setShowExactTime((prev) => {
+      const newValue = !prev;
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('showExactTime', JSON.stringify(newValue));
+      }
+      return newValue;
+    });
+  };
   
   // Initial render with a safe fallback
   if (!formattedTime) {
