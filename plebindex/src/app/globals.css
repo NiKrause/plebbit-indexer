@@ -84,3 +84,22 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+.imprint-page {
+  margin: 1rem !important;
+  padding: 2rem !important;
+}
+
+.imprint-page h1 {
+  margin-bottom: 1.5rem !important;
+}
+
+.imprint-page h2 {
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.imprint-page h3 {
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
