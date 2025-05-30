@@ -9,6 +9,7 @@ interface PostStatsProps {
   isReply?: boolean;
   postCid?: string;
   parentCid?: string;
+  parentReplyCount?: number;
 }
 
 export default function PostStats({ 
@@ -17,9 +18,9 @@ export default function PostStats({
   replyCount, 
   postId,
   subplebbitAddress,
-  isReply = false,
   postCid,
-  parentCid 
+  parentCid,
+  parentReplyCount 
 }: PostStatsProps) {
   return (
     <div style={{ display: 'flex', gap: '12px', fontSize: '14px', color: '#666' }}>
@@ -30,36 +31,21 @@ export default function PostStats({
         <span style={{ color: '#E25241' }}>▼</span> {downvoteCount || 0}
       </span>
       
-      {isReply ? (
-        <>
-          <Link 
-            href={`/p/${subplebbitAddress}/c/${postCid || parentCid}`}
-            title="View original post" 
-            style={{ color: '#888', textDecoration: 'none' }}
-          >
-            <span>📝</span> 
-          </Link>
-          {replyCount > 0 && (
-            <Link 
-              href={`/p/${subplebbitAddress}/c/${postId}`}
-              title="View replies to this comment" 
-              style={{ color: '#888', textDecoration: 'none' }}
-            >
-              <span>💬</span> {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
-            </Link>
-          )}
-        </>
-      ) : (
-        <>
-          <Link 
-            href={`/p/${subplebbitAddress}/c/${postId}`}
-            title="View Replies" 
-            style={{ color: '#888', textDecoration: 'none' }}
-          >
-            <span>💬</span> Reply count: {replyCount || 0}
-          </Link>
-        </>
-      )}
+      <Link 
+        href={`/p/${subplebbitAddress}/c/${postId}`}
+        title="View replies to this comment" 
+        style={{ color: '#888', textDecoration: 'none' }}
+      >
+        <span>💬</span> {replyCount || 0} {replyCount === 1 ? 'reply' : 'replies'}
+      </Link>
+
+      <Link 
+        href={`/p/${subplebbitAddress}/c/${postCid || parentCid}`}
+        title="View original post" 
+        style={{ color: '#888', textDecoration: 'none' }}
+      >
+        <span>📝</span> all comments ({parentReplyCount || replyCount || 0})
+      </Link>
     </div>
   );
 } 

@@ -10,7 +10,6 @@ interface PostItemProps {
 
 export default function PostItem({ post }: PostItemProps) {
   const isReply = !post.title && post.parentCid && post.parentTitle;
-
   // Main post (Thread)
   if (!isReply) {
     return (
@@ -24,12 +23,28 @@ export default function PostItem({ post }: PostItemProps) {
       }}>
         {/* Thread title */}
         <div style={{ fontWeight: 'bold', fontSize: 18, color: '#1976d2', marginBottom: 4 }}>
-          Thread: {post.title}
+          Thread:{' '}
+          <a
+            href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#1976d2', textDecoration: 'none' }}
+          >
+            {post.title || post.parentTitle}
+          </a>
         </div>
         {/* Meta info */}
         <div style={{ fontSize: 12, color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
           <span>
-            by{' '}
+            <a
+              href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
+            >
+              {post.subplebbitAddress}
+            </a>
+            {' | '}by{' '}
             <a
               href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
               target="_blank"
@@ -52,12 +67,13 @@ export default function PostItem({ post }: PostItemProps) {
           <PostStats
             upvoteCount={post.upvoteCount}
             downvoteCount={post.downvoteCount}
-            replyCount={post.parentReplyCount || post.replyCount}
+            replyCount={post.replyCount}
             postId={post.id}
             subplebbitAddress={post.subplebbitAddress}
             isReply={false}
             postCid={post.postCid}
             parentCid={post.parentCid}
+            parentReplyCount={post.parentReplyCount}
           />
         </div>
       </div>
@@ -70,7 +86,7 @@ export default function PostItem({ post }: PostItemProps) {
       borderBottom: '1px solid #ccc',
       marginBottom: 16,
       paddingBottom: 8,
-      marginLeft: 40,
+      // marginLeft: 40,
       borderLeft: '4px solid #b3d4fc',
       background: '#f7fbff',
       borderRadius: 6,
@@ -78,12 +94,28 @@ export default function PostItem({ post }: PostItemProps) {
     }}>
       {/* Thread title (repeated for reply) */}
       <div style={{ fontWeight: 'bold', fontSize: 16, color: '#1976d2', marginBottom: 2 }}>
-        Thread: {post.parentTitle}
+        Thread:{' '}
+        <a
+          href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: '#1976d2', textDecoration: 'none' }}
+        >
+          {post.parentTitle || post.title}
+        </a>
       </div>
       {/* Meta info for reply */}
       <div style={{ fontSize: 12, color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
         <span>
-          by{' '}
+          <a
+            href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
+          >
+            {post.subplebbitAddress}
+          </a>
+          {' | '}by{' '}
           <a
             href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
             target="_blank"
@@ -110,6 +142,7 @@ export default function PostItem({ post }: PostItemProps) {
           isReply={true}
           postCid={post.postCid}
           parentCid={post.parentCid}
+          parentReplyCount={post.parentReplyCount}
         />
       </div>
     </div>
