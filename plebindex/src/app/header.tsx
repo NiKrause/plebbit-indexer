@@ -90,9 +90,6 @@ export default function Header() {
           </div>
         </nav>
       </div>
-      <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a>
     </header>
   );
 }

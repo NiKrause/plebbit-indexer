@@ -246,26 +246,45 @@ export default function SearchBar() {
         )}
 
         <div style={searchStyles.inputWrapper}>
-          <label htmlFor="search" id="search-label">Search content</label>
           <input
             id="search"
-            aria-labelledby="search-label"
-            aria-describedby="search-description"
             type="text"
             name="q"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              setError(null); // Clear error when user types
+              setError(null);
             }}
             placeholder="Search posts..."
             style={{
               ...searchStyles.input,
-              borderColor: error ? '#dc2626' : '#d1d5db' // Highlight input in red if there's an error
+              borderColor: error ? '#dc2626' : '#d1d5db',
+              paddingLeft: '36px' // Add space for the search icon
             }}
             aria-invalid={!!error}
+            aria-label="Search posts"
           />
-          <span id="search-description">Enter keywords to search for content</span>
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            style={{
+              position: 'absolute',
+              left: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#9ca3af'
+            }}
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
           <button
             type="submit"
             style={searchStyles.button}
