@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://plebscan.com/sitemap.xml
