@@ -11,6 +11,7 @@ export default function SearchBar() {
   const [sort, setSort] = useState('new');
   const [timeFilter, setTimeFilter] = useState('all');
   const [includeReplies, setIncludeReplies] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // First check URL parameters
@@ -49,31 +50,43 @@ export default function SearchBar() {
   // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null); // Clear any previous errors
     
-    // Construct URL with all parameters
-    let url = '/search';
-    
-    // Add search query if present
-    if (query) {
-      url += `?q=${encodeURIComponent(query)}`;
+    try {
+      // Validate query if needed
+      if (query.trim().length < 2) {
+        setError('Search query must be at least 2 characters long');
+        return;
+      }
+      
+      // Construct URL with all parameters
+      let url = '/search';
+      
+      // Add search query if present
+      if (query) {
+        url += `?q=${encodeURIComponent(query)}`;
+      }
+      
+      // Add sort parameter if not default
+      if (sort !== 'new') {
+        url += query ? `&sort=${sort}` : `?sort=${sort}`;
+      }
+      
+      // Add time filter parameter if not default
+      if (timeFilter !== 'all') {
+        url += url.includes('?') ? `&t=${timeFilter}` : `?t=${timeFilter}`;
+      }
+      
+      // Add include-replies parameter if not default (default is true)
+      if (!includeReplies) {
+        url += url.includes('?') ? `&include-replies=false` : `?include-replies=false`;
+      }
+      
+      router.push(url);
+    } catch (err) {
+      setError('An error occurred while processing your search. Please try again.');
+      console.error('Search error:', err);
     }
-    
-    // Add sort parameter if not default
-    if (sort !== 'new') {
-      url += query ? `&sort=${sort}` : `?sort=${sort}`;
-    }
-    
-    // Add time filter parameter if not default
-    if (timeFilter !== 'all') {
-      url += url.includes('?') ? `&t=${timeFilter}` : `?t=${timeFilter}`;
-    }
-    
-    // Add include-replies parameter if not default (default is true)
-    if (!includeReplies) {
-      url += url.includes('?') ? `&include-replies=false` : `?include-replies=false`;
-    }
-    
-    router.push(url);
   };
 
   // Function to update a single filter
@@ -213,15 +226,46 @@ export default function SearchBar() {
   return (
     <form onSubmit={handleSubmit} style={searchStyles.form}>
       <div style={searchStyles.container}>
+        {/* Error message */}
+        {error && (
+          <div 
+            role="alert" 
+            aria-live="polite"
+            style={{
+              color: '#dc2626',
+              fontSize: '14px',
+              marginBottom: '8px',
+              padding: '8px',
+              backgroundColor: '#fee2e2',
+              borderRadius: '4px',
+              border: '1px solid #fecaca'
+            }}
+          >
+            {error}
+          </div>
+        )}
+
         <div style={searchStyles.inputWrapper}>
+          <label htmlFor="search" id="search-label">Search content</label>
           <input
+            id="search"
+            aria-labelledby="search-label"
+            aria-describedby="search-description"
             type="text"
             name="q"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setError(null); // Clear error when user types
+            }}
             placeholder="Search posts..."
-            style={searchStyles.input}
+            style={{
+              ...searchStyles.input,
+              borderColor: error ? '#dc2626' : '#d1d5db' // Highlight input in red if there's an error
+            }}
+            aria-invalid={!!error}
           />
+          <span id="search-description">Enter keywords to search for content</span>
           <button
             type="submit"
             style={searchStyles.button}

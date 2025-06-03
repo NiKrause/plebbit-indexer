@@ -44,25 +44,26 @@ const styles = {
 
 export default function Header() {
   return (
-    <header style={styles.header}>
+    <header style={styles.header} role="banner">
       <div style={styles.container}>
-        <div className="header-flex-row">
+        <nav className="header-flex-row" role="navigation" aria-label="Main navigation">
           <div style={styles.logoContainer}>
-            <Link href="/" rel="noopener noreferrer">
+            <Link href="/" rel="noopener noreferrer" aria-label="Home">
               <PlebscanLogo />
             </Link>
             <span style={styles.logoText}>Plebscan</span>
           </div>
           
           <div style={styles.searchContainer} className="search-container">
-            <SearchBar />
+            <SearchBar aria-label="Search content" />
           </div>
           
-          <div style={styles.socialContainer}>
+          <div style={styles.socialContainer} role="navigation" aria-label="Social media links">
             <Link
               href="/imprint"
               title="Imprint"
               style={styles.iconLink}
+              aria-label="Legal information"
             >
               Imprint
             </Link>
@@ -72,6 +73,7 @@ export default function Header() {
               rel="noopener noreferrer"
               title="GitHub Repository"
               style={styles.iconLink}
+              aria-label="Visit our GitHub repository"
             >
               <Image src="/github.svg" alt="GitHub" width={24} height={24} />
             </Link>
@@ -81,12 +83,16 @@ export default function Header() {
               rel="noopener noreferrer"
               title="Telegram Channel"
               style={styles.iconLink}
+              aria-label="Join our Telegram channel"
             >
               <Image src="/telegram.svg" alt="Telegram" width={24} height={24} />
             </Link>
           </div>
-        </div>
+        </nav>
       </div>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
     </header>
   );
 }

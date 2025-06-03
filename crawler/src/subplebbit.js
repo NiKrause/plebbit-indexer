@@ -137,7 +137,6 @@ export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
   
   if (Object.keys(sub.posts.pageCids).length !== 0) {
     console.log(`[Indexer] Found pageCids for ${sub.address}:`, Object.keys(sub.posts.pageCids));
-    console.log(`[Indexer] Initial postsPage comments length: ${sub.posts.pageCids.new.comments.length}`);
     let postsPage = await sub.posts.getPage(sub.posts.pageCids.new);
     console.log(`[Indexer] Processing page ${postsPage.nextCid} for ${sub.address}`);
     console.log(`[Indexer] Found ${postsPage.comments.length} comments on this page`);
