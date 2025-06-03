@@ -11,10 +11,15 @@ async function findActiveCrawler(): Promise<string> {
 
   // Try crawler01 first
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    
     const response = await fetch('http://crawler01:3001/api/posts?limit=1', { 
       method: 'GET',
-      timeout: 2000 // 2 second timeout
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
+    
     if (response.ok) {
       activeCrawlerUrl = 'http://crawler01:3001';
       return activeCrawlerUrl;
@@ -25,10 +30,15 @@ async function findActiveCrawler(): Promise<string> {
 
   // Try crawler02 if crawler01 failed
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    
     const response = await fetch('http://crawler02:3001/api/posts?limit=1', {
       method: 'GET',
-      timeout: 2000
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
+    
     if (response.ok) {
       activeCrawlerUrl = 'http://crawler02:3001';
       return activeCrawlerUrl;
