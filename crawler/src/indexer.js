@@ -3,9 +3,8 @@ import { isAuthorBlacklisted, isSubplebbitBlacklisted } from './db.js';
 export async function indexPosts(db, posts) {
   console.log(`Indexing ${posts.length} posts/comments...`);
   try {
-    //delete all posts from the database
-    // const deleteStmt = db.prepare('DELETE FROM posts');
-    // deleteStmt.run();
+    let finalInsertedCount = 0;
+    let finalSkippedCount = 0;
 
     const transaction = db.transaction(() => {
       const insertStmt = db.prepare(`
@@ -15,7 +14,6 @@ export async function indexPosts(db, posts) {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
-      
       let insertedCount = 0;
       let skippedCount = 0;
       
@@ -76,7 +74,6 @@ export async function indexPosts(db, posts) {
           
           const deleteStmt = db.prepare('DELETE FROM posts where id = ?');
           deleteStmt.run(post.cid);
-          // console.log("deleted post", post.cid);
           
           insertStmt.run(
             post.cid,
@@ -106,15 +103,20 @@ export async function indexPosts(db, posts) {
         }
       }
       
+      // Store the final counts
+      finalInsertedCount = insertedCount;
+      finalSkippedCount = skippedCount;
+      
       console.log(`Indexing complete. Inserted: ${insertedCount}, Skipped: ${skippedCount}`);
     });
     
-    // Transaktion ausführen
+    // Execute transaction
     transaction();
     
+    // Now we can safely use the final counts
     console.log(`[DB] Starting to index ${posts.length} posts...`);
-    console.log(`[DB] Successfully inserted ${insertedCount} posts`);
-    console.log(`[DB] Skipped ${skippedCount} posts`);
+    console.log(`[DB] Successfully inserted ${finalInsertedCount} posts`);
+    console.log(`[DB] Skipped ${finalSkippedCount} posts`);
     
     return true;
   } catch (error) {
