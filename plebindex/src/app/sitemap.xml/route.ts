@@ -34,7 +34,6 @@ export async function GET() {
     return new NextResponse(sitemap, {
       headers: {
         'Content-Type': 'application/xml',
-        'Content-Encoding': 'gzip',
       },
     });
   } catch (error) {
