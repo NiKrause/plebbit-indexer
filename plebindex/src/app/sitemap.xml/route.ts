@@ -19,7 +19,7 @@ async function findActiveCrawler(): Promise<string> {
       activeCrawlerUrl = 'http://crawler01:3001';
       return activeCrawlerUrl;
     }
-  } catch (error) {
+  } catch {
     console.log('crawler01 not available, trying crawler02');
   }
 
@@ -33,7 +33,7 @@ async function findActiveCrawler(): Promise<string> {
       activeCrawlerUrl = 'http://crawler02:3001';
       return activeCrawlerUrl;
     }
-  } catch (error) {
+  } catch {
     console.log('crawler02 not available');
   }
 
