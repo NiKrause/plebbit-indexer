@@ -896,7 +896,7 @@ export async function startServer(_db) {
       
       // Get all posts (excluding replies)
       const posts = db.prepare(`
-        SELECT id, timestamp 
+        SELECT id, timestamp, subplebbitAddress 
         FROM posts 
         WHERE parentCid IS NULL 
         ORDER BY timestamp DESC
@@ -911,11 +911,11 @@ export async function startServer(_db) {
       stream.write({ url: '/', changefreq: 'daily', priority: 1.0 });
       stream.write({ url: '/search', changefreq: 'daily', priority: 0.8 });
       
-      // Add post routes
+      // Add post routes with correct URL format
       posts.forEach(post => {
         stream.write({
-          url: `/post/${post.id}`,
-          changefreq: 'weekly',
+          url: `/p/${post.subplebbitAddress}/c/${post.id}`,
+          changefreq: 'daily',
           priority: 0.7,
           lastmod: new Date(post.timestamp * 1000).toISOString()
         });
@@ -932,8 +932,9 @@ export async function startServer(_db) {
       res.header('Content-Type', 'application/xml');
       res.header('Content-Encoding', 'gzip');
       
-      // Send the response
-      sitemap.pipe(gzip).pipe(res);
+      // Send the response - write the buffer directly to gzip
+      gzip.end(sitemap);
+      gzip.pipe(res);
       
     } catch (err) {
       console.error('Error generating sitemap:', err);
