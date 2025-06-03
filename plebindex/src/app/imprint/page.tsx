@@ -199,7 +199,7 @@ export default function ImprintPage() {
                   <li>We do not use cookies for tracking or user identification</li>
                   <li>Search preferences are stored locally in your browser&apos;s localStorage</li>
                   <li>No user accounts or session cookies are required</li>
-                  <li>We do not track user behavior or search patterns</li>
+                  <li>We use Google Analytics to understand how our service is used and to improve user experience. Google Analytics may collect information such as your IP address, browser type, and pages visited. You can opt out of Google Analytics by installing the <a href="https://tools.google.com/dlpage/gaoptout" className="text-blue-600 hover:text-blue-800 transition-colors" target="_blank" rel="noopener noreferrer">Google Analytics Opt-out Browser Add-on</a></li>
                   <li>IP addresses are temporarily stored in standard access logs for security purposes only</li>
                 </ul>
               </div>
