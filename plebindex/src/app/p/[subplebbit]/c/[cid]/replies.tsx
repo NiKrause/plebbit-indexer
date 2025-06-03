@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
-import { fetchPost, fetchReplies } from '../../../../../api/posts';
+import { fetchReplies } from '../../../../../api/posts';
 import { Post } from '../../../../../types';
-import { formatTimestamp } from '../../../../../utils/formatting';
 import Pagination from '../../../../../components/Pagination';
 // import SortOptions from '../../../../../components/SortOptions';
 import styles from '../../../../../styles/shared.module.css';
@@ -27,71 +26,12 @@ async function RepliesContent({
   return (
     <div>
       {/* Original Post */}
-      <div className={styles.postContainer}>
-        <div className={styles.postMeta}>
-          <a
-            href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: '#4A5568', fontWeight: 'bold', textDecoration: 'none' }}
-          >
-            r/{post.subplebbitAddress}
-          </a>
-          {' • Posted by '}
-          <a
-            href={`https://seedit.app/#/u/${post.authorAddress}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: '#4A5568', textDecoration: 'none' }}
-          >
-            {post.authorDisplayName || post.authorAddress}
-          </a>
-          {' • '}
-          <span title={new Date(post.timestamp * 1000).toLocaleString()}>
-            {formatTimestamp(post.timestamp)}
-          </span>
-        </div>
-        
-        <div className={styles.postTitle}>
-          <a
-            href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'inherit', textDecoration: 'none' }}
-          >
-            {post.title}
-          </a>
-        </div>
-        
-        <div className={styles.postContent}>
-          {post.content}
-        </div>
-        
-        <div className={styles.postStats}>
-          <span title="Upvotes">
-            <span style={{ color: '#4F9956' }}>▲</span> {post.upvoteCount || 0}
-          </span>
-          <span title="Downvotes">
-            <span style={{ color: '#E25241' }}>▼</span> {post.downvoteCount || 0}
-          </span>
-          <span title="Replies">
-            Total Reply count: <span>💬</span> {post.replyCount || 0} 
-            {/* {post.replyCount === 1 ? 'reply' : 'replies'} */}
-          </span>
-        </div>
-      </div>
-      
-      {/* Sort options for replies
-      <SortOptions 
-        currentSort={filters.sort} 
-        page={page} 
-        postId={postId} 
-      /> */}
+      <PostItem post={post} />
       
       {/* Reply count as a heading */}
-      <h2 style={{ fontSize: 20, fontWeight: 600, margin: '24px 0 12px 0' }}>
+      <h1 style={{ fontSize: 20, fontWeight: 600, margin: '24px 0 12px 0' }}>
         {pagination.total} direct {pagination.total === 1 ? 'reply' : 'replies'}
-      </h2> 
+      </h1> 
       
       {/* Replies */}
       <div className={styles.repliesContainer}>
@@ -99,7 +39,7 @@ async function RepliesContent({
           replies.map((reply: Post) => (
             <PostItem 
               key={reply.id} 
-              post={reply as Post} // Type assertion since Reply is compatible with Post
+              post={reply as Post}
             />
           ))
         ) : (
@@ -120,10 +60,12 @@ async function RepliesContent({
 }
 
 export default async function Replies({ 
-  postId, 
+  postId,
+  post,
   searchParams 
 }: { 
-  postId: string, 
+  postId: string,
+  post: Post | null,
   searchParams?: { 
     page?: string,
     sort?: string
@@ -132,9 +74,6 @@ export default async function Replies({
   // Get parameters from URL query
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
   const sort = searchParams?.sort || 'new';
-  
-  // Fetch the post details
-  const post = await fetchPost(postId);
   
   return (
     <Suspense fallback={<div>Loading replies...</div>}>

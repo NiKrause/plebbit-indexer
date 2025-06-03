@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { GoogleAnalytics } from '@next/third-parties/google'
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,6 +20,16 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: '/favicon.ico',
     },
+    alternates: {
+      types: {
+        'application/xml': [
+          {
+            url: '/sitemap.xml',
+            title: 'Sitemap',
+          },
+        ],
+      },
+    },
   };
 }
 
@@ -29,10 +40,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="alternate" type="application/xml" href="/sitemap.xml" title="Sitemap" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen p-4 md:p-8`}>
         <div className="container mx-auto">
           {children}
         </div>
+        <GoogleAnalytics gaId="G-GPL56C3ZBM" />
       </body>
     </html>
   );

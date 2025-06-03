@@ -6,14 +6,14 @@ import { getDb, updateSubplebbitStatus, queueSubplebbit, takeModerationAction } 
 import { refreshSubplebbitQueue, processSubplebbitQueue } from '../subplebbit.js';
 import { getPlebbitClient } from '../plebbitClient.js';
 import { initializeFlaggedPostsTable, flagPost } from '../contentModeration.js';
+import { SitemapStream, streamToPromise } from 'sitemap';
+import { createGzip } from 'zlib';
 
 export async function startServer(_db) {
   const db = getDb(); 
   const app = express();
   const PORT = 3001;
   app.use(cors());
-
-
 
   try {
     const tableStmt = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'");
@@ -886,6 +886,58 @@ export async function startServer(_db) {
     } catch (err) {
       console.error('Error deleting post:', err);
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Add this new endpoint
+  app.get('/sitemap.xml', async (req, res) => {
+    try {
+      const db = getDb();
+      
+      // Get all posts (excluding replies)
+      const posts = db.prepare(`
+        SELECT id, timestamp 
+        FROM posts 
+        WHERE parentCid IS NULL 
+        ORDER BY timestamp DESC
+      `).all();
+      
+      // Create sitemap stream
+      const stream = new SitemapStream({ 
+        hostname: process.env.NEXT_PUBLIC_APP_URL || 'https://plebindex.com' 
+      });
+      
+      // Add static routes
+      stream.write({ url: '/', changefreq: 'daily', priority: 1.0 });
+      stream.write({ url: '/search', changefreq: 'daily', priority: 0.8 });
+      
+      // Add post routes
+      posts.forEach(post => {
+        stream.write({
+          url: `/post/${post.id}`,
+          changefreq: 'weekly',
+          priority: 0.7,
+          lastmod: new Date(post.timestamp * 1000).toISOString()
+        });
+      });
+      
+      // End the stream
+      stream.end();
+      
+      // Convert to XML and compress
+      const sitemap = await streamToPromise(stream);
+      const gzip = createGzip();
+      
+      // Set headers
+      res.header('Content-Type', 'application/xml');
+      res.header('Content-Encoding', 'gzip');
+      
+      // Send the response
+      sitemap.pipe(gzip).pipe(res);
+      
+    } catch (err) {
+      console.error('Error generating sitemap:', err);
+      res.status(500).send('Error generating sitemap');
     }
   });
 

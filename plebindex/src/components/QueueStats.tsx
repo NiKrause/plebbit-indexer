@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getApiBaseUrl } from '../api/admin';
 
 interface QueueStats {
@@ -53,7 +53,8 @@ export default function QueueStats() {
   const [showErrorDetails, setShowErrorDetails] = useState(false);
   const [processingAction, setProcessingAction] = useState(false);
 
-  const loadData = async () => {
+  // Memoize the loadData function
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const authToken = localStorage.getItem('plebbit_admin_auth');
@@ -87,7 +88,14 @@ export default function QueueStats() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    loadData();
+    // Refresh data every minute
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, [loadData, statusFilter]);
 
   const handleAddToQueue = async () => {
     if (!newAddress.trim()) {
@@ -198,13 +206,6 @@ export default function QueueStats() {
       setProcessingAction(false);
     }
   };
-
-  useEffect(() => {
-    loadData();
-    // Refresh data every minute
-    const interval = setInterval(loadData, 60000);
-    return () => clearInterval(interval);
-  }, [statusFilter]);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
