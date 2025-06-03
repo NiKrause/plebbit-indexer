@@ -1,31 +1,68 @@
-// plebindex/src/app/sitemap.xml/route.ts
 import { NextResponse } from 'next/server';
 
-function getApiBaseUrl(): string | undefined {
-  let apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (apiBaseUrl && process.env.NODE_ENV === 'development') {
-    if(typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      apiBaseUrl = 'http://localhost:3001';
+// Cache for the active crawler URL
+let activeCrawlerUrl: string | null = null;
+
+async function findActiveCrawler(): Promise<string> {
+  // If we already found an active crawler, return it
+  if (activeCrawlerUrl) {
+    return activeCrawlerUrl;
+  }
+
+  // Try crawler01 first
+  try {
+    const response = await fetch('http://crawler01:3001/api/posts?limit=1', { 
+      method: 'GET',
+      timeout: 2000 // 2 second timeout
+    });
+    if (response.ok) {
+      activeCrawlerUrl = 'http://crawler01:3001';
+      return activeCrawlerUrl;
     }
-  } 
-  return apiBaseUrl;
+  } catch (error) {
+    console.log('crawler01 not available, trying crawler02');
+  }
+
+  // Try crawler02 if crawler01 failed
+  try {
+    const response = await fetch('http://crawler02:3001/api/posts?limit=1', {
+      method: 'GET',
+      timeout: 2000
+    });
+    if (response.ok) {
+      activeCrawlerUrl = 'http://crawler02:3001';
+      return activeCrawlerUrl;
+    }
+  } catch (error) {
+    console.log('crawler02 not available');
+  }
+
+  // If both fail, default to crawler01
+  activeCrawlerUrl = 'http://crawler01:3001';
+  return activeCrawlerUrl;
 }
 
 export async function GET() {
   try {
-    const apiBaseUrl = getApiBaseUrl();
+    const apiBaseUrl = await findActiveCrawler();
     const baseEndpoint = 'sitemap.xml';
-    const url = apiBaseUrl ? `${apiBaseUrl}/${baseEndpoint}` : baseEndpoint;
+    const url = `${apiBaseUrl}/${baseEndpoint}`;
     
     console.log("Fetching sitemap URL:", url);
     
-    const response = await fetch(url, {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const response = await fetch(url, { 
       headers: {
         'Accept': 'application/xml'
-      }
+      },
+      signal: controller.signal 
     });
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
+      // If the request fails, clear the cached URL to try finding a new active crawler next time
+      activeCrawlerUrl = null;
       throw new Error(`Failed to fetch sitemap: ${response.statusText}`);
     }
 
