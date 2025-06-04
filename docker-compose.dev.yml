@@ -6,25 +6,9 @@ services:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
     ports:
       - "3000:3000"
-    # volumes:
-    #   - ./plebindex:/app
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
-      - NEXT_PUBLIC_APP_TITLE=${NEXT_PUBLIC_APP_TITLE}
-      - NEXT_PUBLIC_APP_DESCRIPTION=${NEXT_PUBLIC_APP_DESCRIPTION}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-  plebindex02:
-    build:
-      context: ./plebindex
-      args:
-        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
-    ports:
-      - "3010:3000"
-    # volumes:
-      # - ./plebindex:/app
+    volumes:
+      - ./plebindex/src:/app/src
+      - ./plebindex/pages:/app/pages
     environment:
       - NODE_ENV=${NODE_ENV}
       - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
@@ -62,40 +46,6 @@ services:
       - CONTENT_MODERATION_INTERVAL=${CONTENT_MODERATION_INTERVAL}
       - QUEUE_REFRESH_INTERVAL=${QUEUE_REFRESH_INTERVAL}
       - ENABLE_CONTENT_MODERATION=${ENABLE_CONTENT_MODERATION}
-      - DB_PATH=/app/data/plebbit_posts.db
-    depends_on:
-      - plebbit-cli
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-  crawler02:
-    build:
-      context: ./crawler
-      args:
-        PLEBBIT_WS_URL: ${PLEBBIT_WS_URL}
-        OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
-        OPENROUTER_MODEL: ${OPENROUTER_MODEL}
-        OPENROUTER_MODEL_B: ${OPENROUTER_MODEL_B}
-        OPENROUTER_MODEL_C: ${OPENROUTER_MODEL_C}
-        SITE_URL: ${SITE_URL}
-        SITE_NAME: ${SITE_NAME}
-        CONTENT_MODERATION_INTERVAL: ${CONTENT_MODERATION_INTERVAL}
-        QUEUE_REFRESH_INTERVAL: ${QUEUE_REFRESH_INTERVAL}
-        ENABLE_CONTENT_MODERATION: ${ENABLE_CONTENT_MODERATION}
-    ports:
-      - "3011:3001"
-    volumes:
-      - ./data/plebbit:/app/data
-    environment:
-      - PLEBBIT_WS_URL=${PLEBBIT_WS_URL}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
-      - OPENROUTER_MODEL=${OPENROUTER_MODEL}
-      - OPENROUTER_MODEL_B=${OPENROUTER_MODEL_B}
-      - OPENROUTER_MODEL_C=${OPENROUTER_MODEL_C}
-      - SITE_URL=${SITE_URL}
-      - SITE_NAME=${SITE_NAME}
-      - CONTENT_MODERATION_INTERVAL=${CONTENT_MODERATION_INTERVAL}
-      - QUEUE_REFRESH_INTERVAL=${QUEUE_REFRESH_INTERVAL}
       - DB_PATH=/app/data/plebbit_posts.db
     depends_on:
       - plebbit-cli

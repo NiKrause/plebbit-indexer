@@ -53,30 +53,62 @@ export default function CookieConsent() {
 
   return (
     <AnalyticsContext.Provider value={{ analyticsEnabled }}>
-      <div className="bg-white border-t border-gray-200 p-4 shadow-lg">
-        <div className="container mx-auto max-w-4xl">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold mb-2">Cookie Consent</h3>
-              <p className="text-gray-600 text-sm">
-                We use Google Analytics to understand how our service is used and to improve user experience. 
-                This helps us make Plebindex better for everyone. You can choose to accept or decline analytics cookies.
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={handleDecline}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-              >
-                Decline
-              </button>
-              <button
-                onClick={handleAccept}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
-              >
-                Accept
-              </button>
-            </div>
+      <div
+        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] border shadow-xl rounded-lg w-[95vw] max-w-xl p-4 m-4"
+        style={{
+          background: '#eaf4fb', // light blue
+          borderColor: '#2176ae', // logo blue
+          boxShadow: '0 4px 24px rgba(33, 118, 174, 0.15)',
+        }}
+      >
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4">
+          <div className="flex-1" style={{ padding: '1rem' }}>
+            <h3 className="text-lg font-bold mb-2" style={{ color: '#2176ae' }}>
+              Cookie Consent
+            </h3>
+            <p
+              className="text-sm"
+              style={{
+                color: '#4a4a4a', // dark gray
+                marginBottom: '0.75rem',
+                marginTop: '0.25rem',
+                lineHeight: 1.6,
+              }}
+            >
+              We use Google Analytics to understand how our service is used and to improve user experience.
+              This helps us make {process.env.NEXT_PUBLIC_APP_TITLE ?? "PlebIndex"} better for everyone. You can choose to accept or decline analytics cookies.better for everyone. You can choose to accept or decline analytics cookies.
+            </p>
+          </div>
+          <div className="flex gap-4 mt-4 md:mt-0">
+            <button
+              onClick={handleDecline}
+              className="px-5 py-2 text-base font-semibold"
+              style={{
+                color: '#2176ae',
+                background: '#eaf4fb',
+                border: '1.5px solid #2176ae',
+                borderRadius: '0.5rem',
+                padding: '0.5rem 1rem',
+                margin: '1rem',
+                transition: 'background 0.2s',
+              }}
+            >
+              Decline
+            </button>
+            <button
+              onClick={handleAccept}
+              className="px-5 py-2 text-base font-semibold shadow"
+              style={{
+                color: '#fff',
+                background: '#2176ae',
+                borderRadius: '0.5rem',
+                padding: '0.5rem 1rem',
+                margin: '1rem',
+                transition: 'background 0.2s',
+              }}
+            >
+              Accept
+            </button>
           </div>
         </div>
       </div>
