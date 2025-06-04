@@ -91,7 +91,6 @@ export async function fetchPosts(
     }
     
     const rawData = await response.json();
-    console.log("fetched data", rawData);
     const data: PaginatedResponse = {
       posts: rawData.posts || [],
       pagination: { 

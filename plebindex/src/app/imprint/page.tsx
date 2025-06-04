@@ -135,27 +135,31 @@ export default function ImprintPage() {
                 </div>
 
                 <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Rights</h3>
-                  <p>Under the GDPR, you have the following rights:</p>
-                  <ul className="list-disc pl-6 space-y-2 mt-2">
-                    <li>Right to access your personal data</li>
-                    <li>Right to rectification of inaccurate data</li>
-                    <li>Right to erasure (&quot;right to be forgotten&quot;)</li>
-                    <li>Right to restriction of processing</li>
-                    <li>Right to data portability</li>
-                    <li>Right to object to processing</li>
-                    <li>Right to withdraw consent</li>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Data Processing</h3>
+                  <p className="mb-2">
+                    We process only a minimal amount of data, strictly necessary for the operation and security of our service:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li>
+                      <strong>IP addresses:</strong> Temporarily stored in access logs for security purposes only, and automatically deleted after a short period.
+                    </li>
+                    <li>
+                      <strong>Search preferences:</strong> Stored locally in your browser&apos;s localStorage, not on our servers.
+                    </li>
+                    <li>
+                      <strong>Content you report for moderation:</strong> No user identification is attached.
+                    </li>
                   </ul>
                 </div>
 
                 <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Data Processing</h3>
-                  <p>We process the following categories of data:</p>
-                  <ul className="list-disc pl-6 space-y-2 mt-2">
-                    <li>IP addresses (temporarily stored in access logs)</li>
-                    <li>Search preferences are stored locally in your browser&apos;s localStorage</li>
-                    <li>Content you report for moderation</li>
-                  </ul>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Rights</h3>
+                  <p className="mb-2">
+                    Under the GDPR, you have certain rights regarding your personal data. However, since we do not collect any user identification data (no accounts, no email addresses, no tracking), it is not possible to exercise most GDPR rights as we cannot identify which data belongs to which user. This applies to both reported content and IP addresses stored in access logs.
+                  </p>
+                  <p>
+                    <strong>Right to object to processing of your reports:</strong> Please note that, in practice, this right cannot be exercised as we cannot identify your data.
+                  </p>
                 </div>
 
                 <div className="mt-6">

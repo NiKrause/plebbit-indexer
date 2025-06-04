@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { GoogleAnalytics } from '@next/third-parties/google'
 import "./globals.css";
+// import CookieConsent from '../components/CookieConsent';
+import Analytics from '../components/Analytics';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,10 +45,14 @@ export default function RootLayout({
         <link rel="alternate" type="application/xml" href="/sitemap.xml" title="Sitemap" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen p-4 md:p-8`}>
+        <div className="fixed bottom-0 left-0 left-0 z-[9999]">
+          i am a cookie consent
+          {/* <CookieConsent /> */}
+        </div>
         <div className="container mx-auto">
           {children}
         </div>
-        <GoogleAnalytics gaId="G-GPL56C3ZBM" />
+        <Analytics />
       </body>
     </html>
   );
