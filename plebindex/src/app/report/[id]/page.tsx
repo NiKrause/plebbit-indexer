@@ -62,7 +62,7 @@ export default function ReportPage({ params }: PageProps) {
   const [postId, setPostId] = useState<string>('');
   const searchParams = useSearchParams();
   const router = useRouter();
-  const isModal = searchParams.get('modal') === 'true';
+  const isModal = searchParams?.get('modal') === 'true';
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{
