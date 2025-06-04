@@ -889,29 +889,84 @@ export async function startServer(_db) {
     }
   });
 
-  // Add this new endpoint
+  // Modify the existing sitemap endpoint to serve as sitemap index
   app.get('/sitemap.xml', async (req, res) => {
     try {
       const db = getDb();
       
-      // Get all posts (excluding replies)
+      // Get total count of posts
+      const { total } = db.prepare(`
+        SELECT COUNT(*) as total 
+        FROM posts 
+        WHERE parentCid IS NULL
+      `).get();
+      
+      // Calculate number of sitemaps needed (50,000 URLs per sitemap)
+      const urlsPerSitemap = 50000;
+      const numSitemaps = Math.ceil(total / urlsPerSitemap);
+      
+      // Create sitemap index stream
+      const stream = new SitemapStream({ 
+        hostname: process.env.NEXT_PUBLIC_APP_URL || 'https://plebscan.com' 
+      });
+      
+      // Add static routes to first sitemap
+      stream.write({ url: '/', changefreq: 'daily', priority: 1.0 });
+      stream.write({ url: '/search', changefreq: 'daily', priority: 0.8 });
+      
+      // Add sitemap index entries
+      for (let i = 0; i < numSitemaps; i++) {
+        stream.write({
+          url: `/sitemap-${i + 1}.xml`,
+          changefreq: 'daily',
+          priority: 0.5
+        });
+      }
+      
+      // End the stream
+      stream.end();
+      
+      // Convert to XML and compress
+      const sitemap = await streamToPromise(stream);
+      const gzip = createGzip();
+      
+      // Set headers
+      res.header('Content-Type', 'application/xml');
+      res.header('Content-Encoding', 'gzip');
+      
+      // Send the response
+      gzip.end(sitemap);
+      gzip.pipe(res);
+      
+    } catch (err) {
+      console.error('Error generating sitemap index:', err);
+      res.status(500).send('Error generating sitemap index');
+    }
+  });
+
+  // Add new endpoint for individual sitemap files
+  app.get('/sitemap-:index.xml', async (req, res) => {
+    try {
+      const db = getDb();
+      const index = parseInt(req.params.index);
+      const urlsPerSitemap = 50000;
+      const offset = (index - 1) * urlsPerSitemap;
+      
+      // Get posts for this sitemap
       const posts = db.prepare(`
         SELECT id, timestamp, subplebbitAddress 
         FROM posts 
         WHERE parentCid IS NULL 
         ORDER BY timestamp DESC
-      `).all();
+        LIMIT ? OFFSET ?
+      `).all(urlsPerSitemap, offset);
       
       // Create sitemap stream
       const stream = new SitemapStream({ 
         hostname: process.env.NEXT_PUBLIC_APP_URL || 'https://plebscan.com' 
       });
       
-      // Add static routes
-      stream.write({ url: '/', changefreq: 'daily', priority: 1.0 });
-      stream.write({ url: '/search', changefreq: 'daily', priority: 0.8 });
-      
-      // Add post routes with correct URL format
+      // Add post routes
       posts.forEach(post => {
         stream.write({
           url: `/p/${post.subplebbitAddress}/c/${post.id}`,
@@ -932,7 +987,7 @@ export async function startServer(_db) {
       res.header('Content-Type', 'application/xml');
       res.header('Content-Encoding', 'gzip');
       
-      // Send the response - write the buffer directly to gzip
+      // Send the response
       gzip.end(sitemap);
       gzip.pipe(res);
       
