@@ -911,7 +911,6 @@ export async function startServer(_db) {
       
       // Add static routes to first sitemap
       stream.write({ url: '/', changefreq: 'daily', priority: 1.0 });
-      stream.write({ url: '/search', changefreq: 'daily', priority: 0.8 });
       
       // Add sitemap index entries
       for (let i = 0; i < numSitemaps; i++) {
