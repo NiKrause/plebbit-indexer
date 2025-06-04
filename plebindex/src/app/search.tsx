@@ -15,10 +15,10 @@ export default function SearchBar() {
 
   useEffect(() => {
     // First check URL parameters
-    const urlQuery = searchParams.get('q') || '';
-    const urlSort = searchParams.get('sort');
-    const urlTimeFilter = searchParams.get('t') || 'all';
-    const urlIncludeReplies = searchParams.get('include-replies');
+    const urlQuery = searchParams?.get('q') || '';
+    const urlSort = searchParams?.get('sort');
+    const urlTimeFilter = searchParams?.get('t') || 'all';
+    const urlIncludeReplies = searchParams?.get('include-replies');
     
     setQuery(urlQuery);
     

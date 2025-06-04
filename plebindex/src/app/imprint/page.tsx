@@ -216,7 +216,7 @@ export default function ImprintPage() {
                 <div className="mt-6 bg-gray-50 p-6 rounded-lg">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Cookie Consent and GDPR Compliance</h3>
                   <p>
-                    In compliance with the EU's General Data Protection Regulation (GDPR), we provide a cookie consent mechanism that allows you to control your privacy preferences. When you first visit our website, you'll see a cookie banner that:
+                    In compliance with the EU&apos;s General Data Protection Regulation (GDPR), we provide a cookie consent mechanism that allows you to control your privacy preferences. When you first visit our website, you&apos;ll see a cookie banner that:
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-2">
                     <li>Informs you about the use of Google Analytics cookies</li>
