@@ -898,7 +898,6 @@ export async function startServer(_db) {
       const { total } = db.prepare(`
         SELECT COUNT(*) as total 
         FROM posts 
-        WHERE parentCid IS NULL
       `).get();
       
       // Calculate number of sitemaps needed (50,000 URLs per sitemap)
@@ -956,7 +955,6 @@ export async function startServer(_db) {
       const posts = db.prepare(`
         SELECT id, timestamp, subplebbitAddress 
         FROM posts 
-        WHERE parentCid IS NULL 
         ORDER BY timestamp DESC
         LIMIT ? OFFSET ?
       `).all(urlsPerSitemap, offset);
