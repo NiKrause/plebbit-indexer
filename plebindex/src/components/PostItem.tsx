@@ -2,6 +2,7 @@ import { Post } from '../types';
 import PostStats from './PostStats';
 import ReportButton from './ReportButton';
 import TimestampDisplay from './TimeStampDisplay';
+import { truncateText } from '../utils/formatting';
 // import Link from 'next/link';
 
 interface PostItemProps {
@@ -23,14 +24,13 @@ export default function PostItem({ post }: PostItemProps) {
       }}>
         {/* Thread title */}
         <div style={{ fontWeight: 'bold', fontSize: 18, color: '#1976d2', marginBottom: 4 }}>
-          {' '}
           <a
             href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: '#1976d2', textDecoration: 'none' }}
           >
-            {post.title || post.parentTitle}
+            {post.title || truncateText(post.content, 60) || post.parentTitle || 'Untitled Post'}
           </a>
         </div>
         {/* Meta info */}
@@ -101,7 +101,7 @@ export default function PostItem({ post }: PostItemProps) {
           rel="noopener noreferrer"
           style={{ color: '#1976d2', textDecoration: 'none' }}
         >
-          {post.parentTitle || post.title}
+          {post.parentTitle || post.title || truncateText(post.content, 60) || 'Untitled Post'}
         </a>
       </div>
       {/* Meta info for reply */}

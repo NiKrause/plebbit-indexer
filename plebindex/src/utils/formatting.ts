@@ -3,6 +3,11 @@ import moment from 'moment';
 export function formatTimestamp(timestamp: number): string {
   return moment(timestamp * 1000).fromNow();
 }
+// Helper function to safely truncate text
+export function truncateText(text: string | undefined | null, maxLength: number): string {
+  if (!text) return '';
+  return text.length <= maxLength ? text : text.slice(0, maxLength);
+}
 
 export function createPostUrl(subplebbitAddress: string, cid: string, searchParams?: URLSearchParams): string {
   const queryString = searchParams?.toString();

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { FlaggedPost } from '../types';
 import { takeModerationAction } from '../api/admin';
+import { truncateText } from '../utils/formatting';
 
 interface AdminPostItemProps {
   post: FlaggedPost;
@@ -81,7 +82,7 @@ export default function AdminPostItem({ post }: AdminPostItemProps) {
       <div style={{ marginBottom: '10px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ margin: '0', color: '#333' }}>
-            {post.title || 'No Title'}
+            {post.title || truncateText(post.content, 60) || 'No Title'}
           </h3>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <span style={{ 

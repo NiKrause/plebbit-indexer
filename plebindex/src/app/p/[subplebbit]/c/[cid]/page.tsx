@@ -2,6 +2,7 @@ import Header from '../../../../header';
 import Replies from './replies';
 import { fetchPost } from '../../../../../api/posts';
 import type { Metadata } from 'next';
+import { truncateText } from '../../../../../utils/formatting';
 
 // Define the SearchParams type for this page
 type SearchParams = {
@@ -9,11 +10,6 @@ type SearchParams = {
   sort?: string;
 };
 
-// Helper function to safely truncate text
-function truncateText(text: string | undefined | null, maxLength: number): string {
-  if (!text) return '';
-  return text.length <= maxLength ? text : text.slice(0, maxLength);
-}
 
 // Generate metadata for the page
 export async function generateMetadata({
@@ -31,8 +27,8 @@ export async function generateMetadata({
     };
   }
 
-  // Use title if available, otherwise use content (truncated)
-  const title = post.title || truncateText(post.content, 100) || 'Untitled Post';
+  // Use title if available, otherwise use first 60 chars of content
+  const title = post.title || truncateText(post.content, 60) || 'Untitled Post';
   const description = truncateText(post.content, 160) || 'No content available';
 
   // Create canonical URL

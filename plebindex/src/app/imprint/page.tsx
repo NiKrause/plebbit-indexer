@@ -9,12 +9,10 @@ export default function ImprintPage() {
       </Suspense>
       <main className="flex-grow flex justify-center py-16 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 md:p-16">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 !px-10 !py-4 !mx-10 !my-6">
             <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Imprint / Legal Notice</h1>
-            <div className="w-24 h-1 bg-blue-600 mx-auto"></div>
           </div>
-
-          <div className="!px-10 !py-10 !mx-10 !my-10">
+          <div className="!px-6 !py-2 !mx-6 !my-4">
             <section>
               <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Information according to § 5 TMG</h2>
               <div className="grid md:grid-cols-2 gap-8">
@@ -139,7 +137,7 @@ export default function ImprintPage() {
                   <p className="mb-2">
                     We process only a minimal amount of data, strictly necessary for the operation and security of our service:
                   </p>
-                  <ul className="list-disc pl-6 space-y-1">
+                  <ul className="list-disc pl-8 space-y-1">
                     <li>
                       <strong>IP addresses:</strong> Temporarily stored in access logs for security purposes only, and automatically deleted after a short period.
                     </li>
@@ -200,12 +198,36 @@ export default function ImprintPage() {
                   Our service is designed with privacy in mind:
                 </p>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>We do not use cookies for tracking or user identification</li>
                   <li>Search preferences are stored locally in your browser&apos;s localStorage</li>
                   <li>No user accounts or session cookies are required</li>
-                  <li>We use Google Analytics to understand how our service is used and to improve user experience. Google Analytics may collect information such as your IP address, browser type, and pages visited. You can opt out of Google Analytics by installing the <a href="https://tools.google.com/dlpage/gaoptout" className="text-blue-600 hover:text-blue-800 transition-colors" target="_blank" rel="noopener noreferrer">Google Analytics Opt-out Browser Add-on</a></li>
+                  <li>
+                    <strong>Google Analytics:</strong> We use Google Analytics to understand how our service is used and to improve user experience. This requires your consent through our cookie banner. Google Analytics uses cookies to collect anonymous data about:
+                    <ul className="list-disc pl-6 mt-2">
+                      <li>Pages visited and time spent on each page</li>
+                      <li>Browser type and device information</li>
+                      <li>Geographic location (country/region level)</li>
+                      <li>How you found our service (referral sources)</li>
+                    </ul>
+                    This data helps us improve our service and understand user needs. The data is anonymous and cannot be used to identify individual users. You can opt out at any time by clicking the cookie settings button in the footer.
+                  </li>
                   <li>IP addresses are temporarily stored in standard access logs for security purposes only</li>
                 </ul>
+
+                <div className="mt-6 bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Cookie Consent and GDPR Compliance</h3>
+                  <p>
+                    In compliance with the EU's General Data Protection Regulation (GDPR), we provide a cookie consent mechanism that allows you to control your privacy preferences. When you first visit our website, you'll see a cookie banner that:
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2 mt-2">
+                    <li>Informs you about the use of Google Analytics cookies</li>
+                    <li>Requires your explicit consent before any tracking cookies are set</li>
+                    <li>Allows you to accept or reject analytics cookies</li>
+                    <li>Provides easy access to change your preferences at any time through the cookie settings button in the footer</li>
+                  </ul>
+                  <p className="mt-2">
+                    This implementation ensures that we respect your privacy rights under GDPR, particularly the right to informed consent and the right to withdraw consent. You can manage your cookie preferences at any time, and your choices will be respected across all pages of our service.
+                  </p>
+                </div>
               </div>
             </section>
 
