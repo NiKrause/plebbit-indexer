@@ -263,6 +263,7 @@ export default function SearchBar() {
             }}
             aria-invalid={!!error}
             aria-label="Search posts"
+            role="searchbox"
           />
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
