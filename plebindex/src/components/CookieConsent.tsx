@@ -12,12 +12,10 @@ export const AnalyticsContext = React.createContext<{
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
-  const [isEU, setIsEU] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkCountry = async () => {
       const euCountry = await isEUCountry();
-      setIsEU(euCountry);
       
       const consent = localStorage.getItem('cookie-consent');
       
