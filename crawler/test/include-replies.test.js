@@ -156,13 +156,13 @@ describe('Include replies functionality', function () {
       console.log(`Found ${replies.length} replies with parent information`);
       
       // At least some replies should have parent titles
-      const repliesWithParentTitles = replies.filter(reply => reply.postTitle);
+      const repliesWithPostTitles = replies.filter(reply => reply.postTitle);
       
-      if (repliesWithParentTitles.length > 0) {
-        console.log(`${repliesWithParentTitles.length} replies have post titles`);
+      if (repliesWithPostTitles.length > 0) {
+        console.log(`${repliesWithPostTitles.length} replies have post titles`);
         
         // Verify parent title structure
-        repliesWithParentTitles.forEach(reply => {
+        repliesWithPostTitles.forEach(reply => {
           assert(typeof reply.postTitle === 'string', 'Post title should be a string');
           assert(reply.postTitle.length > 0, 'Post title should not be empty');
           console.log(`Reply to: "${reply.postTitle}"`);

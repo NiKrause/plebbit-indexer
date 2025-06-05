@@ -135,9 +135,9 @@ describe('Enhanced search with parent post information', function () {
       repliesInResults.forEach(reply => {
         // Replies to our target post should have parent title
         if (reply.parentCid === global.targetPostCid) {
-          assert.equal(reply.parentTitle, targetPostTitle, 
-            'Reply should have correct parent title');
-          console.log(`Reply ${reply.id}: parentTitle="${reply.parentTitle}"`);
+          assert.equal(reply.postTitle, targetPostTitle, 
+            'Reply should have correct post title');
+          console.log(`Reply ${reply.id}: postTitle="${reply.postTitle}"`);
         }
 
         // Replies to our target post should have post title

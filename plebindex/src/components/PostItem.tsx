@@ -10,7 +10,7 @@ interface PostItemProps {
 }
 
 export default function PostItem({ post }: PostItemProps) {
-  const isReply = !post.title && post.parentCid && post.parentTitle;
+  const isReply = !post.title && post.parentCid && post.postTitle;
   // Main post (Thread)
   if (!isReply) {
     return (
@@ -30,7 +30,7 @@ export default function PostItem({ post }: PostItemProps) {
             rel="noopener noreferrer"
             style={{ color: '#1976d2', textDecoration: 'none' }}
           >
-            {post.title || truncateText(post.content, 60) || post.parentTitle || 'Untitled Post'}
+            {post.title || truncateText(post.content, 60) || post.postTitle || 'Untitled Post'}
           </a>
         </div>
         {/* Meta info */}
@@ -101,7 +101,7 @@ export default function PostItem({ post }: PostItemProps) {
           rel="noopener noreferrer"
           style={{ color: '#1976d2', textDecoration: 'none' }}
         >
-          {post.parentTitle || post.title || truncateText(post.content, 60) || 'Untitled Post'}
+          {post.postTitle || post.title || truncateText(post.content, 60) || 'Untitled Post'}
         </a>
       </div>
       {/* Meta info for reply */}
@@ -142,7 +142,7 @@ export default function PostItem({ post }: PostItemProps) {
           isReply={true}
           postCid={post.postCid}
           parentCid={post.parentCid}
-          parentReplyCount={post.parentReplyCount}
+          postReplyCount={post.postReplyCount}
         />
       </div>
     </div>

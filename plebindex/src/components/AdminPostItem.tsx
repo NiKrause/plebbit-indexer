@@ -152,9 +152,9 @@ export default function AdminPostItem({ post }: AdminPostItemProps) {
           fontSize: '0.9em'
         }}>
           <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>In Reply To:</div>
-          <div>{post.parentTitle || 'Untitled Post'}</div>
+          <div>{post.postTitle || 'Untitled Post'}</div>
           <div style={{ fontSize: '0.9em', color: '#666' }}>
-            by {post.parentAuthorDisplayName || 'Unknown'} ({post.parentAuthorAddress || 'Unknown'})
+            by {post.postAuthorDisplayName || 'Unknown'} ({post.postAuthorAddress || 'Unknown'})
           </div>
         </div>
       )}

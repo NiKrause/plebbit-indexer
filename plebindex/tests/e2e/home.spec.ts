@@ -25,7 +25,7 @@ test.describe('Home page', () => {
     await expect(page.getByRole('dialog')).toBeVisible();
   });
 
-  test.only('sitemap.xml should be accessible and contain valid XML', async ({ page }) => {
+  test('sitemap.xml should be accessible and contain valid XML', async ({ page }) => {
     // Navigate to the sitemap
     const response = await page.goto('/sitemap.xml');
     
@@ -76,5 +76,28 @@ test.describe('Home page', () => {
         expect(urlPath).toMatch(/^https:\/\/plebscan\.com\/p\/.*\/c\/.*$/);
       });
     }
+  });
+
+  test.only('should find specific post through search', async ({ page }) => {
+    // Navigate to the home page
+    await page.goto('/');
+
+    // Find and fill the search box
+    const searchBox = page.getByRole('searchbox');
+    await searchBox.fill('Great post, really insightful and some very creative ideas');
+    await searchBox.press('Enter');
+
+    // Wait for search results to load
+    await page.waitForLoadState('networkidle');
+
+    // Verify the post title
+    await expect(page.getByText('Plebbit is super fast now, where is everybody?')).toBeVisible();
+
+    // Verify the subplebbit
+    await expect(page.getByText('plebtoken.eth')).toBeVisible();
+
+    // Verify it's marked as a reply by checking for the reply styling
+    const replyElement = page.locator('div[style*="border-left"]');
+    await expect(replyElement).toBeVisible();
   });
 });

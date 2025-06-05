@@ -9,7 +9,7 @@ interface PostStatsProps {
   isReply?: boolean;
   postCid?: string;
   parentCid?: string;
-  parentReplyCount?: number;
+  postReplyCount?: number;
 }
 
 export default function PostStats({ 
@@ -20,7 +20,7 @@ export default function PostStats({
   subplebbitAddress,
   postCid,
   parentCid,
-  parentReplyCount 
+  postReplyCount 
 }: PostStatsProps) {
   return (
     <div style={{ display: 'flex', gap: '12px', fontSize: '14px', color: '#666' }}>
@@ -44,7 +44,7 @@ export default function PostStats({
         title="View original post" 
         style={{ color: '#888', textDecoration: 'none' }}
       >
-        <span>📝</span> all comments ({parentReplyCount || replyCount || 0})
+        <span>📝</span> all comments ({postReplyCount || replyCount || 0})
       </Link>
     </div>
   );

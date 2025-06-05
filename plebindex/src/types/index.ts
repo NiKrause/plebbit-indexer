@@ -12,10 +12,10 @@ export interface Post {
   parentCid?: string;  // Add for replies
   postCid?: string;    // Add for replies
   // New fields from JOIN
-  parentTitle?: string;
-  parentAuthorDisplayName?: string;
-  parentAuthorAddress?: string;
-  parentReplyCount?: number; 
+  postTitle?: string;
+  postAuthorDisplayName?: string;
+  postAuthorAddress?: string;
+  postReplyCount?: number; 
 }
 
 export interface PaginatedResponse {
@@ -77,9 +77,9 @@ export interface FlaggedPost {
   reason: string;
   status: 'pending' | 'ignored' | 'deindexed_comment' | 'deindexed_author' | 'deindexed_subplebbit';  // Update this line
   flagged_at: string;
-  parentTitle?: string;
-  parentAuthorDisplayName?: string;
-  parentAuthorAddress?: string;
+  postTitle?: string;
+  postAuthorDisplayName?: string;
+  postAuthorAddress?: string;
 }
 
 export interface AdminStats {
