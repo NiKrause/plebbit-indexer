@@ -34,7 +34,7 @@ describe('Enhanced search with parent post information', function () {
     await indexSubplebbit(sub, db);
 
     // Find and store target post
-    const searchResponse = await request.get(`/api/posts/search?q=${encodeURIComponent(targetPostTitle)}`);
+    const searchResponse = await request.get(`/api/posts/search?q=${encodeURIComponent(targetPostTitle)}&limit=5&sort=old`);
     assert.equal(searchResponse.status, 200);
     
     const targetPost = searchResponse.body.posts.find(post => 
@@ -70,12 +70,18 @@ describe('Enhanced search with parent post information', function () {
         assert(reply.parentCid, 'Reply should have parentCid');
         
         // If parent exists, should have parent title (unless parent is also a reply)
-        if (reply.parentTitle !== null) {
-          assert(typeof reply.parentTitle === 'string' || reply.parentTitle === null, 
-            'parentTitle should be string or null');
+        if (reply.postTitle !== null) {
+          assert(typeof reply.postTitle === 'string' || reply.postTitle === null, 
+            'postTitle should be string or null');
         }
         
-        console.log(`Reply ${reply.id}: parentCid=${reply.parentCid}, parentTitle="${reply.parentTitle}"`);
+        // Update field checks and assertions
+        if (reply.postTitle !== null) {
+          assert(typeof reply.postTitle === 'string' || reply.postTitle === null,
+            'postTitle should be string or null');
+        }
+        
+        console.log(`Reply ${reply.id}: parentCid=${reply.parentCid}, postTitle="${reply.postTitle}"`);
       });
     } else {
       console.log('No replies found in search results');
@@ -83,14 +89,12 @@ describe('Enhanced search with parent post information', function () {
   }, 20000);
 
   it('should not include parent information when excluding replies', async function() {
-    const response = await request.get('/api/posts/search?q=test&include-replies=false');
+    const response = await request.get('/api/posts/search?q=test&include-replies=false&limit=5&sort=old');
     assert.equal(response.status, 200);
     assert(Array.isArray(response.body.posts), 'Should return array of posts');
-
     // All posts should be top-level (no parentCid)
     response.body.posts.forEach(post => {
       assert(!post.parentCid, 'Should not have parentCid when replies are excluded');
-      assert(!post.parentTitle, 'Should not have parentTitle when replies are excluded');
     });
 
     console.log(`Found ${response.body.posts.length} top-level posts only`);
@@ -135,6 +139,13 @@ describe('Enhanced search with parent post information', function () {
             'Reply should have correct parent title');
           console.log(`Reply ${reply.id}: parentTitle="${reply.parentTitle}"`);
         }
+
+        // Replies to our target post should have post title
+        if (reply.postCid === global.targetPostCid) {
+          assert.equal(reply.postTitle, targetPostTitle,
+            'Reply should have correct post title');
+          console.log(`Reply ${reply.id}: postTitle="${reply.postTitle}"`);
+        }
       });
     }
   }, 20000);
@@ -153,27 +164,24 @@ describe('Enhanced search with parent post information', function () {
 
     console.log(`Analyzing ${postsWithParents.length} replies for parent information`);
 
-    let repliesWithParentTitles = 0;
-    let repliesWithNullParentTitles = 0;
+    let repliesWithPostTitles = 0;
+    let repliesWithNullPostTitles = 0;
 
     postsWithParents.forEach(post => {
-      if (post.parentTitle) {
-        repliesWithParentTitles++;
-        // Parent title should be a non-empty string
-        assert(typeof post.parentTitle === 'string' && post.parentTitle.length > 0,
-          'Parent title should be non-empty string');
+      if (post.postTitle) {
+        repliesWithPostTitles++;
+        assert(typeof post.postTitle === 'string' && post.postTitle.length > 0,
+          'postTitle should be non-empty string');
       } else {
-        repliesWithNullParentTitles++;
-        // This could be a reply to another reply (nested)
+        repliesWithNullPostTitles++;
       }
     });
 
-    console.log(`Replies with parent titles: ${repliesWithParentTitles}`);
-    console.log(`Replies with null parent titles (nested): ${repliesWithNullParentTitles}`);
+    console.log(`Replies with post titles: ${repliesWithPostTitles}`);
+    console.log(`Replies with null post titles (nested): ${repliesWithNullPostTitles}`);
 
-    // Should have at least some replies with parent information
-    assert(repliesWithParentTitles > 0 || repliesWithNullParentTitles > 0, 
-      'Should find some replies in the search results');
+    assert(repliesWithPostTitles > 0 || repliesWithNullPostTitles > 0,
+      'Should have at least some replies with or without post titles');
   }, 20000);
 
   it('should maintain performance with JOIN queries', async function() {

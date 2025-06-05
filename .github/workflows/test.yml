@@ -88,7 +88,7 @@ jobs:
         
         echo "Running Jest tests with correct WebSocket URL..."
         # Run tests inside the crawler container with the proper auth key URL
-        docker compose exec -T -e PLEBBIT_WS_URL=ws://plebbit-cli:9138/$AUTH_KEY crawler01 npm test test/subplebbit.test.js
+        docker compose exec -T -e PLEBBIT_WS_URL=ws://plebbit-cli:9138/$AUTH_KEY crawler01 npm test test/subplebbit.test.js sorting.test.js sitemap.test.js replies.test.js include-replies.test.js enhanced-search.test.js pagination.test.js
       timeout-minutes: 15
 
     - name: Show service logs on failure

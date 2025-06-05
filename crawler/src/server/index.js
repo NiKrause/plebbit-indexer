@@ -100,7 +100,7 @@ export async function startServer(_db) {
       const countQuery = `
         SELECT COUNT(*) as total 
         FROM posts p
-        LEFT JOIN posts parent ON p.parentCid = parent.id
+        LEFT JOIN posts post ON p.postCid = post.id
         ${whereClause}
       `;
       const countStmt = db.prepare(countQuery);
@@ -132,12 +132,12 @@ export async function startServer(_db) {
       const selectClause = `
         SELECT 
           p.*,
-          parent.title as parentTitle,
-          parent.authorDisplayName as parentAuthorDisplayName,
-          parent.authorAddress as parentAuthorAddress,
-          parent.replyCount as parentReplyCount
+          post.title as postTitle,
+          post.authorDisplayName as postAuthorDisplayName,
+          post.authorAddress as postAuthorAddress,
+          post.replyCount as postReplyCount
         FROM posts p
-        LEFT JOIN posts parent ON p.parentCid = parent.id
+        LEFT JOIN posts post ON p.postCid = post.id
         ${whereClause}
         ${orderClause}
       `;
@@ -252,17 +252,17 @@ export async function startServer(_db) {
       const countQuery = `
         SELECT COUNT(*) as total 
         FROM posts p
-        LEFT JOIN posts parent ON p.parentCid = parent.id
+        LEFT JOIN posts post ON p.postCid = post.id
         WHERE (LOWER(p.title) LIKE LOWER(?)
         OR LOWER(p.content) LIKE LOWER(?)
         OR LOWER(p.authorDisplayName) LIKE LOWER(?)
         OR LOWER(p.authorAddress) LIKE LOWER(?)
         OR LOWER(p.subplebbitAddress) LIKE LOWER(?)
-        OR LOWER(parent.title) LIKE LOWER(?)
-        OR LOWER(parent.authorDisplayName) LIKE LOWER(?)
-        OR LOWER(parent.authorAddress) LIKE LOWER(?)
-        OR LOWER(p.id) LIKE LOWER(?)
-        OR LOWER(p.parentCid) LIKE LOWER(?))
+        OR LOWER(post.title) LIKE LOWER(?)
+        OR LOWER(post.authorDisplayName) LIKE LOWER(?)
+        OR LOWER(post.authorAddress) LIKE LOWER(?)
+        OR p.id = ?
+        OR p.postCid = ?)
         ${whereClause}${repliesClause}
       `;
       
@@ -277,22 +277,22 @@ export async function startServer(_db) {
       const selectClause = `
         SELECT 
           p.*,
-          parent.title as parentTitle,
-          parent.authorDisplayName as parentAuthorDisplayName,
-          parent.authorAddress as parentAuthorAddress,
-          parent.replyCount as parentReplyCount
+          post.title as postTitle,
+          post.authorDisplayName as postAuthorDisplayName,
+          post.authorAddress as postAuthorAddress,
+          post.replyCount as postReplyCount
         FROM posts p
-        LEFT JOIN posts parent ON p.parentCid = parent.id
+        LEFT JOIN posts post ON p.postCid = post.id
         WHERE (LOWER(p.title) LIKE LOWER(?)
         OR LOWER(p.content) LIKE LOWER(?)
         OR LOWER(p.authorDisplayName) LIKE LOWER(?)
         OR LOWER(p.authorAddress) LIKE LOWER(?)
         OR LOWER(p.subplebbitAddress) LIKE LOWER(?)
-        OR LOWER(parent.title) LIKE LOWER(?)
-        OR LOWER(parent.authorDisplayName) LIKE LOWER(?)
-        OR LOWER(parent.authorAddress) LIKE LOWER(?)
-        OR LOWER(p.id) LIKE LOWER(?)
-        OR LOWER(p.parentCid) LIKE LOWER(?))
+        OR LOWER(post.title) LIKE LOWER(?)
+        OR LOWER(post.authorDisplayName) LIKE LOWER(?)
+        OR LOWER(post.authorAddress) LIKE LOWER(?)
+        OR p.id = ?
+        OR p.postCid = ?)
         ${whereClause}${repliesClause}
         ${orderClause}
       `;
@@ -348,12 +348,12 @@ export async function startServer(_db) {
       const postStmt = db.prepare(`
         SELECT 
           p.*,
-          parent.title as parentTitle,
-          parent.authorDisplayName as parentAuthorDisplayName,
-          parent.authorAddress as parentAuthorAddress,
-          parent.replyCount as parentReplyCount
+          post.title as postTitle,
+          post.authorDisplayName as postAuthorDisplayName,
+          post.authorAddress as postAuthorAddress,
+          post.replyCount as postReplyCount
         FROM posts p
-        LEFT JOIN posts parent ON p.parentCid = parent.id
+        LEFT JOIN posts post ON p.postCid = post.id
         WHERE p.id = ?
       `);
       const post = postStmt.get(postId);
@@ -607,12 +607,12 @@ export async function startServer(_db) {
       const repliesStmt = db.prepare(`
         SELECT 
           r.*,
-          parent.title as parentTitle,
-          parent.authorDisplayName as parentAuthorDisplayName,
-          parent.authorAddress as parentAuthorAddress,
-          parent.replyCount as parentReplyCount
+          post.title as postTitle,
+          post.authorDisplayName as postAuthorDisplayName,
+          post.authorAddress as postAuthorAddress,
+          post.replyCount as postReplyCount
         FROM posts r
-        LEFT JOIN posts parent ON r.parentCid = parent.id
+        LEFT JOIN posts post ON r.postCid = post.id
         WHERE r.parentCid = ? 
         ${orderClause} 
         LIMIT ? OFFSET ?

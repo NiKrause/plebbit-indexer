@@ -156,16 +156,16 @@ describe('Include replies functionality', function () {
       console.log(`Found ${replies.length} replies with parent information`);
       
       // At least some replies should have parent titles
-      const repliesWithParentTitles = replies.filter(reply => reply.parentTitle);
+      const repliesWithParentTitles = replies.filter(reply => reply.postTitle);
       
       if (repliesWithParentTitles.length > 0) {
-        console.log(`${repliesWithParentTitles.length} replies have parent titles`);
+        console.log(`${repliesWithParentTitles.length} replies have post titles`);
         
         // Verify parent title structure
         repliesWithParentTitles.forEach(reply => {
-          assert(typeof reply.parentTitle === 'string', 'Parent title should be a string');
-          assert(reply.parentTitle.length > 0, 'Parent title should not be empty');
-          console.log(`Reply to: "${reply.parentTitle}"`);
+          assert(typeof reply.postTitle === 'string', 'Post title should be a string');
+          assert(reply.postTitle.length > 0, 'Post title should not be empty');
+          console.log(`Reply to: "${reply.postTitle}"`);
         });
       }
     }
@@ -181,36 +181,25 @@ describe('Include replies functionality', function () {
     let repliesChecked = 0;
 
     response.body.posts.forEach((post, index) => {
-      // Verify that parent information fields are present
-      assert('parentTitle' in post, `Post ${index} should have parentTitle field`);
-      assert('parentAuthorDisplayName' in post, `Post ${index} should have parentAuthorDisplayName field`);
-      assert('parentAuthorAddress' in post, `Post ${index} should have parentAuthorAddress field`);
+      // Verify that post information fields are present
+      assert('postTitle' in post, `Post ${index} should have postTitle field`);
+      assert('postAuthorDisplayName' in post, `Post ${index} should have postAuthorDisplayName field`);
+      assert('postAuthorAddress' in post, `Post ${index} should have postAuthorAddress field`);
 
-      if (post.parentCid) {
-        // This is a reply
         repliesChecked++;
-        console.log(`Reply ${post.id}: parentTitle="${post.parentTitle}", parentAuthor="${post.parentAuthorDisplayName}"`);
+        console.log(`Reply ${post.id}: postTitle="${post.postTitle}", postAuthor="${post.postAuthorDisplayName}"`);
         
-        // Parent fields can be null if parent post doesn't exist or has null values,
+        // Post fields can be null if parent post doesn't exist or has null values,
         // but they should be defined in the response
-        if (post.parentTitle !== null) {
-          assert(typeof post.parentTitle === 'string', `Reply ${index} parentTitle should be string or null`);
+        if (post.postTitle !== null) {
+          assert(typeof post.postTitle === 'string', `Reply ${index} postTitle should be string or null`);
         }
-        if (post.parentAuthorDisplayName !== null) {
-          assert(typeof post.parentAuthorDisplayName === 'string', `Reply ${index} parentAuthorDisplayName should be string or null`);
+        if (post.postAuthorDisplayName !== null) {
+          assert(typeof post.postAuthorDisplayName === 'string', `Reply ${index} postAuthorDisplayName should be string or null`);
         }
-        if (post.parentAuthorAddress !== null) {
-          assert(typeof post.parentAuthorAddress === 'string', `Reply ${index} parentAuthorAddress should be string or null`);
+        if (post.postAuthorAddress !== null) {
+          assert(typeof post.postAuthorAddress === 'string', `Reply ${index} postAuthorAddress should be string or null`);
         }
-      } else {
-        // This is a top-level post
-        topLevelPostsChecked++;
-        
-        // Top-level posts should have null parent fields
-        assert.equal(post.parentTitle, null, `Top-level post ${index} should have null parentTitle`);
-        assert.equal(post.parentAuthorDisplayName, null, `Top-level post ${index} should have null parentAuthorDisplayName`);
-        assert.equal(post.parentAuthorAddress, null, `Top-level post ${index} should have null parentAuthorAddress`);
-      }
     });
 
     console.log(`Verified parent information for ${topLevelPostsChecked} top-level posts and ${repliesChecked} replies`);

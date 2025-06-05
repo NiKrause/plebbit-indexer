@@ -43,10 +43,16 @@ describe('Reply indexing functionality', function () {
     await indexSubplebbit(sub, db);
 
     // Search for the post by title
-    const searchResponse = await request.get(`/api/posts/search?q=${encodeURIComponent(targetPostTitle)}`);
+    const searchResponse = await request.get(`/api/posts/search?q=${encodeURIComponent(targetPostTitle)}&limit=5&sort=old`);
     assert.equal(searchResponse.status, 200);
     assert(Array.isArray(searchResponse.body.posts), 'Should return an array of posts');
+    console.log("searchResponse.body.posts", searchResponse.body.posts);
     console.log("searchResponse.body.posts.length", searchResponse.body.posts.length);
+    // Debug log posts with titles
+    console.log("Posts with titles:");
+    searchResponse.body.posts.forEach((post, index) => {
+      console.log(`Post ${index}: title="${post.title || 'NO TITLE'}", author="${post.authorAddress}"`);
+    });
     // Find the target post
     const targetPost = searchResponse.body.posts.find(post => 
       post.title === targetPostTitle && 
@@ -94,11 +100,11 @@ describe('Reply indexing functionality', function () {
     assert(firstReply.timestamp, 'Reply should have a timestamp');
     
     // Verify parent information fields are present (new JOIN functionality)
-    assert('parentTitle' in firstReply, 'Reply should have parentTitle field');
-    assert('parentAuthorDisplayName' in firstReply, 'Reply should have parentAuthorDisplayName field');
-    assert('parentAuthorAddress' in firstReply, 'Reply should have parentAuthorAddress field');
+    assert('postTitle' in firstReply, 'Reply should have postTitle field');
+    assert('postAuthorDisplayName' in firstReply, 'Reply should have postAuthorDisplayName field');
+    assert('postAuthorAddress' in firstReply, 'Reply should have postAuthorAddress field');
     
-    console.log(`First reply parent info: title="${firstReply.parentTitle}", author="${firstReply.parentAuthorDisplayName}"`);
+    console.log(`First reply parent info: title="${firstReply.postTitle}", author="${firstReply.postAuthorDisplayName}"`);
   }, 20000);
 
   it('should verify parent information is correctly populated for replies', async function() {
@@ -122,11 +128,11 @@ describe('Reply indexing functionality', function () {
     repliesResponse.body.replies.forEach((reply, index) => {
       // Since these are direct replies to the original post, parent info should match original post
       assert.equal(reply.parentCid, global.targetPostCid, `Reply ${index} should have correct parentCid`);
-      assert.equal(reply.parentTitle, originalPost.title, `Reply ${index} should have correct parentTitle`);
-      assert.equal(reply.parentAuthorDisplayName, originalPost.authorDisplayName, `Reply ${index} should have correct parentAuthorDisplayName`);
-      assert.equal(reply.parentAuthorAddress, originalPost.authorAddress, `Reply ${index} should have correct parentAuthorAddress`);
+      assert.equal(reply.postTitle, originalPost.title, `Reply ${index} should have correct postTitle`);
+      assert.equal(reply.postAuthorDisplayName, originalPost.authorDisplayName, `Reply ${index} should have correct postAuthorDisplayName`);
+      assert.equal(reply.postAuthorAddress, originalPost.authorAddress, `Reply ${index} should have correct postAuthorAddress`);
       
-      console.log(`Reply ${index}: parentTitle="${reply.parentTitle}", parentAuthor="${reply.parentAuthorDisplayName}"`);
+      console.log(`Reply ${index}: postTitle="${reply.postTitle}", postAuthor="${reply.postAuthorDisplayName}"`);
     });
     
     console.log(`Verified parent information for ${repliesResponse.body.replies.length} replies`);
@@ -166,16 +172,16 @@ describe('Reply indexing functionality', function () {
         assert.equal(nestedReply.postCid, global.targetPostCid, 'Nested reply should reference the original post');
         
         // Verify parent information fields are present
-        assert('parentTitle' in nestedReply, `Nested reply ${index} should have parentTitle field`);
-        assert('parentAuthorDisplayName' in nestedReply, `Nested reply ${index} should have parentAuthorDisplayName field`);
-        assert('parentAuthorAddress' in nestedReply, `Nested reply ${index} should have parentAuthorAddress field`);
+        assert('postTitle' in nestedReply, `Nested reply ${index} should have postTitle field`);
+        assert('postAuthorDisplayName' in nestedReply, `Nested reply ${index} should have postAuthorDisplayName field`);
+        assert('postAuthorAddress' in nestedReply, `Nested reply ${index} should have postAuthorAddress field`);
         
         // For nested replies, parent info should match the immediate parent (the reply they're replying to)
-        assert.equal(nestedReply.parentTitle, potentialParentReply.title, `Nested reply ${index} should have correct parentTitle`);
-        assert.equal(nestedReply.parentAuthorDisplayName, potentialParentReply.authorDisplayName, `Nested reply ${index} should have correct parentAuthorDisplayName`);
-        assert.equal(nestedReply.parentAuthorAddress, potentialParentReply.authorAddress, `Nested reply ${index} should have correct parentAuthorAddress`);
+        assert.equal(nestedReply.postTitle, potentialParentReply.title, `Nested reply ${index} should have correct postTitle`);
+        assert.equal(nestedReply.postAuthorDisplayName, potentialParentReply.authorDisplayName, `Nested reply ${index} should have correct postAuthorDisplayName`);
+        assert.equal(nestedReply.postAuthorAddress, potentialParentReply.authorAddress, `Nested reply ${index} should have correct postAuthorAddress`);
         
-        console.log(`Nested reply ${index}: replying to "${nestedReply.parentTitle}" by ${nestedReply.parentAuthorDisplayName}`);
+        console.log(`Nested reply ${index}: replying to "${nestedReply.postTitle}" by ${nestedReply.postAuthorDisplayName}`);
       });
     }
   }, 20000);

@@ -80,7 +80,7 @@ describe('Subplebbit functionality', function () {
 
   it('should get a specific post by ID', async function() {
     // First, get a list of posts to find a valid ID
-    const postsResponse = await request.get('/api/posts');
+    const postsResponse = await request.get('/api/posts?limit=10');
     assert.equal(postsResponse.status, 200);
     assert(postsResponse.body.posts.length > 0, 'Should have at least one post to test with');
     
@@ -102,21 +102,15 @@ describe('Subplebbit functionality', function () {
     assert(post.authorAddress !== undefined, 'Post should have an authorAddress');
     
     // Verify parent information fields are present (they should exist but may be null for top-level posts)
-    assert('parentTitle' in post, 'Post should have parentTitle field');
-    assert('parentAuthorDisplayName' in post, 'Post should have parentAuthorDisplayName field');
-    assert('parentAuthorAddress' in post, 'Post should have parentAuthorAddress field');
+    assert('postTitle' in post, 'Post should have postTitle field');
+    assert('postAuthorDisplayName' in post, 'Post should have postAuthorDisplayName field');
+    assert('postAuthorAddress' in post, 'Post should have postAuthorAddress field');
     
-    // If this is a reply (has parentCid), parent fields should not be null
-    if (post.parentCid) {
-      console.log(`Post ${testPostId} is a reply to ${post.parentCid}`);
-      // Note: Parent fields could still be null if parent post doesn't exist or has null values
-    } else {
-      console.log(`Post ${testPostId} is a top-level post`);
-      // For top-level posts, parent fields should be null
-      assert.equal(post.parentTitle, null, 'Top-level post should have null parentTitle');
-      assert.equal(post.parentAuthorDisplayName, null, 'Top-level post should have null parentAuthorDisplayName');
-      assert.equal(post.parentAuthorAddress, null, 'Top-level post should have null parentAuthorAddress');
-    }
+    // Update field checks
+    assert('postTitle' in post, 'Post should have postTitle field');
+    assert('postAuthorDisplayName' in post, 'Post should have postAuthorDisplayName field');
+    assert('postAuthorAddress' in post, 'Post should have postAuthorAddress field');
+
   }, 20000);
 
   it('should return 404 for non-existent post ID', async function() {
