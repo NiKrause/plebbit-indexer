@@ -6,6 +6,7 @@ import { getPlebbitClient } from '../src/plebbitClient.js';
 import supertest from 'supertest';
 
 describe('Reply indexing functionality', function () {
+  
   let plebbit;
   let db;
   let request;

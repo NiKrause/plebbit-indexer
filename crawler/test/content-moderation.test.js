@@ -40,7 +40,6 @@ async function testContentModeration() {
   
   // Initialize database
   const db = getDb();
-  initializeFlaggedPostsTable(db);
   
   // Test direct content analysis
   console.log('\n--- Testing direct content analysis ---');

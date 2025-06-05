@@ -1,27 +1,19 @@
 import { getDb } from './db.js';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-
-/**
- * Initialize the flagged_posts table (this is already handled in db.js)
- */
-export function initializeFlaggedPostsTable(db) {
-  // This function is kept for compatibility but the table initialization
-  // is now handled in the main db.js file
-  console.log('flagged_posts table initialization is handled in db.js');
-}
-
 dotenv.config();
 
-// Initialize OpenRouter client
-const openai = new OpenAI({
+let openai;
+if (process.env.OPENROUTER_API_KEY) {
+openai = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
   apiKey: process.env.OPENROUTER_API_KEY,
   defaultHeaders: {
-    'HTTP-Referer': process.env.SITE_URL || 'https://plebbit-indexer.local',
-    'X-Title': process.env.SITE_NAME || 'Plebbit Indexer',
-  },
-});
+    'HTTP-Referer': process.env.SITE_URL || 'https://plebscan.com',
+      'X-Title': process.env.SITE_NAME || 'PlebScan.com',
+    },
+  });
+}
 
 // Prompt for detecting problematic content
 const MODERATION_PROMPT = `

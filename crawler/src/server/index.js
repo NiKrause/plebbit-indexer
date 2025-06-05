@@ -5,7 +5,7 @@ import cors from 'cors';
 import { getDb, updateSubplebbitStatus, queueSubplebbit, takeModerationAction } from '../db.js';
 import { refreshSubplebbitQueue, processSubplebbitQueue } from '../subplebbit.js';
 import { getPlebbitClient } from '../plebbitClient.js';
-import { initializeFlaggedPostsTable, flagPost } from '../contentModeration.js';
+import { flagPost } from '../contentModeration.js';
 import { SitemapStream, streamToPromise } from 'sitemap';
 import { createGzip } from 'zlib';
 
@@ -28,8 +28,6 @@ export async function startServer(_db) {
     const result = countStmt.get();
     console.log(`Posts table exists with ${result.count} records`);
     
-    // Initialize flagged_posts table
-    initializeFlaggedPostsTable(db);
   } catch (err) {
     console.error('Error checking posts table:', err);
   }
@@ -889,7 +887,6 @@ export async function startServer(_db) {
     }
   });
 
-  // Modify the existing sitemap endpoint to serve as sitemap index
   app.get('/sitemap.xml', async (req, res) => {
     try {
       const db = getDb();
