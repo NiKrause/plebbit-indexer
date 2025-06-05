@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import React from 'react';
+import { isEUCountry } from '../utils/geo';
 
 // Create a context to share the analytics state
 export const AnalyticsContext = React.createContext<{
@@ -11,20 +12,37 @@ export const AnalyticsContext = React.createContext<{
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
+  const [isEU, setIsEU] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Add debug logging
-    console.log('CookieConsent mounted');
-    const consent = localStorage.getItem('cookie-consent');
-    console.log('Current consent value:', consent);
-    if (consent === null) {
-      console.log('Setting showBanner to true');
-      setShowBanner(true);
-    } else {
-      const enabled = consent === 'accepted';
-      console.log('Setting analyticsEnabled to:', enabled);
-      setAnalyticsEnabled(enabled);
-    }
+    const checkCountry = async () => {
+      const euCountry = await isEUCountry();
+      setIsEU(euCountry);
+      
+      const consent = localStorage.getItem('cookie-consent');
+      
+      if (euCountry) {
+        // For EU countries, show banner if no consent is stored
+        if (consent === null) {
+          setShowBanner(true);
+        } else {
+          setAnalyticsEnabled(consent === 'accepted');
+        }
+      } else {
+        // For non-EU countries, enable analytics by default
+        if (consent === null) {
+          localStorage.setItem('cookie-consent', 'accepted');
+          setAnalyticsEnabled(true);
+          window.gtag?.('consent', 'update', {
+            'analytics_storage': 'granted'
+          });
+        } else {
+          setAnalyticsEnabled(consent === 'accepted');
+        }
+      }
+    };
+
+    checkCountry();
   }, []);
 
   const handleAccept = () => {
