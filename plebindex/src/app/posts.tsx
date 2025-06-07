@@ -79,10 +79,20 @@ async function PostsContent({
   
   return (
     <div>
-      <h2>{searchTerm ? `Search Results for "${searchTerm}"` : 'All Posts'}</h2>
+      <h2 style={{ 
+        fontSize: 20, 
+        fontWeight: 600, 
+        margin: '24px 0 12px 0',
+        padding: '0 16px'  // Added padding to prevent it from being too close to the border
+      }}>{searchTerm ? `Search Results for "${searchTerm}"` : 'All Posts'}</h2>
       
       {/* Display current filters */}
-      <div style={{ marginBottom: '20px', fontSize: '14px', color: '#666' }}>
+      <div style={{ 
+        marginBottom: '20px', 
+        fontSize: '14px', 
+        color: '#666',
+        padding: '0 16px'  // Added padding to match the heading
+      }}>
         <span>Sorted by: <strong>{filters.sort}</strong></span>
         {filters.timeFilter !== 'all' && (
           <span> • Time: <strong>{filters.timeFilter}</strong></span>

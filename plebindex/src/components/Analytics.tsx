@@ -2,7 +2,7 @@
 
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { useEffect, useState } from 'react';
-import { isEUCountry } from '../utils/geo';
+import { requiresCookieConsent } from '../utils/geo';
 
 export default function Analytics() {
   const [hasConsent, setHasConsent] = useState(false);
@@ -10,12 +10,12 @@ export default function Analytics() {
   useEffect(() => {
     const checkConsent = async () => {
       const consent = localStorage.getItem('cookie-consent');
-      const euCountry = await isEUCountry();
+      const needsConsent = await requiresCookieConsent();
       
       // Enable analytics if either:
       // 1. User has explicitly consented
       // 2. User is from a non-EU country and no consent is stored
-      setHasConsent(consent === 'accepted' || (!euCountry && consent === null));
+      setHasConsent(consent === 'accepted' || (!needsConsent && consent === null));
     };
 
     checkConsent();

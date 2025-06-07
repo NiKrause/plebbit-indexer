@@ -28,7 +28,12 @@ async function RepliesContent({
       <PostItem post={post} />
       
       {/* Reply count as a heading */}
-      <h1 style={{ fontSize: 20, fontWeight: 600, margin: '24px 0 12px 0' }}>
+      <h1 style={{ 
+        fontSize: 20, 
+        fontWeight: 600, 
+        margin: '24px 0 12px 0',
+        padding: '0 16px'
+      }}>
         {pagination.total} direct {pagination.total === 1 ? 'reply' : 'replies'}
       </h1> 
       
@@ -42,7 +47,15 @@ async function RepliesContent({
             />
           ))
         ) : (
-          <div>No replies found.</div>
+          <div style={{ 
+            maxWidth: 700, 
+            width: '100%', 
+            textAlign: 'left', 
+            color: '#444', 
+            padding: '16px 16px'
+          }}>
+            No replies found.
+          </div>
         )}
       </div>
       
