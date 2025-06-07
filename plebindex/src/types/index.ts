@@ -16,6 +16,7 @@ export interface Post {
   postAuthorDisplayName?: string;
   postAuthorAddress?: string;
   postReplyCount?: number; 
+  postTimestamp: number;
 }
 
 export interface PaginatedResponse {
@@ -80,6 +81,7 @@ export interface FlaggedPost {
   postTitle?: string;
   postAuthorDisplayName?: string;
   postAuthorAddress?: string;
+  postTimestamp?: number;
 }
 
 export interface AdminStats {
