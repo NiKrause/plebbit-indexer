@@ -3,6 +3,7 @@ import Image from 'next/image';
 import PlebscanLogo from './plebscanlogo';
 import SearchBar from './search';
 import './header.css';
+import MobileMenu from '../components/MobileMenu';
 
 const styles = {
   header: {
@@ -73,15 +74,7 @@ export default function Header() {
           </div>
           
           <div style={styles.socialContainer}>
-            <Link
-              href="/imprint"
-              title="Imprint"
-              style={styles.iconLink}
-              aria-label="Legal information"
-              className="hidden md:inline"
-            >
-              Imprint
-            </Link>
+        
             <Link
               href="https://github.com/NiKrause/plebbit-indexer/"
               target="_blank"
@@ -105,27 +98,15 @@ export default function Header() {
               <Image src="/telegram.svg" alt="Telegram" width={24} height={24} />
             </Link>
             <Link
-              href="/menu"
-              style={styles.menuButton}
-              className="md:hidden"
-              aria-label="Open menu"
+              href="/imprint"
+              title="Imprint"
+              style={styles.iconLink}
+              aria-label="Legal information"
+              className="hidden md:inline"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
+              Imprint
             </Link>
+            <MobileMenu />
           </div>
         </div>
 

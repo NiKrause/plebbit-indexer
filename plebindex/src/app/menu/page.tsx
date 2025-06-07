@@ -7,11 +7,22 @@ export default function MenuPage() {
       padding: '20px',
       maxWidth: '300px',
       margin: '0 auto',
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      width: '100%',
+      backgroundColor: 'white',
+      boxShadow: '-2px 0 5px rgba(0, 0, 0, 0.1)',
+      zIndex: 1000,
+      transform: 'translateX(100%)',
+      transition: 'transform 0.3s ease-in-out',
     }}>
       <nav style={{
         display: 'flex',
         flexDirection: 'column',
         gap: '16px',
+        paddingTop: '60px', // Add space for the close button
       }}>
         <Link
           href="/imprint"
