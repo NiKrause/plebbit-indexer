@@ -56,8 +56,8 @@ export default function PostItem({ post }: PostItemProps) {
             </a>
             {' | '}
             <TimestampDisplay timestamp={post.timestamp} />
-            {' | '}
-            {post.postReplyCount || post.replyCount} posts 
+            {/* {' | '}
+            {post.postReplyCount || post.replyCount} posts  */}
           </span>
           <ReportButton postId={post.id} />
         </div>
