@@ -12,6 +12,8 @@ export default function SearchBar() {
   const [timeFilter, setTimeFilter] = useState('all');
   const [includeReplies, setIncludeReplies] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isTimeOpen, setIsTimeOpen] = useState(false);
 
   useEffect(() => {
     // First check URL parameters
@@ -218,6 +220,52 @@ export default function SearchBar() {
     }
   };
 
+  // Add this new style object after the existing searchStyles
+  const dropdownStyles = {
+    dropdownContainer: {
+      position: 'relative' as const,
+      display: 'inline-block' as const,
+    },
+    dropdownButton: {
+      padding: '4px 8px',
+      fontSize: '10px',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderColor: '#d1d5db',
+      backgroundColor: 'white',
+      color: '#4b5563',
+      display: 'flex' as const,
+      alignItems: 'center' as const,
+      gap: '4px',
+    },
+    dropdownContent: {
+      position: 'absolute' as const,
+      top: '100%',
+      left: '0',
+      backgroundColor: 'white',
+      minWidth: '120px',
+      boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+      borderRadius: '4px',
+      zIndex: 1000,
+      marginTop: '4px',
+    },
+    dropdownItem: {
+      padding: '8px 12px',
+      fontSize: '12px',
+      cursor: 'pointer',
+      color: '#4b5563',
+      ':hover': {
+        backgroundColor: '#f3f4f6',
+      },
+    },
+    dropdownItemActive: {
+      backgroundColor: '#f3f4f6',
+      color: '#1f2937',
+    },
+  };
+
   // Helper to combine styles conditionally
   const mergeStyles = (base: object, conditional: object, condition: boolean) => {
     return condition ? { ...base, ...conditional } : base;
@@ -324,42 +372,104 @@ export default function SearchBar() {
         
         {/* Filter options */}
         <div style={searchStyles.filterContainer}>
-          {/* Sort options */}
-          <div style={searchStyles.filterGroup}>
-            <span style={searchStyles.filterLabel}>Sort:</span>
-            {['new', 'top', 'replies', 'old'].map(sortOption => (
-              <button
-                key={sortOption}
-                type="button"
-                onClick={() => handleFilterChange('sort', sortOption)}
-                style={mergeStyles(
-                  searchStyles.filterItem,
-                  searchStyles.filterActive,
-                  sort === sortOption
-                )}
+          {/* Sort dropdown */}
+          <div style={dropdownStyles.dropdownContainer}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsSortOpen(!isSortOpen);
+                setIsTimeOpen(false);
+              }}
+              style={dropdownStyles.dropdownButton}
+            >
+              Sort: {sort.charAt(0).toUpperCase() + sort.slice(1)}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  transform: isSortOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.2s',
+                }}
               >
-                {sortOption.charAt(0).toUpperCase() + sortOption.slice(1)}
-              </button>
-            ))}
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            {isSortOpen && (
+              <div style={dropdownStyles.dropdownContent}>
+                {['new', 'top', 'replies', 'old'].map(sortOption => (
+                  <div
+                    key={sortOption}
+                    onClick={() => {
+                      handleFilterChange('sort', sortOption);
+                      setIsSortOpen(false);
+                    }}
+                    style={{
+                      ...dropdownStyles.dropdownItem,
+                      ...(sort === sortOption ? dropdownStyles.dropdownItemActive : {}),
+                    }}
+                  >
+                    {sortOption.charAt(0).toUpperCase() + sortOption.slice(1)}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          
-          {/* Time filter options */}
-          <div style={searchStyles.filterGroup}>
-            <span style={searchStyles.filterLabel}>Time:</span>
-            {['all', 'hour', 'day', 'week', 'month', 'year'].map(timeOption => (
-              <button
-                key={timeOption}
-                type="button"
-                onClick={() => handleFilterChange('time', timeOption)}
-                style={mergeStyles(
-                  searchStyles.filterItem,
-                  searchStyles.filterActive,
-                  timeFilter === timeOption
-                )}
+
+          {/* Time filter dropdown */}
+          <div style={dropdownStyles.dropdownContainer}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsTimeOpen(!isTimeOpen);
+                setIsSortOpen(false);
+              }}
+              style={dropdownStyles.dropdownButton}
+            >
+              Time: {timeFilter.charAt(0).toUpperCase() + timeFilter.slice(1)}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  transform: isTimeOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.2s',
+                }}
               >
-                {timeOption.charAt(0).toUpperCase() + timeOption.slice(1)}
-              </button>
-            ))}
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            {isTimeOpen && (
+              <div style={dropdownStyles.dropdownContent}>
+                {['all', 'hour', 'day', 'week', 'month', 'year'].map(timeOption => (
+                  <div
+                    key={timeOption}
+                    onClick={() => {
+                      handleFilterChange('time', timeOption);
+                      setIsTimeOpen(false);
+                    }}
+                    style={{
+                      ...dropdownStyles.dropdownItem,
+                      ...(timeFilter === timeOption ? dropdownStyles.dropdownItemActive : {}),
+                    }}
+                  >
+                    {timeOption.charAt(0).toUpperCase() + timeOption.slice(1)}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
