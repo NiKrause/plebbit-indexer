@@ -3,7 +3,6 @@ import PostStats from './PostStats';
 import ReportButton from './ReportButton';
 import TimestampDisplay from './TimeStampDisplay';
 import { truncateText } from '../utils/formatting';
-// import Link from 'next/link';
 
 interface PostItemProps {
   post: Post;
@@ -51,7 +50,9 @@ export default function PostItem({ post }: PostItemProps) {
               rel="noopener noreferrer"
               style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
             >
-              {post.authorDisplayName || post.authorAddress}
+              {post.authorDisplayName ? 
+                `${post.authorDisplayName.length > 20 ? post.authorDisplayName.substring(0, 20) : post.authorDisplayName} (u/${post.authorAddress})` 
+                : `u/${post.authorAddress}`}
             </a>
             {' | '}
             <TimestampDisplay timestamp={post.timestamp} />
@@ -122,7 +123,9 @@ export default function PostItem({ post }: PostItemProps) {
             rel="noopener noreferrer"
             style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
           >
-            {post.authorDisplayName || post.authorAddress}
+            {post.authorDisplayName ? 
+              `${post.authorDisplayName.length > 20 ? post.authorDisplayName.substring(0, 20) : post.authorDisplayName} (u/${post.authorAddress})` 
+              : `u/${post.authorAddress}`}
           </a>
           {' | '}
           <TimestampDisplay timestamp={post.timestamp} />

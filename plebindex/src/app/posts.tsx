@@ -94,7 +94,9 @@ async function PostsContent({
             <PostItem key={post.id} post={post} />
           ))
         ) : (
-          <div>No posts found.</div>
+          <div style={{ maxWidth: 700, width: '100%', textAlign: 'left', color: '#444', padding: '16px 0' }}>
+            No posts found.
+          </div>
         )}
       </div>
       
