@@ -8,6 +8,7 @@ services:
       - "3000:3000"
     volumes:
       - ./plebindex/src:/app/src
+      - ./plebindex/public:/app/public
       - ./plebindex/pages:/app/pages
     environment:
       - NODE_ENV=${NODE_ENV}
