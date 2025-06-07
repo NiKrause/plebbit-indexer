@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-
+import Link from 'next/link';
 
 export default function SearchBar() {
   const searchParams = useSearchParams();
@@ -139,8 +139,7 @@ export default function SearchBar() {
     router.push(url);
   };
 
-  // CSS styles with proper TypeScript types
-  const searchStyles = {
+  const styles = {
     form: {
       width: '100%'
     },
@@ -159,8 +158,7 @@ export default function SearchBar() {
     },
     input: {
       width: '100%',
-      padding: '8px',
-      paddingRight: '40px',
+      padding: '8px 40px 8px 12px',
       fontSize: '14px',
       border: '1px solid #d1d5db',
       borderRadius: '4px',
@@ -169,27 +167,23 @@ export default function SearchBar() {
     button: {
       position: 'absolute' as const,
       right: '8px',
+      top: '50%',
+      transform: 'translateY(-50%)',
       background: 'transparent',
       border: 'none',
       padding: '4px',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      color: '#9ca3af'
     },
     filterContainer: {
       display: 'flex' as const,
       gap: '10px',
       marginTop: '8px',
       width: '100%',
-      flexWrap: 'wrap' as const
+      flexWrap: 'wrap' as const,
+      justifyContent: 'center'
     },
-    filterGroup: {
-      display: 'flex' as const,
-      alignItems: 'center' as const,
-      gap: '5px'
-    },
-    filterLabel: {
-      fontSize: '10px'
-    },
-    filterItem: {
+    filterButton: {
       padding: '4px 8px',
       fontSize: '10px',
       borderRadius: '4px',
@@ -198,33 +192,13 @@ export default function SearchBar() {
       borderStyle: 'solid',
       borderColor: '#d1d5db',
       backgroundColor: 'white',
-      color: '#4b5563'
-    },
-    filterActive: {
-      backgroundColor: '#4b5563',
-      color: 'white',
-      borderColor: '#4b5563'
-    },
-    checkboxContainer: {
+      color: '#4b5563',
       display: 'flex' as const,
       alignItems: 'center' as const,
-      gap: '8px',
-      padding: '4px 0'
+      gap: '4px',
     },
-    checkbox: {
-      cursor: 'pointer'
-    },
-    checkboxLabel: {
-      fontSize: '12px',
-      cursor: 'pointer'
-    }
-  };
-
-  // Add this new style object after the existing searchStyles
-  const dropdownStyles = {
     dropdownContainer: {
       position: 'relative' as const,
-      display: 'inline-block' as const,
     },
     dropdownButton: {
       padding: '4px 8px',
@@ -243,37 +217,36 @@ export default function SearchBar() {
     dropdownContent: {
       position: 'absolute' as const,
       top: '100%',
-      left: '0',
+      left: 0,
+      right: 0,
       backgroundColor: 'white',
-      minWidth: '120px',
-      boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
       borderRadius: '4px',
+      border: '1px solid #d1d5db',
+      padding: '8px',
       zIndex: 1000,
-      marginTop: '4px',
     },
     dropdownItem: {
-      padding: '8px 12px',
-      fontSize: '12px',
+      padding: '4px 8px',
       cursor: 'pointer',
-      color: '#4b5563',
-      ':hover': {
-        backgroundColor: '#f3f4f6',
-      },
     },
     dropdownItemActive: {
       backgroundColor: '#f3f4f6',
-      color: '#1f2937',
+    },
+    checkboxContainer: {
+      display: 'flex',
+      alignItems: 'center',
+    },
+    checkbox: {
+      marginRight: '8px',
+    },
+    checkboxLabel: {
+      marginRight: '16px',
     },
   };
 
-  // Helper to combine styles conditionally
-  const mergeStyles = (base: object, conditional: object, condition: boolean) => {
-    return condition ? { ...base, ...conditional } : base;
-  };
-
   return (
-    <form onSubmit={handleSubmit} style={searchStyles.form}>
-      <div style={searchStyles.container}>
+    <form onSubmit={handleSubmit} style={styles.form}>
+      <div style={styles.container}>
         {/* Error message */}
         {error && (
           <div 
@@ -293,7 +266,7 @@ export default function SearchBar() {
           </div>
         )}
 
-        <div style={searchStyles.inputWrapper}>
+        <div style={styles.inputWrapper}>
           <input
             id="search"
             type="text"
@@ -304,39 +277,13 @@ export default function SearchBar() {
               setError(null);
             }}
             placeholder="Search posts..."
-            style={{
-              ...searchStyles.input,
-              borderColor: error ? '#dc2626' : '#d1d5db',
-              paddingLeft: '36px' // Add space for the search icon
-            }}
-            aria-invalid={!!error}
+            style={styles.input}
             aria-label="Search posts"
             role="searchbox"
           />
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-            style={{
-              position: 'absolute',
-              left: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#9ca3af'
-            }}
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
           <button
             type="submit"
-            style={searchStyles.button}
+            style={styles.button}
             aria-label="Search"
           >
             <svg 
@@ -356,31 +303,17 @@ export default function SearchBar() {
           </button>
         </div>
         
-        {/* Include Replies Checkbox */}
-        <div style={searchStyles.checkboxContainer}>
-          <input
-            type="checkbox"
-            id="include-replies"
-            checked={includeReplies}
-            onChange={(e) => handleFilterChange('includeReplies', e.target.checked)}
-            style={searchStyles.checkbox}
-          />
-          <label htmlFor="include-replies" style={searchStyles.checkboxLabel}>
-            Include replies
-          </label>
-        </div>
-        
         {/* Filter options */}
-        <div style={searchStyles.filterContainer}>
+        <div style={styles.filterContainer}>
           {/* Sort dropdown */}
-          <div style={dropdownStyles.dropdownContainer}>
+          <div style={styles.dropdownContainer}>
             <button
               type="button"
               onClick={() => {
                 setIsSortOpen(!isSortOpen);
                 setIsTimeOpen(false);
               }}
-              style={dropdownStyles.dropdownButton}
+              style={styles.dropdownButton}
             >
               Sort: {sort.charAt(0).toUpperCase() + sort.slice(1)}
               <svg
@@ -402,7 +335,7 @@ export default function SearchBar() {
               </svg>
             </button>
             {isSortOpen && (
-              <div style={dropdownStyles.dropdownContent}>
+              <div style={styles.dropdownContent}>
                 {['new', 'top', 'replies', 'old'].map(sortOption => (
                   <div
                     key={sortOption}
@@ -411,8 +344,8 @@ export default function SearchBar() {
                       setIsSortOpen(false);
                     }}
                     style={{
-                      ...dropdownStyles.dropdownItem,
-                      ...(sort === sortOption ? dropdownStyles.dropdownItemActive : {}),
+                      ...styles.dropdownItem,
+                      ...(sort === sortOption ? styles.dropdownItemActive : {}),
                     }}
                   >
                     {sortOption.charAt(0).toUpperCase() + sortOption.slice(1)}
@@ -423,14 +356,14 @@ export default function SearchBar() {
           </div>
 
           {/* Time filter dropdown */}
-          <div style={dropdownStyles.dropdownContainer}>
+          <div style={styles.dropdownContainer}>
             <button
               type="button"
               onClick={() => {
                 setIsTimeOpen(!isTimeOpen);
                 setIsSortOpen(false);
               }}
-              style={dropdownStyles.dropdownButton}
+              style={styles.dropdownButton}
             >
               Time: {timeFilter.charAt(0).toUpperCase() + timeFilter.slice(1)}
               <svg
@@ -452,7 +385,7 @@ export default function SearchBar() {
               </svg>
             </button>
             {isTimeOpen && (
-              <div style={dropdownStyles.dropdownContent}>
+              <div style={styles.dropdownContent}>
                 {['all', 'hour', 'day', 'week', 'month', 'year'].map(timeOption => (
                   <div
                     key={timeOption}
@@ -461,8 +394,8 @@ export default function SearchBar() {
                       setIsTimeOpen(false);
                     }}
                     style={{
-                      ...dropdownStyles.dropdownItem,
-                      ...(timeFilter === timeOption ? dropdownStyles.dropdownItemActive : {}),
+                      ...styles.dropdownItem,
+                      ...(timeFilter === timeOption ? styles.dropdownItemActive : {}),
                     }}
                   >
                     {timeOption.charAt(0).toUpperCase() + timeOption.slice(1)}
@@ -470,6 +403,20 @@ export default function SearchBar() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Include Replies Checkbox */}
+          <div style={styles.checkboxContainer}>
+            <input
+              type="checkbox"
+              id="include-replies"
+              checked={includeReplies}
+              onChange={(e) => handleFilterChange('includeReplies', e.target.checked)}
+              style={styles.checkbox}
+            />
+            <label htmlFor="include-replies" style={styles.checkboxLabel}>
+              Include replies
+            </label>
           </div>
         </div>
       </div>
