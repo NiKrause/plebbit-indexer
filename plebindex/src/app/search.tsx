@@ -13,6 +13,7 @@ export default function SearchBar() {
   const [error, setError] = useState<string | null>(null);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isTimeOpen, setIsTimeOpen] = useState(false);
+  const [isRepliesOpen, setIsRepliesOpen] = useState(false);
 
   useEffect(() => {
     // First check URL parameters
@@ -404,18 +405,58 @@ export default function SearchBar() {
             )}
           </div>
 
-          {/* Include Replies Checkbox */}
-          <div style={styles.checkboxContainer}>
-            <input
-              type="checkbox"
-              id="include-replies"
-              checked={includeReplies}
-              onChange={(e) => handleFilterChange('includeReplies', e.target.checked)}
-              style={styles.checkbox}
-            />
-            <label htmlFor="include-replies" style={styles.checkboxLabel}>
-              Include replies
-            </label>
+          {/* Replace the checkbox container with a dropdown */}
+          <div style={styles.dropdownContainer}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsRepliesOpen(!isRepliesOpen);
+                setIsSortOpen(false);
+                setIsTimeOpen(false);
+              }}
+              style={styles.dropdownButton}
+            >
+              Replies: {includeReplies ? 'Included' : 'Excluded'}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  transform: isRepliesOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.2s',
+                }}
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            {isRepliesOpen && (
+              <div style={styles.dropdownContent}>
+                {[
+                  { value: true, label: 'Included' },
+                  { value: false, label: 'Excluded' }
+                ].map(option => (
+                  <div
+                    key={option.label}
+                    onClick={() => {
+                      handleFilterChange('includeReplies', option.value);
+                      setIsRepliesOpen(false);
+                    }}
+                    style={{
+                      ...styles.dropdownItem,
+                      ...(includeReplies === option.value ? styles.dropdownItemActive : {}),
+                    }}
+                  >
+                    {option.label}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
