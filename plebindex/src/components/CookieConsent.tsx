@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import React from 'react';
-import { isEUCountry } from '../utils/geo';
+import { requiresCookieConsent } from '../utils/geo';
 
 // Create a context to share the analytics state
 export const AnalyticsContext = React.createContext<{
@@ -15,19 +15,19 @@ export default function CookieConsent() {
 
   useEffect(() => {
     const checkCountry = async () => {
-      const euCountry = await isEUCountry();
+      const needsConsent = await requiresCookieConsent();
       
       const consent = localStorage.getItem('cookie-consent');
       
-      if (euCountry) {
-        // For EU countries, show banner if no consent is stored
+      if (needsConsent) {
+        // For countries requiring consent, show banner if no consent is stored
         if (consent === null) {
           setShowBanner(true);
         } else {
           setAnalyticsEnabled(consent === 'accepted');
         }
       } else {
-        // For non-EU countries, enable analytics by default
+        // For other countries, enable analytics by default
         if (consent === null) {
           localStorage.setItem('cookie-consent', 'accepted');
           setAnalyticsEnabled(true);

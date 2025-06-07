@@ -203,8 +203,21 @@ export default function ImprintPage() {
                   <li>
                     <strong>Google Analytics:</strong> We use Google Analytics to understand how our service is used and to improve user experience. The implementation varies based on your location:
                     <ul className="list-disc pl-6 mt-2">
-                      <li><strong>For EU Users:</strong> Google Analytics is disabled by default and requires explicit consent through our cookie consent banner. You can enable or disable it through this banner.</li>
-                      <li><strong>For Non-EU Users:</strong> Google Analytics is enabled by default to help us understand and improve our service. No cookie consent banner is shown, and analytics are automatically enabled.</li>
+                      <li><strong>For Users in Jurisdictions Requiring Consent:</strong> Google Analytics is disabled by default and requires explicit consent through our cookie consent banner. You can enable or disable it through this banner. This applies to users in:
+                        <ul className="list-disc pl-6 mt-2">
+                          <li>European Union (EU) countries</li>
+                          <li>United Kingdom</li>
+                          <li>Brazil</li>
+                          <li>California, USA</li>
+                          <li>South Korea</li>
+                          <li>Japan</li>
+                          <li>Canada</li>
+                          <li>Australia</li>
+                          <li>South Africa</li>
+                          <li>India</li>
+                        </ul>
+                      </li>
+                      <li><strong>For Other Users:</strong> Google Analytics is enabled by default to help us understand and improve our service. No cookie consent banner is shown, and analytics are automatically enabled.</li>
                     </ul>
                     Google Analytics collects anonymous data about:
                     <ul className="list-disc pl-6 mt-2">
@@ -219,16 +232,16 @@ export default function ImprintPage() {
                 </ul>
 
                 <div className="mt-6 bg-gray-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Cookie Consent and GDPR Compliance</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Cookie Consent and Privacy Compliance</h3>
                   <p>
                     Our cookie consent implementation varies based on your location:
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-2">
-                    <li><strong>EU Users:</strong> You will see a cookie consent banner that requires explicit consent before any tracking cookies are set. Google Analytics is disabled by default until you provide consent.</li>
-                    <li><strong>Non-EU Users:</strong> Google Analytics is enabled by default without showing a cookie consent banner. This is in compliance with privacy regulations applicable to non-EU jurisdictions.</li>
+                    <li><strong>Users in Jurisdictions Requiring Consent:</strong> You will see a cookie consent banner that requires explicit consent before any tracking cookies are set. Google Analytics is disabled by default until you provide consent.</li>
+                    <li><strong>Other Users:</strong> Google Analytics is enabled by default without showing a cookie consent banner. This is in compliance with privacy regulations applicable to your jurisdiction.</li>
                   </ul>
                   <p className="mt-2">
-                    This implementation ensures compliance with the EU&apos;s General Data Protection Regulation (GDPR) while providing a seamless experience for users outside the EU. For EU users, your cookie preferences are stored in your browser&apos;s localStorage and will be respected across all pages of our service.
+                    This implementation ensures compliance with various privacy regulations including the EU&apos;s General Data Protection Regulation (GDPR), California Consumer Privacy Act (CCPA), Brazil&apos;s LGPD, and other applicable privacy laws. For users in jurisdictions requiring consent, your cookie preferences are stored in your browser&apos;s localStorage and will be respected across all pages of our service.
                   </p>
                 </div>
               </div>
