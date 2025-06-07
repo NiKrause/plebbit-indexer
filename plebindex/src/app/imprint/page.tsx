@@ -7,16 +7,16 @@ export default function ImprintPage() {
       <Suspense fallback={<div>Loading...</div>}>
         <Header />
       </Suspense>
-      <main className="flex-grow flex justify-center py-16 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 md:p-16">
-          <div className="text-center mb-16 !px-10 !py-4 !mx-10 !my-6">
-            <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Imprint / Legal Notice</h1>
+      <main className="flex-grow flex justify-center py-8 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-4 sm:p-8 md:p-12">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">Imprint / Legal Notice</h1>
           </div>
-          <div className="!px-6 !py-2 !mx-6 !my-4">
+          <div className="space-y-8">
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Information according to § 5 TMG</h2>
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-gray-50 p-6 rounded-lg">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Information according to § 5 TMG</h2>
+              <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
+                <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Service Provider</h3>
                   <div className="space-y-2 text-gray-700">
                     <div>Le Space UG (haftungsbeschränkt)</div>
@@ -32,7 +32,7 @@ export default function ImprintPage() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Geschäftsführer</h3>
                   <div className="space-y-2 text-gray-700">
                     <div>Nico Krause</div>
@@ -48,7 +48,7 @@ export default function ImprintPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Service Description</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Service Description</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
                   This service provides a search engine for content within the decentralized peer-to-peer community &quot;Plebbit&quot;, which operates on the IPFS (InterPlanetary File System) network. The service indexes publicly accessible content from independently operated subforums (so-called &quot;SubPlebbit communities&quot;) and makes it searchable.
@@ -60,7 +60,7 @@ export default function ImprintPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Liability for Content</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Liability for Content</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
                   As a service provider, we are responsible for our own content on this search engine in accordance with general legislation (§ 7 (1) TMG). However, pursuant to §§ 8 to 10 TMG, we are not obligated to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.
@@ -72,7 +72,7 @@ export default function ImprintPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Liability for Links</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Liability for Links</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
                   Our service may contain links to external websites operated by third parties, over whose content we have no control. We therefore cannot accept any liability for such third-party content. The respective provider or operator of the linked pages is always responsible for their content.
@@ -81,7 +81,7 @@ export default function ImprintPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Copyright</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Copyright</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
                   Content and works created by us on this platform are subject to German copyright law. Third-party content is marked accordingly. Any duplication, editing, distribution, or use beyond the scope permitted by copyright law requires the prior written consent of the respective author or creator.
@@ -90,7 +90,7 @@ export default function ImprintPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Dispute Resolution</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Dispute Resolution</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
                   The European Commission provides a platform for online dispute resolution (ODR):{' '}
@@ -110,13 +110,13 @@ export default function ImprintPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Data Protection (GDPR)</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Data Protection (GDPR)</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
                   In accordance with the General Data Protection Regulation (GDPR), we provide the following information about data processing:
                 </p>
                 
-                <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Data Controller</h3>
                   <div className="space-y-2">
                     <div>Le Space UG (haftungsbeschränkt)</div>
@@ -192,7 +192,7 @@ export default function ImprintPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Privacy and Data Usage</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Privacy and Data Usage</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
                   Our service is designed with privacy in mind:
@@ -231,7 +231,7 @@ export default function ImprintPage() {
                   <li>IP addresses are temporarily stored in standard access logs for security purposes only</li>
                 </ul>
 
-                <div className="mt-6 bg-gray-50 p-6 rounded-lg">
+                <div className="mt-6 bg-gray-50 p-4 sm:p-6 rounded-lg">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Cookie Consent and Privacy Compliance</h3>
                   <p>
                     Our cookie consent implementation varies based on your location:
@@ -248,7 +248,7 @@ export default function ImprintPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">API Usage</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">API Usage</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
                   Our search API is currently available for free use. We reserve the right to modify this policy in the future, with appropriate notice to users.
@@ -257,7 +257,7 @@ export default function ImprintPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-8">Content Moderation</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Content Moderation</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
                   We employ a dual approach to content moderation:
