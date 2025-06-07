@@ -1,7 +1,9 @@
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+'use client';
 
-export default function FilterPage() {
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+
+function FilterContent() {
   const searchParams = useSearchParams();
   const query = searchParams?.get('q') || '';
   const sort = searchParams?.get('sort') || 'new';
@@ -63,4 +65,12 @@ export default function FilterPage() {
       </form>
     </div>
   );
-} 
+}
+
+export default function FilterPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FilterContent />
+    </Suspense>
+  );
+}

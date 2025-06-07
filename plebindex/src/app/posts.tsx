@@ -19,7 +19,8 @@ function getMockPosts(): Post[] {
       timestamp: Math.floor(Date.now() / 1000) - 3600,
       upvoteCount: 15,
       downvoteCount: 3,
-      replyCount: 7
+      replyCount: 7,
+      postTimestamp: Math.floor(Date.now() / 1000) - 103600
     },
     {
       id: 'mock2',
@@ -31,7 +32,8 @@ function getMockPosts(): Post[] {
       timestamp: Math.floor(Date.now() / 1000) - 7200,
       upvoteCount: 8,
       downvoteCount: 1,
-      replyCount: 2
+      replyCount: 2,
+      postTimestamp: Math.floor(Date.now() / 1000) - 107200
     }
   ];
 }
