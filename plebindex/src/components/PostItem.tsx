@@ -19,10 +19,20 @@ export default function PostItem({ post }: PostItemProps) {
         paddingBottom: 8,
         background: '#f8f9fa',
         borderRadius: 6,
-        padding: 16,
+        padding: '12px',
+        width: '100%',
+        maxWidth: '100%',
+        overflow: 'hidden',
+        wordBreak: 'break-word'
       }}>
         {/* Thread title */}
-        <div style={{ fontWeight: 'bold', fontSize: 18, color: '#1976d2', marginBottom: 4 }}>
+        <div style={{ 
+          fontWeight: 'bold', 
+          fontSize: 'clamp(16px, 4vw, 18px)', 
+          color: '#1976d2', 
+          marginBottom: 4,
+          wordBreak: 'break-word'
+        }}>
           <a
             href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.id}`}
             target="_blank"
@@ -33,8 +43,16 @@ export default function PostItem({ post }: PostItemProps) {
           </a>
         </div>
         {/* Meta info */}
-        <div style={{ fontSize: 12, color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span>
+        <div style={{ 
+          fontSize: 12, 
+          color: '#888', 
+          marginBottom: 8, 
+          display: 'flex', 
+          flexWrap: 'wrap',
+          alignItems: 'center', 
+          gap: 8 
+        }}>
+          <span style={{ wordBreak: 'break-all' }}>
             <a
               href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
               target="_blank"
@@ -56,13 +74,17 @@ export default function PostItem({ post }: PostItemProps) {
             </a>
             {' | '}
             <TimestampDisplay timestamp={post.timestamp} />
-            {/* {' | '}
-            {post.postReplyCount || post.replyCount} posts  */}
           </span>
           <ReportButton postId={post.id} />
         </div>
         {/* Content */}
-        <div style={{ marginBottom: 8 }}>{post.content}</div>
+        <div style={{ 
+          marginBottom: 8,
+          wordBreak: 'break-word',
+          overflowWrap: 'break-word'
+        }}>
+          {post.content}
+        </div>
         {/* Post stats and report */}
         <div style={{ marginTop: 8 }}>
           <PostStats
@@ -91,26 +113,39 @@ export default function PostItem({ post }: PostItemProps) {
         background: '#f7fbff',
         borderRadius: 6,
         padding: 0,
+        width: '100%',
+        maxWidth: '100%',
+        overflow: 'hidden'
       }}
     >
-      {/* Quoted original post (title + author + time, all on one line, left-aligned with blue line) */}
+      {/* Quoted original post */}
       <div
         style={{
           marginTop: 16,
-          marginRight: 16,
-          marginLeft: 0,
+          marginRight: 12,
+          marginLeft: 12,
           marginBottom: 0,
           background: '#fff',
           borderRadius: 6,
-          padding: '12px 0 12px 0',
+          padding: '12px',
           boxShadow: '0 1px 2px rgba(25, 118, 210, 0.04)',
+          width: 'auto'
         }}
       >
-        <div style={{ marginLeft: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontWeight: 'bold', fontSize: 15, color: '#1976d2' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ 
+            fontWeight: 'bold', 
+            fontSize: 'clamp(14px, 3.5vw, 15px)', 
+            color: '#1976d2',
+            wordBreak: 'break-word'
+          }}>
             {post.postTitle || post.title || 'Untitled Post'}
           </span>
-          <span style={{ fontSize: 12, color: '#888' }}>
+          <span style={{ 
+            fontSize: 12, 
+            color: '#888',
+            wordBreak: 'break-all'
+          }}>
             by{' '}
             <a
               href={`https://seedit.app/#/u/${post.postAuthorAddress || post.authorAddress}/c/${post.parentCid || post.id}`}
@@ -128,7 +163,12 @@ export default function PostItem({ post }: PostItemProps) {
         </div>
       </div>
       {/* Reply content with blue vertical line */}
-      <div style={{ display: 'flex', flexDirection: 'row', margin: '0 16px 16px 16px' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'row', 
+        margin: '0 12px 16px 12px',
+        width: 'auto'
+      }}>
         {/* Blue vertical line */}
         <div
           style={{
@@ -142,10 +182,23 @@ export default function PostItem({ post }: PostItemProps) {
           }}
         />
         {/* Reply meta and content */}
-        <div style={{ flex: 1, paddingTop: 8 }}>
+        <div style={{ 
+          flex: 1, 
+          paddingTop: 8,
+          wordBreak: 'break-word',
+          overflowWrap: 'break-word'
+        }}>
           {/* Meta info for reply */}
-          <div style={{ fontSize: 12, color: '#888', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span>
+          <div style={{ 
+            fontSize: 12, 
+            color: '#888', 
+            display: 'flex', 
+            flexWrap: 'wrap',
+            alignItems: 'center', 
+            gap: 8, 
+            marginBottom: 4 
+          }}>
+            <span style={{ wordBreak: 'break-all' }}>
               by{' '}
               <a
                 href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
@@ -163,7 +216,13 @@ export default function PostItem({ post }: PostItemProps) {
             <ReportButton postId={post.id} />
           </div>
           {/* Reply content */}
-          <div style={{ marginBottom: 8 }}>{post.content}</div>
+          <div style={{ 
+            marginBottom: 8,
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word'
+          }}>
+            {post.content}
+          </div>
           {/* Post stats and report */}
           <div style={{ marginTop: 8 }}>
             <PostStats
