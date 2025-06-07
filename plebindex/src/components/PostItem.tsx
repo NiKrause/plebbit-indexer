@@ -69,7 +69,9 @@ export default function PostItem({ post }: PostItemProps) {
               style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
             >
               {post.authorDisplayName ? 
-                `${post.authorDisplayName.length > 20 ? post.authorDisplayName.substring(0, 20) : post.authorDisplayName} (u/${post.authorAddress})` 
+                <span title={`${post.authorDisplayName} (u/${post.authorAddress})`}>
+                  {`${post.authorDisplayName.length > 20 ? post.authorDisplayName.substring(0, 20) + '...' : post.authorDisplayName} (u/${post.authorAddress})`}
+                </span>
                 : `u/${post.authorAddress}`}
             </a>
             {' | '}
