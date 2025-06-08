@@ -125,7 +125,7 @@ export default function PostItem({ post }: PostItemProps) {
         style={{
           marginTop: 16,
           marginRight: 12,
-          marginLeft: 12,
+          marginLeft: 0,
           marginBottom: 0,
           background: '#fff',
           borderRadius: 6,
@@ -176,7 +176,7 @@ export default function PostItem({ post }: PostItemProps) {
       <div style={{ 
         display: 'flex', 
         flexDirection: 'row', 
-        margin: '0 12px 16px 12px',
+        margin: '12px 16px 12px',
         width: 'auto'
       }}>
         {/* Blue vertical line */}
