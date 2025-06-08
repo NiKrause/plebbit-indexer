@@ -148,7 +148,15 @@ export default function PostItem({ post }: PostItemProps) {
             color: '#888',
             wordBreak: 'break-all'
           }}>
-            by{' '}
+            <a
+              href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
+            >
+              {post.subplebbitAddress}
+            </a>
+            {' | '}by{' '}
             <a
               href={`https://seedit.app/#/u/${post.postAuthorAddress || post.authorAddress}/c/${post.parentCid || post.id}`}
               target="_blank"
@@ -201,6 +209,15 @@ export default function PostItem({ post }: PostItemProps) {
             marginBottom: 4 
           }}>
             <span style={{ wordBreak: 'break-all' }}>
+              {/* <a
+                href={`https://seedit.app/#/p/${post.subplebbitAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#888', textDecoration: 'underline', fontWeight: 500 }}
+              >
+                {post.subplebbitAddress}
+              </a>
+              {' | '} */}
               by{' '}
               <a
                 href={`https://seedit.app/#/u/${post.authorAddress}/c/${post.id}`}
