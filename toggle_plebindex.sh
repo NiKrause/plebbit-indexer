@@ -22,6 +22,16 @@ print_help() {
     echo "  $0 crawler plebindex   # Toggle both services (order doesn't matter)"
 }
 
+# Function to check if a service is running
+check_service_running() {
+    local service=$1
+    if ! docker-compose ps $service | grep -q "Up"; then
+        echo "Error: $service is not running. Please start it first."
+        return 1
+    fi
+    return 0
+}
+
 # Function to toggle plebindex
 toggle_plebindex() {
     echo "Toggling plebindex..."
@@ -29,20 +39,42 @@ toggle_plebindex() {
     # Check which instance is currently active
     if grep -q "plebindex01" ${PLEBINDEX_UPSTREAM_CONF} && ! grep -q "#server plebindex01" ${PLEBINDEX_UPSTREAM_CONF}; then
         echo "Switching from plebindex01 to plebindex02"
+        
+        # Check if plebindex02 is running
+        if ! check_service_running "plebindex02"; then
+            exit 1
+        fi
+        
+        # Update nginx config
         cat > ${PLEBINDEX_UPSTREAM_CONF} << EOF
 upstream plebindex_backend {
     # server plebindex01:3000;
     server plebindex02:3000;
 }
 EOF
+        
+        # Stop plebindex01
+        echo "Stopping plebindex01..."
+        docker-compose stop plebindex01
     else
         echo "Switching from plebindex02 to plebindex01"
+        
+        # Check if plebindex01 is running
+        if ! check_service_running "plebindex01"; then
+            exit 1
+        fi
+        
+        # Update nginx config
         cat > ${PLEBINDEX_UPSTREAM_CONF} << EOF
 upstream plebindex_backend {
     server plebindex01:3000;
     # server plebindex02:3000;
 }
 EOF
+        
+        # Stop plebindex02
+        echo "Stopping plebindex02..."
+        docker-compose stop plebindex02
     fi
 }
 
@@ -53,20 +85,42 @@ toggle_crawler() {
     # Check which instance is currently active
     if grep -q "crawler01" ${CRAWLER_UPSTREAM_CONF} && ! grep -q "#server crawler01" ${CRAWLER_UPSTREAM_CONF}; then
         echo "Switching from crawler01 to crawler02"
+        
+        # Check if crawler02 is running
+        if ! check_service_running "crawler02"; then
+            exit 1
+        fi
+        
+        # Update nginx config
         cat > ${CRAWLER_UPSTREAM_CONF} << EOF
 upstream crawler_backend {
     # server crawler01:3001;
     server crawler02:3001;
 }
 EOF
+        
+        # Stop crawler01
+        echo "Stopping crawler01..."
+        docker-compose stop crawler01
     else
         echo "Switching from crawler02 to crawler01"
+        
+        # Check if crawler01 is running
+        if ! check_service_running "crawler01"; then
+            exit 1
+        fi
+        
+        # Update nginx config
         cat > ${CRAWLER_UPSTREAM_CONF} << EOF
 upstream crawler_backend {
     server crawler01:3001;
     # server crawler02:3001;
 }
 EOF
+        
+        # Stop crawler02
+        echo "Stopping crawler02..."
+        docker-compose stop crawler02
     fi
 }
 
