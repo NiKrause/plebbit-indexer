@@ -35,11 +35,13 @@ const styles = {
   searchContainer: {
     width: '100%',
     marginBottom: '8px',
+    display: 'flex',
+    justifyContent: 'flex-start'
   },
   filterContainer: {
     display: 'flex',
     gap: '8px',
-    justifyContent: 'center',
+    justifyContent: 'flex-start'
   },
   socialContainer: {
     display: 'flex',

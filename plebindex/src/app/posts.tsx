@@ -106,7 +106,7 @@ async function PostsContent({
             <PostItem key={post.id} post={post} />
           ))
         ) : (
-          <div style={{ maxWidth: 700, width: '100%', textAlign: 'left', color: '#444', padding: '16px 0' }}>
+          <div style={{ maxWidth: 700, width: '100%', textAlign: 'left', color: '#444', padding: '16px' }}>
             No posts found.
           </div>
         )}

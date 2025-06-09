@@ -17,4 +17,9 @@
     max-width: 100%;
     margin: 0;
   }
+
+  /* Center elements on mobile */
+  .filterContainer {
+    justify-content: center;
+  }
 }

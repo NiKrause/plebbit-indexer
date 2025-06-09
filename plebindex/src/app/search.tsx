@@ -146,15 +146,15 @@ export default function SearchBar() {
     container: {
       position: 'relative' as const,
       display: 'flex' as const,
-      alignItems: 'center' as const,
+      alignItems: 'left' as const,
       flexDirection: 'column' as const,
-      gap: '10px'
+      gap: '12px'
     },
     inputWrapper: {
       position: 'relative' as const,
       width: '100%',
       display: 'flex' as const,
-      alignItems: 'center' as const,
+      alignItems: 'left' as const,
     },
     input: {
       width: '100%',
@@ -176,12 +176,12 @@ export default function SearchBar() {
       color: '#9ca3af'
     },
     filterContainer: {
-      display: 'flex' as const,
+      display: 'flex',
       gap: '10px',
       marginTop: '8px',
       width: '100%',
       flexWrap: 'wrap' as const,
-      justifyContent: 'center'
+      justifyContent: 'flex-start'
     },
     filterButton: {
       padding: '4px 8px',
@@ -194,11 +194,14 @@ export default function SearchBar() {
       backgroundColor: 'white',
       color: '#4b5563',
       display: 'flex' as const,
-      alignItems: 'center' as const,
+      alignItems: 'left' as const,
       gap: '4px',
     },
     dropdownContainer: {
       position: 'relative' as const,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      alignItems: 'flex-start'
     },
     dropdownButton: {
       padding: '4px 8px',
@@ -211,19 +214,22 @@ export default function SearchBar() {
       backgroundColor: 'white',
       color: '#4b5563',
       display: 'flex' as const,
-      alignItems: 'center' as const,
+      alignItems: 'left' as const,
       gap: '4px',
+      width: 'auto',
+      whiteSpace: 'nowrap'
     },
     dropdownContent: {
       position: 'absolute' as const,
       top: '100%',
       left: 0,
-      right: 0,
+      minWidth: '200px',
       backgroundColor: 'white',
       borderRadius: '4px',
       border: '1px solid #d1d5db',
       padding: '8px',
       zIndex: 1000,
+      width: 'max-content'
     },
     dropdownItem: {
       padding: '4px 8px',
