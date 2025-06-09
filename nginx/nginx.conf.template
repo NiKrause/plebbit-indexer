@@ -61,7 +61,7 @@ server {
     location /rpc {
         proxy_pass http://plebbit-cli:9138;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade $http_upgrade; # setting this to localhost makes plebbit-cli think we get request from localhost and we don't need an auth-key! 
         proxy_set_header Connection $connection_upgrade;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

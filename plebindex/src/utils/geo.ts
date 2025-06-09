@@ -24,13 +24,20 @@ const CONSENT_REQUIRED_COUNTRIES = [
 
 export async function requiresCookieConsent(): Promise<boolean> {
   try {
-    const response = await fetch('https://ipapi.co/json/');
+    
+    return true;
+    // First try to get location from browser's geolocation API
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
+    
+    // Then use the coordinates to get country info
+    const response = await fetch(`https://ipapi.co/${position.coords.latitude},${position.coords.longitude}/json/`);
     const data = await response.json();
     console.log('Country detected:', data.country_code);
     
     // Special handling for US (California)
     if (data.country_code === 'US') {
-      // Check if user is in California (state code: CA)
       return data.region_code === 'CA';
     }
     
