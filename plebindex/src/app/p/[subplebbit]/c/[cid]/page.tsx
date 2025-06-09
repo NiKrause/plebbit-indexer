@@ -35,7 +35,7 @@ export async function generateMetadata({
   const canonicalUrl = `https://plebindex.com/p/${resolvedParams.subplebbit}/c/${resolvedParams.cid}`;
 
   return {
-    title: `${title} - r/${post.subplebbitAddress}`,
+    title: `${title} - p/${post.subplebbitAddress}`,
     description,
     alternates: {
       canonical: canonicalUrl,
