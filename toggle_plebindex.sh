@@ -36,8 +36,8 @@ check_service_running() {
 toggle_plebindex() {
     echo "Toggling plebindex..."
     
-    # Check which instance is currently active
-    if grep -q "plebindex01" ${PLEBINDEX_UPSTREAM_CONF} && ! grep -q "#server plebindex01" ${PLEBINDEX_UPSTREAM_CONF}; then
+    # Check which instance is currently running
+    if docker-compose ps plebindex01 | grep -q "Up"; then
         echo "Switching from plebindex01 to plebindex02"
         
         # Check if plebindex02 is running
@@ -56,7 +56,7 @@ EOF
         # Stop plebindex01
         echo "Stopping plebindex01..."
         docker-compose stop plebindex01
-    else
+    elif docker-compose ps plebindex02 | grep -q "Up"; then
         echo "Switching from plebindex02 to plebindex01"
         
         # Check if plebindex01 is running
@@ -75,6 +75,9 @@ EOF
         # Stop plebindex02
         echo "Stopping plebindex02..."
         docker-compose stop plebindex02
+    else
+        echo "Error: Neither plebindex01 nor plebindex02 is running"
+        exit 1
     fi
 }
 
