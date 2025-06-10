@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getApiBaseUrl, getQueueStats, getKnownSubplebbitsStats } from '../api/admin';
+import { getApiBaseUrl } from '../api/admin';
 
 interface QueueStats {
   total: number;
@@ -12,6 +12,12 @@ interface QueueStats {
     total_failures: number;
     total_runs: number;
   }[];
+}
+
+interface KnownSubplebbitsStats {
+  total: number;
+  github_count: number;
+  dune_count: number;
 }
 
 interface QueueItem {
@@ -43,7 +49,7 @@ interface QueueError {
 
 export default function QueueStats() {
   const [stats, setStats] = useState<QueueStats | null>(null);
-  const [knownStats, setKnownStats] = useState<any>(null);
+  const [knownStats, setKnownStats] = useState<KnownSubplebbitsStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
