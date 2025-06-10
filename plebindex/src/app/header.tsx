@@ -13,7 +13,7 @@ const styles = {
   },
   container: {
     maxWidth: '1200px',
-    margin: '0 auto',
+    margin: '0',
     padding: '0 16px',
   },
   topRow: {
@@ -36,12 +36,14 @@ const styles = {
     width: '100%',
     marginBottom: '8px',
     display: 'flex',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
   },
   filterContainer: {
     display: 'flex',
     gap: '8px',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
   },
   socialContainer: {
     display: 'flex',

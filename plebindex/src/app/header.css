@@ -1,7 +1,7 @@
 .header-flex-row {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: s;
   justify-content: space-between;
 }
 
@@ -22,4 +22,16 @@
   .filterContainer {
     justify-content: center;
   }
+}
+
+.search-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding-left: 0;
+}
+
+.filterContainer {
+  justify-content: flex-start;
+  padding-left: 0;
 }
