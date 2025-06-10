@@ -23,25 +23,25 @@ const CONSENT_REQUIRED_COUNTRIES = [
 ];
 
 export async function requiresCookieConsent(): Promise<boolean> {
+  // Ensure this code only runs on the client side
+  if (typeof window === 'undefined') {
+    throw new Error('This function can only be called on the client side');
+  }
+
   try {
-    
-    return true;
-    // First try to get location from browser's geolocation API
-    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject);
-    });
-    
-    // Then use the coordinates to get country info
-    const response = await fetch(`https://ipapi.co/${position.coords.latitude},${position.coords.longitude}/json/`);
+    // Use IP-based geolocation
+    const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();
-    console.log('Country detected:', data.country_code);
+    const countryCode = data.country_code;
+    
+    console.log('Country detected:', countryCode);
     
     // Special handling for US (California)
-    if (data.country_code === 'US') {
+    if (countryCode === 'US') {
       return data.region_code === 'CA';
     }
     
-    return CONSENT_REQUIRED_COUNTRIES.includes(data.country_code);
+    return CONSENT_REQUIRED_COUNTRIES.includes(countryCode);
   } catch (error) {
     console.error('Error detecting country:', error);
     // If we can't detect the country, we don't want to show the consent banner
