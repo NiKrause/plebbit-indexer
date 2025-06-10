@@ -1,16 +1,45 @@
 import { indexPosts } from './indexer.js';
 import { withTimeout } from './utils.js';
-import { queueMultipleSubplebbits, getNextSubplebbitsFromQueue, updateSubplebbitStatus, isSubplebbitBlacklisted, isAuthorBlacklisted } from './db.js';
+import { queueMultipleSubplebbits, getNextSubplebbitsFromQueue, updateSubplebbitStatus, isSubplebbitBlacklisted, isAuthorBlacklisted, cleanupNullAddresses } from './db.js';
 
 /**
- * Fetches subplebbit addresses from GitHub and adds them to the queue
+ * Fetches subplebbit addresses from GitHub and adds them to known_subplebbits
  */
-export async function getSubplebbitAddresses() {
+export async function getSubplebbitAddresses(db) {
   try {
     const response = await fetch('https://raw.githubusercontent.com/plebbit/temporary-default-subplebbits/master/multisub.json');
     const subplebbitList = await response.json();
     const addresses = subplebbitList.subplebbits.map(item => item.address);
-    return addresses;
+    
+    // Add new addresses to known_subplebbits
+    const newAddresses = [];
+    for (const address of addresses) {
+      // Check if we already know about this subplebbit
+      const knownStmt = db.prepare('SELECT address FROM known_subplebbits WHERE address = ?');
+      const known = knownStmt.get(address);
+      
+      if (!known) {
+        // Add to known subplebbits
+        const insertStmt = db.prepare(`
+          INSERT INTO known_subplebbits (address, source, discovered_at, last_seen_at)
+          VALUES (?, 'github', ?, ?)
+        `);
+        const now = Date.now();
+        insertStmt.run(address, now, now);
+        newAddresses.push(address);
+      } else {
+        // Update last_seen_at
+        const updateStmt = db.prepare(`
+          UPDATE known_subplebbits 
+          SET last_seen_at = ? 
+          WHERE address = ?
+        `);
+        updateStmt.run(Date.now(), address);
+      }
+    }
+    
+    console.log(`Added ${newAddresses.length} new subplebbits from GitHub to known_subplebbits`);
+    return newAddresses;
   } catch (error) {
     console.error('Error fetching subplebbit addresses:', error);
     return [];
@@ -18,9 +47,12 @@ export async function getSubplebbitAddresses() {
 }
 
 /**
- * Initializes the queue with addresses from GitHub
+ * Initializes the queue with addresses from known_subplebbits
  */
 export async function initializeSubplebbitQueue(db) {
+  // First clean up any null addresses
+  cleanupNullAddresses(db);
+  
   // Reset any stuck processing items back to queued
   const resetStmt = db.prepare(`
     UPDATE subplebbit_queue 
@@ -30,9 +62,17 @@ export async function initializeSubplebbitQueue(db) {
   `);
   resetStmt.run(Date.now());
 
-  const addresses = await getSubplebbitAddresses();
+  // Get all addresses from known_subplebbits that aren't in the queue
+  const addressesStmt = db.prepare(`
+    SELECT k.address 
+    FROM known_subplebbits k
+    LEFT JOIN subplebbit_queue q ON k.address = q.address
+    WHERE q.address IS NULL
+  `);
+  const addresses = addressesStmt.all().map(row => row.address);
+
   if (addresses.length > 0) {
-    console.log(`Queueing ${addresses.length} subplebbit addresses...`);
+    console.log(`Queueing ${addresses.length} subplebbit addresses from known_subplebbits...`);
     queueMultipleSubplebbits(db, addresses);
   }
   return addresses.length;
@@ -353,10 +393,10 @@ export function startQueueProcessor(plebbit, db, intervalMinutes = 15) {
  * Updates the queue with new addresses from GitHub
  */
 export async function refreshSubplebbitQueue(db) {
-  const addresses = await getSubplebbitAddresses();
-  if (addresses.length > 0) {
-    console.log(`Refreshing queue with ${addresses.length} subplebbit addresses...`);
-    queueMultipleSubplebbits(db, addresses);
+  const newAddresses = await getSubplebbitAddresses(db);
+  if (newAddresses.length > 0) {
+    console.log(`Queueing ${newAddresses.length} new subplebbit addresses...`);
+    queueMultipleSubplebbits(db, newAddresses);
   }
-  return addresses.length;
+  return newAddresses.length;
 }

@@ -51,7 +51,7 @@ export default function ImprintPage() {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Service Description</h2>
               <div className="space-y-4 text-gray-700">
                 <p>
-                  This service provides a search engine for content within the decentralized peer-to-peer community &quot;Plebbit&quot;, which operates on the IPFS (InterPlanetary File System) network. The service indexes publicly accessible content from independently operated subforums (so-called &quot;SubPlebbit communities&quot;) and makes it searchable.
+                  This service provides an independent search engine for content in the <a href="https://plebbit.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 transition-colors">Plebbit</a> community, which operates on the IPFS (InterPlanetary File System) network. The service indexes publicly accessible content from independently operated subforums (so-called &quot;SubPlebbit communities&quot;) and makes it searchable.
                 </p>
                 <p>
                   We do not host or operate any communities ourselves and are not responsible for the content posted within them. Each SubPlebbit community is responsible for its own content, managed by its respective users or moderators.

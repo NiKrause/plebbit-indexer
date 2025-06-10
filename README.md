@@ -116,11 +116,28 @@ This will:
 
 ### Crawler (Backend)
 
-- Fetches a list of subplebbit addresses from a public JSON file.
+- Fetches subplebbit addresses from multiple sources:
+  - A public JSON file on GitHub
+  - Dune Analytics query results (executed weekly)
 - For each subplebbit:
-  - Fetches all posts and stores them in a local SQLite database.
-  - Listens for updates and re-indexes as needed.
-- Exposes a REST API at `/api/posts` to retrieve all indexed posts.
+  - Fetches all posts and stores them in a local SQLite database
+  - Listens for updates and re-indexes as needed
+- Maintains a `known_subplebbits` table to track all discovered subplebbits and their sources
+- Exposes a REST API at `/api/posts` to retrieve all indexed posts
+- Includes content moderation capabilities (optional)
+- Features a queue system for processing subplebbits with retry logic and error tracking
+
+#### Dune Analytics Integration
+
+The crawler integrates with Dune Analytics to discover new subplebbit communities:
+
+- **Weekly Query Execution**: Executes a Dune query once a week to refresh the list of `.eth` and `.sol` plebbit communities
+- **Daily Results Processing**: Fetches and processes the query results once a day to check for new communities
+- **Duplicate Prevention**: Maintains a record of all known subplebbits to avoid processing duplicates
+- **Configuration**: 
+  - `DUNE_API_KEY`: Your Dune Analytics API key
+  - `DUNE_QUERY_EXECUTE_INTERVAL_HOURS`: Interval for query execution (default: 168 hours/1 week)
+  - `DUNE_QUERY_FETCH_INTERVAL_HOURS`: Interval for fetching results (default: 24 hours/1 day)
 
 ### Plebindex (Frontend)
 

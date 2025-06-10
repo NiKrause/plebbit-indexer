@@ -129,6 +129,14 @@ export function getDb() {
     CREATE INDEX IF NOT EXISTS idx_flagged_posts_moderation_action ON flagged_posts(moderation_action);
     CREATE INDEX IF NOT EXISTS idx_flagged_posts_subplebbit ON flagged_posts(subplebbitAddress);
     CREATE INDEX IF NOT EXISTS idx_flagged_posts_author ON flagged_posts(authorAddress);
+
+    -- Known subplebbits table for tracking discovered subplebbits
+    CREATE TABLE IF NOT EXISTS known_subplebbits (
+      address TEXT PRIMARY KEY,
+      source TEXT NOT NULL,
+      discovered_at INTEGER NOT NULL,
+      last_seen_at INTEGER NOT NULL
+    );
   `);
   
   // Check if title column is NOT NULL and fix if needed
@@ -300,17 +308,23 @@ export function getNextSubplebbitsFromQueue(db, limit = 10) {
  * Queue multiple subplebbit addresses
  */
 export function queueMultipleSubplebbits(db, addresses) {
+  // Filter out null/undefined addresses
+  const validAddresses = addresses.filter(address => address != null);
+  
+  if (validAddresses.length !== addresses.length) {
+    console.log(`Filtered out ${addresses.length - validAddresses.length} null/undefined addresses`);
+  }
+  
   const transaction = db.transaction((addressList) => {
     for (const address of addressList) {
       if (isSubplebbitBlacklisted(db, address)) {
-        console.log(`Subplebbit ${address} is blacklisted, skipping indexing`);
         continue;
       }
       queueSubplebbit(db, address);
     }
   });
   
-  transaction(addresses);
+  transaction(validAddresses);
 }
 
 /**
@@ -417,4 +431,15 @@ export function takeModerationAction(db, flaggedPostId, action, moderatedBy = 's
   });
   
   return transaction();
+}
+
+// Add this function to clean up null addresses
+export function cleanupNullAddresses(db) {
+  const stmt = db.prepare(`
+    DELETE FROM subplebbit_queue 
+    WHERE address IS NULL
+  `);
+  const result = stmt.run();
+  console.log(`Cleaned up ${result.changes} null addresses from queue`);
+  return result.changes;
 }

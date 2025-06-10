@@ -8,6 +8,7 @@ import { getPlebbitClient } from '../plebbitClient.js';
 import { flagPost } from '../contentModeration.js';
 import { SitemapStream, streamToPromise } from 'sitemap';
 import { createGzip } from 'zlib';
+import { executeDuneQuery, processDuneResults } from '../duneAnalytics.js';
 
 export async function startServer(_db) {
   const db = getDb(); 
@@ -992,6 +993,48 @@ export async function startServer(_db) {
     } catch (err) {
       console.error('Error generating sitemap:', err);
       res.status(500).send('Error generating sitemap');
+    }
+  });
+
+  // Add this after the other queue endpoints
+  app.get('/api/queue/known-subplebbits', requireAuth, async (req, res) => {
+    try {
+      const db = getDb();
+      
+      const countQuery = `
+        SELECT 
+          COUNT(*) as total,
+          SUM(CASE WHEN source = 'github' THEN 1 ELSE 0 END) as github_count,
+          SUM(CASE WHEN source = 'dune' THEN 1 ELSE 0 END) as dune_count
+        FROM known_subplebbits
+      `;
+      
+      const stmt = db.prepare(countQuery);
+      const stats = stmt.get();
+      
+      res.json(stats);
+    } catch (err) {
+      console.error('Error fetching known subplebbits stats:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Add Dune API endpoint
+  app.post('/api/dune/trigger', requireAuth, async (req, res) => {
+    try {
+
+      await executeDuneQuery();
+      
+      const db = getDb();
+      const newCount = await processDuneResults(db);
+      
+      res.json({ 
+        success: true, 
+        message: `Dune query executed successfully. Found ${newCount} new subplebbits.` 
+      });
+    } catch (error) {
+      console.error('Error triggering Dune query:', error);
+      res.status(500).json({ error: error.message });
     }
   });
 

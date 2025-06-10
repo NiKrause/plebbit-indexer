@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getApiBaseUrl } from '../api/admin';
+import { getApiBaseUrl, getQueueStats, getKnownSubplebbitsStats } from '../api/admin';
 
 interface QueueStats {
   total: number;
@@ -43,6 +43,7 @@ interface QueueError {
 
 export default function QueueStats() {
   const [stats, setStats] = useState<QueueStats | null>(null);
+  const [knownStats, setKnownStats] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -76,13 +77,19 @@ export default function QueueStats() {
       const activityResponse = await fetch(activityUrl);
       if (!activityResponse.ok) throw new Error('Failed to fetch queue activity');
       const activityData = await activityResponse.json();
-      setRecentActivity(activityData.slice(0, 10));
+      setRecentActivity(activityData);
 
       // Fetch queue errors
       const errorsResponse = await fetch(`${apiBaseUrl}/api/queue/errors?auth=${authToken}`);
       if (!errorsResponse.ok) throw new Error('Failed to fetch queue errors');
       const errorsData = await errorsResponse.json();
       setQueueErrors(errorsData);
+
+      // Fetch known subplebbits stats
+      const subplebbitStatsResponse = await fetch(`${apiBaseUrl}/api/queue/known-subplebbits?auth=${authToken}`);
+      if (!subplebbitStatsResponse.ok) throw new Error('Failed to fetch known subplebbits stats');
+      const subplebbitStatsData = await subplebbitStatsResponse.json();
+      setKnownStats(subplebbitStatsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load queue data');
     } finally {
@@ -207,6 +214,29 @@ export default function QueueStats() {
     }
   };
 
+  const handleTriggerDuneQuery = async () => {
+    try {
+      setProcessingAction(true);
+      const authToken = localStorage.getItem('plebbit_admin_auth');
+      if (!authToken) {
+        throw new Error('No auth token found');
+      }
+      const apiBaseUrl = getApiBaseUrl();
+      
+      const response = await fetch(`${apiBaseUrl}/api/dune/trigger?auth=${authToken}`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) throw new Error('Failed to trigger Dune query');
+      
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to trigger Dune query');
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
@@ -232,6 +262,45 @@ export default function QueueStats() {
     }}>
       <h2 style={{ marginBottom: '20px', color: '#333' }}>Queue Statistics</h2>
       
+      {/* Known Subplebbits Stats */}
+      {knownStats && (
+        <div style={{ marginBottom: '20px' }}>
+          <h3>Known Subplebbits</h3>
+          <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+            <div style={{
+              padding: '15px',
+              background: 'white',
+              borderRadius: '4px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              flex: 1
+            }}>
+              <div style={{ fontSize: '0.9em', color: '#666' }}>Total Known</div>
+              <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>{knownStats.total}</div>
+            </div>
+            <div style={{
+              padding: '15px',
+              background: 'white',
+              borderRadius: '4px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              flex: 1
+            }}>
+              <div style={{ fontSize: '0.9em', color: '#666' }}>From GitHub</div>
+              <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>{knownStats.github_count}</div>
+            </div>
+            <div style={{
+              padding: '15px',
+              background: 'white',
+              borderRadius: '4px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              flex: 1
+            }}>
+              <div style={{ fontSize: '0.9em', color: '#666' }}>From Dune</div>
+              <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>{knownStats.dune_count}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Queue Management */}
       <div style={{ marginBottom: '20px' }}>
         <h3 style={{ marginBottom: '10px', color: '#666' }}>Queue Management</h3>
@@ -279,6 +348,21 @@ export default function QueueStats() {
             }}
           >
             Refresh Queue
+          </button>
+          <button
+            onClick={handleTriggerDuneQuery}
+            disabled={processingAction}
+            style={{
+              padding: '8px 16px',
+              background: '#9C27B0',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: processingAction ? 'not-allowed' : 'pointer',
+              opacity: processingAction ? 0.7 : 1
+            }}
+          >
+            Trigger Dune Query
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <input
@@ -374,8 +458,8 @@ export default function QueueStats() {
               </tr>
             </thead>
             <tbody>
-              {recentActivity.map((item) => (
-                <tr key={item.address} style={{ borderTop: '1px solid #eee' }}>
+              {recentActivity.map((item, index) => (
+                <tr key={`${item.address}-${item.updated_at}-${index}`} style={{ borderTop: '1px solid #eee' }}>
                   <td style={{ padding: '12px' }}>{item.address}</td>
                   <td style={{ padding: '12px' }}>
                     <span style={{
@@ -465,8 +549,8 @@ export default function QueueStats() {
                 </tr>
               </thead>
               <tbody>
-                {queueErrors.map((error) => (
-                  <tr key={error.address} style={{ borderTop: '1px solid #eee' }}>
+                {queueErrors.map((error, index) => (
+                  <tr key={`${error.address}-${error.errors[0]?.updated_at}-${index}`} style={{ borderTop: '1px solid #eee' }}>
                     <td style={{ padding: '12px' }}>{error.address}</td>
                     <td style={{ padding: '12px' }}>
                       {error.errors.map((err, index) => (

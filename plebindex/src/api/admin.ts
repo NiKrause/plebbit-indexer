@@ -135,3 +135,38 @@ export async function getFlaggedPostsStats(): Promise<AdminStats | null> {
     return null;
   }
 } 
+
+export async function getKnownSubplebbitsStats(): Promise<{ total: number, github_count: number, dune_count: number } | null> {
+  const apiBaseUrl = getApiBaseUrl();
+  const authToken = getAuthToken();
+  
+  if (!authToken) {
+    throw new Error('No authentication token found');
+  }
+  
+  const params = new URLSearchParams();
+  params.append('auth', authToken);
+  
+  const baseEndpoint = `api/queue/known-subplebbits?${params.toString()}`;
+  const url = apiBaseUrl ? `${apiBaseUrl}/${baseEndpoint}` : baseEndpoint;
+  
+  try {
+    const response = await fetch(url, { 
+      method: 'GET',
+      cache: 'no-store', 
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching known subplebbits stats:', error);
+    return null;
+  }
+}
