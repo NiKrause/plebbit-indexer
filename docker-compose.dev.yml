@@ -33,6 +33,7 @@ services:
         QUEUE_REFRESH_INTERVAL: ${QUEUE_REFRESH_INTERVAL}
         ENABLE_CONTENT_MODERATION: ${ENABLE_CONTENT_MODERATION}
         DUNE_API_KEY: ${DUNE_API_KEY}
+        DUNE_QUERY_ID: ${DUNE_QUERY_ID}
         DUNE_QUERY_EXECUTE_INTERVAL_HOURS: ${DUNE_QUERY_EXECUTE_INTERVAL_HOURS}
         DUNE_QUERY_FETCH_INTERVAL_HOURS: ${DUNE_QUERY_FETCH_INTERVAL_HOURS}
     ports:
@@ -52,6 +53,7 @@ services:
       - ENABLE_CONTENT_MODERATION=${ENABLE_CONTENT_MODERATION}
       - DB_PATH=/app/data/plebbit_posts.db
       - DUNE_API_KEY=${DUNE_API_KEY}
+      - DUNE_QUERY_ID=${DUNE_QUERY_ID}
       - DUNE_QUERY_EXECUTE_INTERVAL_HOURS=${DUNE_QUERY_EXECUTE_INTERVAL_HOURS}
       - DUNE_QUERY_FETCH_INTERVAL_HOURS=${DUNE_QUERY_FETCH_INTERVAL_HOURS}
     depends_on:
@@ -60,8 +62,9 @@ services:
       - "host.docker.internal:host-gateway"
 
   plebbit-cli:
-    build: ./plebbit-cli
-    image: plebbit-cli
+    # build: ./plebbit-cli
+    # image: plebbit-cli
+    image: silkroadnomad/plebbit-cli:v0.0.1
     ports:
       - "9138:9138"
     volumes:

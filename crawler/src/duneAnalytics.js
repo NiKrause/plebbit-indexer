@@ -2,7 +2,7 @@ import { getDb } from './db.js';
 import { queueMultipleSubplebbits } from './db.js';
 
 const DUNE_API_KEY = process.env.DUNE_API_KEY;
-const DUNE_QUERY_ID = '3740068';
+const DUNE_QUERY_ID = process.env.DUNE_QUERY_ID || '5261403'; // Fallback to default if not set
 const DUNE_API_BASE = 'https://api.dune.com/api/v1';
 
 /**
