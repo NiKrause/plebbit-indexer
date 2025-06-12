@@ -9,13 +9,20 @@ export default function Analytics() {
 
   useEffect(() => {
     const checkConsent = async () => {
-      const consent = localStorage.getItem('cookie-consent');
-      const needsConsent = await requiresCookieConsent();
-      
-      // Enable analytics if either:
-      // 1. User has explicitly consented
-      // 2. User is from a non-EU country and no consent is stored
-      setHasConsent(consent === 'accepted' || (!needsConsent && consent === null));
+      try {
+        const consent = localStorage.getItem('cookie-consent');
+        const needsConsent = await requiresCookieConsent();
+        
+        // Enable analytics if either:
+        // 1. User has explicitly consented
+        // 2. User is from a non-EU country and no consent is stored
+        setHasConsent(consent === 'accepted' || (!needsConsent && consent === null));
+      } catch (error) {
+        console.error('Error in checkConsent:', error);
+        // Fallback: only enable if user has explicitly consented
+        const consent = localStorage.getItem('cookie-consent');
+        setHasConsent(consent === 'accepted');
+      }
     };
 
     checkConsent();

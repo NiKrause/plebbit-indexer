@@ -1,2 +1,15 @@
 node_modules/
 *.db
+*.log
+.git/
+.plebbit/
+test/
+*.test.js
+.env*
+README.md
+pnpm-lock.yaml
+# package-lock.json
+Dockerfile*
+.dockerignore
+coverage/
+.nyc_output/

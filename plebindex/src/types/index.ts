@@ -97,3 +97,17 @@ export interface AdminStats {
 export interface ModerationAction {
   action: 'ignore' | 'deindex_comment' | 'deindex_author' | 'deindex_subplebbit';
 }
+export interface SubplebbitStats {
+  address: string;
+  title: string;
+  totalPosts: number;
+  cph: number; // Comments per hour
+  oldestPost: number; // timestamp
+  newestPost: number; // timestamp
+  createdAt: number; // timestamp (using oldestPost as proxy)
+}
+
+export interface SubplebbitsResponse {
+  subplebbits: SubplebbitStats[];
+  total: number;
+}

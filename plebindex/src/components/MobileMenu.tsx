@@ -109,6 +109,17 @@ export default function MobileMenu() {
             gap: '16px',
           }}>
             <Link
+              href="/subplebbits"
+              onClick={() => setIsOpen(false)}
+              style={{
+                padding: '8px 0',
+                color: '#4b5563',
+                textDecoration: 'none',
+              }}
+            >
+              Subplebbits
+            </Link>
+            <Link
               href="https://t.me/plebbitindexer"
               target="_blank"
               rel="noopener noreferrer"

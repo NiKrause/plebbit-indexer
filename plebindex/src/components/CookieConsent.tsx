@@ -15,28 +15,35 @@ export default function CookieConsent() {
 
   useEffect(() => {
     const checkCountry = async () => {
-      const needsConsent = await requiresCookieConsent();
-      
-      const consent = localStorage.getItem('cookie-consent');
-      
-      if (needsConsent) {
-        // For countries requiring consent, show banner if no consent is stored
-        if (consent === null) {
-          setShowBanner(true);
+      try {
+        const needsConsent = await requiresCookieConsent();
+        
+        const consent = localStorage.getItem('cookie-consent');
+        
+        if (needsConsent) {
+          // For countries requiring consent, show banner if no consent is stored
+          if (consent === null) {
+            setShowBanner(true);
+          } else {
+            setAnalyticsEnabled(consent === 'accepted');
+          }
         } else {
-          setAnalyticsEnabled(consent === 'accepted');
+          // For other countries, enable analytics by default
+          if (consent === null) {
+            localStorage.setItem('cookie-consent', 'accepted');
+            setAnalyticsEnabled(true);
+            window.gtag?.('consent', 'update', {
+              'analytics_storage': 'granted'
+            });
+          } else {
+            setAnalyticsEnabled(consent === 'accepted');
+          }
         }
-      } else {
-        // For other countries, enable analytics by default
-        if (consent === null) {
-          localStorage.setItem('cookie-consent', 'accepted');
-          setAnalyticsEnabled(true);
-          window.gtag?.('consent', 'update', {
-            'analytics_storage': 'granted'
-          });
-        } else {
-          setAnalyticsEnabled(consent === 'accepted');
-        }
+      } catch (error) {
+        console.error('Error in checkCountry:', error);
+        // Fallback: don't show banner and don't enable analytics
+        setShowBanner(false);
+        setAnalyticsEnabled(false);
       }
     };
 
@@ -92,7 +99,7 @@ export default function CookieConsent() {
               }}
             >
               We use Google Analytics to understand how our service is used and to improve user experience.
-              This helps us make {process.env.NEXT_PUBLIC_APP_TITLE ?? "PlebIndex"} better for everyone. You can choose to accept or decline analytics cookies.better for everyone. You can choose to accept or decline analytics cookies.
+              This helps us make {process.env.NEXT_PUBLIC_APP_TITLE ?? "PlebIndex"} better for everyone. You can choose to accept or decline analytics cookies.
             </p>
           </div>
           <div className="flex gap-4 mt-4 md:mt-0">

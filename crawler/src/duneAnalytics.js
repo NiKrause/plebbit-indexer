@@ -10,7 +10,9 @@ const DUNE_API_BASE = 'https://api.dune.com/api/v1';
  */
 export async function executeDuneQuery() {
   if (!DUNE_API_KEY) {
-    throw new Error('DUNE_API_KEY environment variable is required');
+    console.log('DUNE_API_KEY environment variable is required');
+    return;
+    // throw new Error('DUNE_API_KEY environment variable is required');
   }
 
   console.log('Starting Dune query execution...');
@@ -45,7 +47,9 @@ export async function executeDuneQuery() {
  */
 export async function fetchDuneResults() {
   if (!DUNE_API_KEY) {
-    throw new Error('DUNE_API_KEY environment variable is required');
+    console.log('DUNE_API_KEY environment variable is required');
+    return [];
+    // throw new Error('DUNE_API_KEY environment variable is required');
   }
 
   try {

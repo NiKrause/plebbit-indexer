@@ -28,9 +28,22 @@ export async function requiresCookieConsent(): Promise<boolean> {
     throw new Error('This function can only be called on the client side');
   }
 
+  // Skip API call in development to avoid rate limits
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Development mode: skipping geolocation API call');
+    // Return false to not show consent banner in development
+    // Change to true if you want to test the consent banner
+    return false;
+  }
+
   try {
     // Use IP-based geolocation
     const response = await fetch('https://ipapi.co/json/');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const data = await response.json();
     const countryCode = data.country_code;
     

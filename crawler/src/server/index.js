@@ -16,22 +16,21 @@ export async function startServer(_db) {
   const PORT = 3001;
   app.use(cors());
 
-  try {
-    const tableStmt = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'");
-    const table = tableStmt.get();
-    
-    if (!table) {
-      console.log('Posts table does not exist');
-      return;
-    }
-
-    const countStmt = db.prepare('SELECT COUNT(*) as count FROM posts');
-    const result = countStmt.get();
-    console.log(`Posts table exists with ${result.count} records`);
-    
-  } catch (err) {
-    console.error('Error checking posts table:', err);
-  }
+  const requireAuth = (req, res, next) => {
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+      
+      const authKey = req.query.auth;
+      
+      // Allow access if either token or auth key is valid
+      if ((token && token === process.env.PLEBBIT_AUTH_TOKEN) || 
+          (authKey && authKey === process.env.PLEBBIT_AUTH_KEY)) {
+        return next();
+      }
+      
+      return res.status(401).json({ error: 'Unauthorized - Invalid or missing authentication' });
+  };
+  
 
   app.get('/api/posts', async (req, res) => {
     try {
@@ -174,6 +173,53 @@ export async function startServer(_db) {
         }
       });
     } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/subplebbits', async (req, res) => {
+    try {
+      const db = getDb();
+      const sevenDaysAgo = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
+      const subplebbitsQuery = `
+        SELECT 
+          p.subplebbitAddress,
+          COUNT(*) as totalPosts,
+          COUNT(CASE WHEN p.timestamp > ? THEN 1 END) as recentPosts,
+          MIN(p.timestamp) as oldestPost,
+          MAX(p.timestamp) as newestPost
+        FROM posts p
+        GROUP BY p.subplebbitAddress
+        HAVING totalPosts > 0
+        ORDER BY totalPosts DESC
+      `;
+      
+      const stmt = db.prepare(subplebbitsQuery);
+      const subplebbits = stmt.all(sevenDaysAgo);
+      
+      // Calculate CPH (Comments Per Hour) for each subplebbit
+      const result = subplebbits.map(sub => {
+        const hoursInWeek = 7 * 24; // 168 hours
+        const cph = (sub.recentPosts / hoursInWeek).toFixed(6);
+        
+        return {
+          address: sub.subplebbitAddress,
+          title: sub.subplebbitAddress, // We don't have actual titles stored, use address
+          totalPosts: sub.totalPosts,
+          cph: parseFloat(cph),
+          oldestPost: sub.oldestPost,
+          newestPost: sub.newestPost,
+          // We don't have createdAt, so we'll use the oldest post timestamp as a proxy
+          createdAt: sub.oldestPost
+        };
+      });
+      
+      res.json({
+        subplebbits: result,
+        total: result.length
+      });
+    } catch (err) {
+      console.error('Error fetching subplebbits:', err);
       res.status(500).json({ error: err.message });
     }
   });
@@ -372,24 +418,6 @@ export async function startServer(_db) {
       res.status(500).json({ error: err.message });
     }
   });
-
-  // Add this middleware function after the imports and before the routes
-  const requireAuth = (req, res, next) => {
-    // Check for token in Authorization header
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-    
-    // Check for auth key in query parameters
-    const authKey = req.query.auth;
-    
-    // Allow access if either token or auth key is valid
-    if ((token && token === process.env.PLEBBIT_AUTH_TOKEN) || 
-        (authKey && authKey === process.env.PLEBBIT_AUTH_KEY)) {
-      return next();
-    }
-    
-    return res.status(401).json({ error: 'Unauthorized - Invalid or missing authentication' });
-  };
 
   // Modify the queue endpoints to use the middleware
   app.get('/api/queue', requireAuth, async (req, res) => {
@@ -841,8 +869,7 @@ export async function startServer(_db) {
    * @since 1.0.0
    * @author Plebbit Indexer Team
    */
-  // app.post('/api/posts/:id/flag', requireAuth, express.json(), async (req, res) => {
-    app.post('/api/posts/:id/flag', express.json(), async (req, res) => {
+  app.post('/api/posts/:id/flag', express.json(), async (req, res) => {
     try {
       const { id } = req.params;
       const { reason } = req.body;
@@ -1019,10 +1046,9 @@ export async function startServer(_db) {
     }
   });
 
-  // Add Dune API endpoint
+  // Keep only one Dune API endpoint at the end
   app.post('/api/dune/trigger', requireAuth, async (req, res) => {
     try {
-
       await executeDuneQuery();
       
       const db = getDb();
