@@ -20,12 +20,16 @@ export async function executeDuneQuery() {
     const response = await fetch(`${DUNE_API_BASE}/query/${DUNE_QUERY_ID}/execute`, {
       method: 'POST',
       headers: {
-        'X-Dune-API-Key': DUNE_API_KEY
-      }
+        'X-Dune-API-Key': DUNE_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
     });
 
     if (!response.ok) {
       console.error(`Dune query execution failed with status: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
       throw new Error(`Failed to execute Dune query: ${response.statusText}`);
     }
 
