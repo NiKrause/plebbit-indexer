@@ -515,12 +515,14 @@ export async function startServer(_db) {
   
   app.post('/api/queue/refresh', requireAuth, async (req, res) => {
     try {
+      console.log('[API] Received request to refresh queue');
       const db = getDb();
+      console.log('[API] Starting queue refresh process...');
       const count = await refreshSubplebbitQueue(db);
-      
+      console.log(`[API] Queue refresh completed. Added ${count} new addresses`);
       res.json({ success: true, message: `Queue refreshed with ${count} addresses` });
     } catch (err) {
-      console.error('Error refreshing queue:', err);
+      console.error('[API] Error refreshing queue:', err);
       res.status(500).json({ error: err.message });
     }
   });

@@ -5,11 +5,13 @@ import { queueMultipleSubplebbits, getNextSubplebbitsFromQueue, updateSubplebbit
 /**
  * Fetches subplebbit addresses from GitHub and adds them to known_subplebbits
  */
-export async function getSubplebbitAddresses(db) {
+export async function getNewSubplebbitAddressesFromGithub(db) {
   try {
+    console.log('[GitHub] Fetching subplebbit addresses from GitHub...');
     const response = await fetch('https://raw.githubusercontent.com/plebbit/temporary-default-subplebbits/master/multisub.json');
     const subplebbitList = await response.json();
     const addresses = subplebbitList.subplebbits.map(item => item.address);
+    console.log(`[GitHub] Retrieved ${addresses.length} addresses from GitHub`);
     
     // Add new addresses to known_subplebbits
     const newAddresses = [];
@@ -19,6 +21,7 @@ export async function getSubplebbitAddresses(db) {
       const known = knownStmt.get(address);
       
       if (!known) {
+        console.log(`[GitHub] Found new subplebbit: ${address}`);
         // Add to known subplebbits
         const insertStmt = db.prepare(`
           INSERT INTO known_subplebbits (address, source, discovered_at, last_seen_at)
@@ -38,10 +41,10 @@ export async function getSubplebbitAddresses(db) {
       }
     }
     
-    console.log(`Added ${newAddresses.length} new subplebbits from GitHub to known_subplebbits`);
+    console.log(`[GitHub] Added ${newAddresses.length} new subplebbits to known_subplebbits`);
     return newAddresses;
   } catch (error) {
-    console.error('Error fetching subplebbit addresses:', error);
+    console.error('[GitHub] Error fetching subplebbit addresses:', error);
     return [];
   }
 }
@@ -54,15 +57,16 @@ export async function initializeSubplebbitQueue(db) {
   cleanupNullAddresses(db);
   
   // Reset any stuck processing items back to queued
+  console.log('[Queue] Resetting any stuck processing items back to queued');
   const resetStmt = db.prepare(`
     UPDATE subplebbit_queue 
     SET status = 'queued', 
         updated_at = ? 
-    WHERE status = 'processing'
   `);
   resetStmt.run(Date.now());
 
   // Get all addresses from known_subplebbits that aren't in the queue
+  console.log('[Queue] Getting all addresses from known_subplebbits that aren\'t in the queue');
   const addressesStmt = db.prepare(`
     SELECT k.address 
     FROM known_subplebbits k
@@ -70,6 +74,7 @@ export async function initializeSubplebbitQueue(db) {
     WHERE q.address IS NULL
   `);
   const addresses = addressesStmt.all().map(row => row.address);
+  console.log(`[Queue] Found ${addresses.length} addresses from known_subplebbits that aren't in the queue`);
 
   if (addresses.length > 0) {
     console.log(`Queueing ${addresses.length} subplebbit addresses from known_subplebbits...`);
@@ -133,7 +138,8 @@ export async function processSubplebbitQueue(plebbit, db, batchSize = 10) {
     } catch (err) {
       console.error(`Error processing subplebbit at address ${address}:`, err);
       // Mark as failed with error message
-      updateSubplebbitStatus(db, address, 'failed', err.message || 'Unknown error');
+      const errorMessage = err.details ? `${err.message} (Details: ${err.details})` : err.message || 'Unknown error';
+      updateSubplebbitStatus(db, address, 'failed', errorMessage);
     }
   }
   
@@ -147,7 +153,8 @@ export function setupSubplebbitListener(sub, db, address) {
   // Listen for errors on this subplebbit
   sub.on('error', (err) => {
     console.error(`Subplebbit error event for ${address}:`, err);
-    updateSubplebbitStatus(db, address, 'failed', err.message || 'Error event');
+    const errorMessage = err.details ? `${err.message} (Details: ${err.details})` : err.message || 'Error event';
+    updateSubplebbitStatus(db, address, 'failed', errorMessage);
   });
 
   // Listen for updates
@@ -158,13 +165,19 @@ export function setupSubplebbitListener(sub, db, address) {
       updateSubplebbitStatus(db, address, 'success');
     } catch (err) {
       console.error(`Error updating/indexing subplebbit at ${address} (on update event):`, err);
-      updateSubplebbitStatus(db, address, 'failed', err.message || 'Update event error');
+      const errorMessage = err.details ? `${err.message} (Details: ${err.details})` : err.message || 'Update event error';
+      updateSubplebbitStatus(db, address, 'failed', errorMessage);
     }
   });
 }
 
 export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
   console.log(`[Indexer] Starting indexing for subplebbit ${sub.address} (isUpdateEvent: ${isUpdateEvent})`);
+  console.log(`[Indexer] Subplebbit details:
+    Title: ${sub.title || 'N/A'}
+    Description: ${sub.description || 'N/A'}
+    Tags: ${sub.tags?.join(', ') || 'N/A'}
+  `);
   
   // Check if subplebbit is blacklisted
   if (isSubplebbitBlacklisted(db, sub.address)) {
@@ -390,13 +403,23 @@ export function startQueueProcessor(plebbit, db, intervalMinutes = 15) {
 }
 
 /**
- * Updates the queue with new addresses from GitHub
+ * 1. Updates known_subplebbits with new addresses from GitHub
+ * 2. Initializes the queue with addresses from known_subplebbits
  */
 export async function refreshSubplebbitQueue(db) {
-  const newAddresses = await getSubplebbitAddresses(db);
-  if (newAddresses.length > 0) {
-    console.log(`Queueing ${newAddresses.length} new subplebbit addresses...`);
-    queueMultipleSubplebbits(db, newAddresses);
-  }
+  console.log('[Refresh] Starting queue refresh process');
+  console.log('[Refresh] Fetching new addresses from GitHub...');
+  const newAddresses = await getNewSubplebbitAddressesFromGithub(db);
+  console.log(`[Refresh] Found ${newAddresses.length} new addresses from GitHub`);
+  initializeSubplebbitQueue(db);
+
+  // if (newAddresses.length > 0) {
+  //   console.log('[Refresh] New addresses found:', newAddresses);
+  //   console.log('[Refresh] Adding new addresses to queue...');
+  //   queueMultipleSubplebbits(db, newAddresses);
+  //   console.log('[Refresh] Successfully added new addresses to queue');
+  // } else {
+  //   console.log('[Refresh] No new addresses found to add to queue');
+  // }
   return newAddresses.length;
 }

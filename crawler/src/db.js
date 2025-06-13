@@ -308,23 +308,28 @@ export function getNextSubplebbitsFromQueue(db, limit = 10) {
  * Queue multiple subplebbit addresses
  */
 export function queueMultipleSubplebbits(db, addresses) {
+  console.log('[Queue] Starting to queue multiple subplebbits');
   // Filter out null/undefined addresses
   const validAddresses = addresses.filter(address => address != null);
   
   if (validAddresses.length !== addresses.length) {
-    console.log(`Filtered out ${addresses.length - validAddresses.length} null/undefined addresses`);
+    console.log(`[Queue] Filtered out ${addresses.length - validAddresses.length} null/undefined addresses`);
   }
   
+  console.log(`[Queue] Queueing ${validAddresses.length} valid addresses`);
   const transaction = db.transaction((addressList) => {
     for (const address of addressList) {
       if (isSubplebbitBlacklisted(db, address)) {
+        console.log(`[Queue] Skipping blacklisted address: ${address}`);
         continue;
       }
+      console.log(`[Queue] Adding address to queue: ${address}`);
       queueSubplebbit(db, address);
     }
   });
   
   transaction(validAddresses);
+  console.log('[Queue] Finished queueing subplebbits');
 }
 
 /**

@@ -17,6 +17,8 @@ export async function executeDuneQuery() {
 
   console.log('Starting Dune query execution...');
   try {
+    const url = `${DUNE_API_BASE}/query/${DUNE_QUERY_ID}/execute`;
+    console.log('Executing Dune query:', url);
     const response = await fetch(`${DUNE_API_BASE}/query/${DUNE_QUERY_ID}/execute`, {
       method: 'POST',
       headers: {

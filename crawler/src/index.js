@@ -27,7 +27,7 @@ async function main() {
   const db = getDb();
   const plebbit = await getPlebbitClient();
   
-  // Initialize the queue with addresses from GitHub
+  // Initialize the queue with addresses from the database known_subplebbits
   const queuedCount = await initializeSubplebbitQueue(db);
   console.log(`Initialized queue with ${queuedCount} subplebbit addresses`);
   
