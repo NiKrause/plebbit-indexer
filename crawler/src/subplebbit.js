@@ -138,7 +138,7 @@ export async function processSubplebbitQueue(plebbit, db, batchSize = 10) {
     } catch (err) {
       console.error(`Error processing subplebbit at address ${address}:`, err);
       // Mark as failed with error message
-      const errorMessage = err.details ? `${err.message} (Details: ${err.details})` : err.message || 'Unknown error';
+      const errorMessage = err.details ? `${err.message} (Details: ${JSON.stringify(err.details)})` : err.message || 'Unknown error';
       updateSubplebbitStatus(db, address, 'failed', errorMessage);
     }
   }
@@ -153,7 +153,7 @@ export function setupSubplebbitListener(sub, db, address) {
   // Listen for errors on this subplebbit
   sub.on('error', (err) => {
     console.error(`Subplebbit error event for ${address}:`, err);
-    const errorMessage = err.details ? `${err.message} (Details: ${err.details})` : err.message || 'Error event';
+    const errorMessage = err.details ? `${err.message} (Details: ${JSON.stringify(err.details)})` : err.message || 'Error event';
     updateSubplebbitStatus(db, address, 'failed', errorMessage);
   });
 
@@ -165,7 +165,7 @@ export function setupSubplebbitListener(sub, db, address) {
       updateSubplebbitStatus(db, address, 'success');
     } catch (err) {
       console.error(`Error updating/indexing subplebbit at ${address} (on update event):`, err);
-      const errorMessage = err.details ? `${err.message} (Details: ${err.details})` : err.message || 'Update event error';
+      const errorMessage = err.details ? `${err.message} (Details: ${JSON.stringify(err.details)})` : err.message || 'Update event error';
       updateSubplebbitStatus(db, address, 'failed', errorMessage);
     }
   });
