@@ -47,22 +47,6 @@ A Plebbit crawler, indexer and UI.
 
 ---
 
-## Recent Updates
-
-### Latest Features (Recent Implementation)
-- ✅ **Include Replies Checkbox**: Users can now toggle whether replies are included in post listings and search results
-- ✅ **Enhanced Reply Threading**: Complete parent-child relationship tracking with context information
-- ✅ **Improved Search**: Search now works across both posts and replies with parent context
-- ✅ **Blue-Green Deployment**: Enhanced zero-downtime deployment with container toggling script
-
-### Technical Improvements
-- **Frontend**: Upgraded to Next.js 15.3.1 with React 19 for cutting-edge performance
-- **Backend**: Enhanced API endpoints with comprehensive reply support and filtering
-- **Testing**: Extensive test coverage including reply functionality, search, and parent information
-- **Infrastructure**: New `toggle_plebindex.sh` script for seamless container management during deployments
-
----
-
 ## Project Structure
 
 ```
