@@ -66,7 +66,7 @@ export default function ImprintPage() {
                   As a service provider, we are responsible for our own content on this search engine in accordance with general legislation (§ 7 (1) TMG). However, pursuant to §§ 8 to 10 TMG, we are not obligated to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.
                 </p>
                 <p>
-                  Once we become aware of specific legal violations, such content will be promptly removed from our index. A <strong>reporting feature</strong> is available (&quot;Report&quot; button) for notifying us of potentially illegal or questionable content. Each report is reviewed by us, and if a legal or policy violation is confirmed, the respective entry is removed from the index. The associated author or community (SubPlebbit) may also be excluded from future indexing.
+                Once we become aware of specific legal violations, such content will be promptly removed from our index. A reporting feature is available ("Report" button) for notifying us of potentially illegal or questionable content. Each report is reviewed by us, and if a legal or policy violation is confirmed, the respective entry is removed from our index. Please note that as an independent search engine, we can only remove content from our index - we have no control over or access to the actual SubPlebbit nodes that host the content. The associated author or community (SubPlebbit) may also be excluded from future indexing in our search engine
                 </p>
               </div>
             </section>
