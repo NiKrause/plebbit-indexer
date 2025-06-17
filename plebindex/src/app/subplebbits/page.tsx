@@ -1,9 +1,7 @@
 import Header from '../header';
 import SubplebbitsTable from '../../components/SubplebbitsTable';
 import type { Metadata } from 'next';
-
-// Force dynamic rendering - this prevents static prerendering
-export const dynamic = 'force-dynamic';
+import { Suspense } from 'react';
 
 // Export metadata for the page
 export const metadata: Metadata = {
@@ -28,7 +26,9 @@ export default function SubplebbitsPage() {
         </div>
 
         <div style={{ padding: '0 16px' }}>
-          <SubplebbitsTable />
+          <Suspense fallback={<div>Loading subplebbit statistics...</div>}>
+            <SubplebbitsTable />
+          </Suspense>
         </div>
       </main>
     </div>

@@ -69,14 +69,28 @@ async function analyzeContent(content) {
         max_tokens: 10,
       });
   
-      const response = completion.choices[0].message.content.trim();
+      const responseText = completion.choices[0].message.content.trim();
+      let response;
+      try {
+        response = JSON.parse(responseText);
+      } catch (e) {
+        console.error(`Failed to parse JSON response from model ${modelName}: ${responseText}`);
+        return { success: false, error: `Invalid JSON response: ${responseText}` };
+      }
+  
       const category = normalizeResponse(response.category);
-      if (validResponses.includes(response.category)) {
-        console.log(`Valid response from model ${modelName}: ${response}`);
-        return { success: true, response: category, harm: response.harm, reason: response.reason, category: response.category};
+      if (validResponses.includes(category)) {
+        console.log(`Valid response from model ${modelName}: ${category}`);
+        return { 
+          success: true, 
+          response: category, 
+          harm: response.harm, 
+          reason: response.reason, 
+          category: category
+        };
       } else {
-        console.error(`Unexpected response from model ${modelName}: ${response}`);
-        return { success: false, error: `Invalid response: ${response}` };
+        console.error(`Unexpected response from model ${modelName}: ${category}`);
+        return { success: false, error: `Invalid response: ${category}` };
       }
     } catch (error) {
       // Check if it's a rate limit error

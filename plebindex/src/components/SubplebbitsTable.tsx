@@ -33,23 +33,35 @@ export default function SubplebbitsTable() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   useEffect(() => {
+    let mounted = true;
+
     const loadData = async () => {
       try {
         setLoading(true);
         const data = await getSubplebbits();
-        if (data) {
-          setSubplebbits(data.subplebbits);
-        } else {
-          setError('Failed to load subplebbit data');
+        if (mounted) {
+          if (data) {
+            setSubplebbits(data.subplebbits);
+          } else {
+            setError('Failed to load subplebbit data');
+          }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'An error occurred');
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadData();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleSort = (field: SortField) => {

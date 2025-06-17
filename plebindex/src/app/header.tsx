@@ -4,6 +4,7 @@ import PlebscanLogo from './plebscanlogo';
 import SearchBar from './search';
 import './header.css';
 import MobileMenu from '../components/MobileMenu';
+import { Suspense } from 'react';
 
 const styles = {
   header: {
@@ -127,7 +128,9 @@ export default function Header() {
 
         {/* Search row */}
         <div style={styles.searchContainer}>
-          <SearchBar aria-label="Search content" />
+          <Suspense fallback={<div>Loading search...</div>}>
+            <SearchBar aria-label="Search content" />
+          </Suspense>
         </div>
       </div>
     </header>

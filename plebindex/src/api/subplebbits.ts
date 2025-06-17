@@ -10,7 +10,7 @@ export async function getSubplebbits(): Promise<SubplebbitsResponse | null> {
   try {
     const response = await fetch(url, { 
       method: 'GET',
-      cache: 'no-store', 
+      next: { revalidate: 60 },
       headers: {
         'Accept': 'application/json'
       }
