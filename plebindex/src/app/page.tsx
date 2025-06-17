@@ -32,7 +32,7 @@ export default async function Home({
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header pathname="/" />
       
       <main className="flex-grow container mx-auto px-4 py-6 flex flex-col">
         <Posts searchParams={resolvedSearchParams} />

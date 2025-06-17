@@ -141,7 +141,14 @@ export default function PostItem({ post }: PostItemProps) {
             color: '#1976d2',
             wordBreak: 'break-word'
           }}>
-            {post.postTitle || post.title || 'Untitled Post'}
+            <a
+              href={`https://seedit.app/#/p/${post.subplebbitAddress}/c/${post.parentCid || post.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#1976d2', textDecoration: 'none' }}
+            >
+              {post.postTitle || post.title || 'Untitled Post'}
+            </a>
           </span>
           <span style={{ 
             fontSize: 12, 

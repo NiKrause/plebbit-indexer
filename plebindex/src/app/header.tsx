@@ -65,7 +65,9 @@ const styles = {
   },
 };
 
-export default function Header() {
+export default function Header({ pathname }: { pathname: string }) {
+  const isSubplebbitsPage = pathname === '/subplebbits';
+
   return (
     <header style={styles.header} role="banner">
       <div style={styles.container}>
@@ -126,12 +128,14 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Search row */}
-        <div style={styles.searchContainer}>
-          <Suspense fallback={<div>Loading search...</div>}>
-            <SearchBar aria-label="Search content" />
-          </Suspense>
-        </div>
+        {/* Search row - only show if not on subplebbits page */}
+        {!isSubplebbitsPage && (
+          <div style={styles.searchContainer}>
+            <Suspense fallback={<div>Loading search...</div>}>
+              <SearchBar aria-label="Search content" />
+            </Suspense>
+          </div>
+        )}
       </div>
     </header>
   );

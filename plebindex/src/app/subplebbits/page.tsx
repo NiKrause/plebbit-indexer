@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function SubplebbitsPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header pathname="/subplebbits" />
       
       <main className="flex-grow container mx-auto px-4 pt-8 pb-6">
         <div style={{ marginBottom: '20px', padding: '0 16px' }}>

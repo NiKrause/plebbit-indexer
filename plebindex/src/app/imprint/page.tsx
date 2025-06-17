@@ -5,7 +5,7 @@ export default function ImprintPage() {
   return (
     <div className="imprint-page flex flex-col min-h-screen bg-gray-50">
       <Suspense fallback={<div>Loading...</div>}>
-        <Header />
+        <Header pathname="/imprint" />
       </Suspense>
       <main className="flex-grow flex justify-center py-8 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-4 sm:p-8 md:p-12">

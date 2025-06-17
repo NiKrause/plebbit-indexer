@@ -29,8 +29,22 @@ export default function SubplebbitsTable() {
   const [subplebbits, setSubplebbits] = useState<SubplebbitStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [sortField, setSortField] = useState<SortField>('totalPosts');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortField, setSortField] = useState<SortField>(() => {
+    // Initialize from localStorage if available
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('subplebbitsSortField');
+      return (saved as SortField) || 'cph'; // Default to 'cph' if nothing saved
+    }
+    return 'cph';
+  });
+  const [sortDirection, setSortDirection] = useState<SortDirection>(() => {
+    // Initialize from localStorage if available
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('subplebbitsSortDirection');
+      return (saved as SortDirection) || 'desc'; // Default to 'desc' if nothing saved
+    }
+    return 'desc';
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -66,10 +80,20 @@ export default function SubplebbitsTable() {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      setSortDirection(newDirection);
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('subplebbitsSortDirection', newDirection);
+      }
     } else {
       setSortField(field);
       setSortDirection('desc');
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('subplebbitsSortField', field);
+        localStorage.setItem('subplebbitsSortDirection', 'desc');
+      }
     }
   };
 

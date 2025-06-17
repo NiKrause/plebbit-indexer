@@ -63,7 +63,7 @@ export default async function PostPage({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header pathname={`/p/${post?.subplebbitAddress}/c/${cid}`} />
       
       <main className="flex-grow container mx-auto px-4 py-6">
         <Replies

@@ -19,7 +19,7 @@ export default async function Search({
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header pathname="/search" />
       
       <main className="flex-grow container mx-auto px-4 py-6 flex flex-col">
         <Posts searchParams={resolvedSearchParams} />
