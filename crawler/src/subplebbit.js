@@ -10,34 +10,39 @@ export async function getNewSubplebbitAddressesFromGithub(db) {
     console.log('[GitHub] Fetching subplebbit addresses from GitHub...');
     const response = await fetch('https://raw.githubusercontent.com/plebbit/temporary-default-subplebbits/master/multisub.json');
     const subplebbitList = await response.json();
-    const addresses = subplebbitList.subplebbits.map(item => item.address);
-    console.log(`[GitHub] Retrieved ${addresses.length} addresses from GitHub`);
+    const subplebbits = subplebbitList.subplebbits.map(item => ({
+      address: item.address,
+      tags: item.tags ? JSON.stringify(item.tags) : null
+    }));
+    console.log(`[GitHub] Retrieved ${subplebbits.length} subplebbits from GitHub`);
     
     // Add new addresses to known_subplebbits
     const newAddresses = [];
-    for (const address of addresses) {
+    for (const subplebbit of subplebbits) {
       // Check if we already know about this subplebbit
-      const knownStmt = db.prepare('SELECT address FROM known_subplebbits WHERE address = ?');
-      const known = knownStmt.get(address);
+      const knownStmt = db.prepare('SELECT address,tags FROM known_subplebbits WHERE address = ?');
+      const known = knownStmt.get(subplebbit.address);
+      console.log(`[GitHub] Known subplebbit: ${known.address} with tags: ${known.tags}`);
       
       if (!known) {
-        console.log(`[GitHub] Found new subplebbit: ${address}`);
+        console.log(`[GitHub] Found new subplebbit: ${subplebbit.address}`);
         // Add to known subplebbits
         const insertStmt = db.prepare(`
-          INSERT INTO known_subplebbits (address, source, discovered_at, last_seen_at)
-          VALUES (?, 'github', ?, ?)
+          INSERT INTO known_subplebbits (address, source, discovered_at, last_seen_at, tags)
+          VALUES (?, 'github', ?, ?, ?)
         `);
         const now = Date.now();
-        insertStmt.run(address, now, now);
-        newAddresses.push(address);
+        insertStmt.run(subplebbit.address, now, now, subplebbit.tags);
+        newAddresses.push(subplebbit.address);
       } else {
-        // Update last_seen_at
+        // Update last_seen_at and tags
         const updateStmt = db.prepare(`
           UPDATE known_subplebbits 
-          SET last_seen_at = ? 
+          SET last_seen_at = ?,
+              tags = ?
           WHERE address = ?
         `);
-        updateStmt.run(Date.now(), address);
+        updateStmt.run(Date.now(), subplebbit.tags, subplebbit.address);
       }
     }
     

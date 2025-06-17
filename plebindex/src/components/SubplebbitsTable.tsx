@@ -178,6 +178,17 @@ export default function SubplebbitsTable() {
             >
               Age {getSortIcon('createdAt')}
             </th>
+            <th
+              style={{
+                padding: '12px',
+                textAlign: 'left',
+                borderBottom: '2px solid #dee2e6',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              Tags
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -214,6 +225,28 @@ export default function SubplebbitsTable() {
               </td>
               <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px' }}>
                 {formatAge(sub.createdAt)}
+              </td>
+              <td style={{ padding: '12px', fontSize: '14px' }}>
+                {sub.tags && sub.tags.length > 0 ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    {sub.tags.map((tag, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          backgroundColor: '#e9ecef',
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          fontSize: '12px',
+                          color: '#495057'
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span style={{ color: '#6c757d', fontSize: '12px' }}>No tags</span>
+                )}
               </td>
             </tr>
           ))}

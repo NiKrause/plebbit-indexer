@@ -105,6 +105,7 @@ export interface SubplebbitStats {
   oldestPost: number; // timestamp
   newestPost: number; // timestamp
   createdAt: number; // timestamp (using oldestPost as proxy)
+  tags: string[];
 }
 
 export interface SubplebbitsResponse {

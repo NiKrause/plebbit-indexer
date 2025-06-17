@@ -187,8 +187,10 @@ export async function startServer(_db) {
           COUNT(*) as totalPosts,
           COUNT(CASE WHEN p.timestamp > ? THEN 1 END) as recentPosts,
           MIN(p.timestamp) as oldestPost,
-          MAX(p.timestamp) as newestPost
+          MAX(p.timestamp) as newestPost,
+          k.tags
         FROM posts p
+        LEFT JOIN known_subplebbits k ON p.subplebbitAddress = k.address
         GROUP BY p.subplebbitAddress
         HAVING totalPosts > 0
         ORDER BY totalPosts DESC
@@ -209,8 +211,8 @@ export async function startServer(_db) {
           cph: parseFloat(cph),
           oldestPost: sub.oldestPost,
           newestPost: sub.newestPost,
-          // We don't have createdAt, so we'll use the oldest post timestamp as a proxy
-          createdAt: sub.oldestPost
+          createdAt: sub.oldestPost,
+          tags: sub.tags ? JSON.parse(sub.tags) : [] // Parse the JSON string back to array
         };
       });
       

@@ -19,7 +19,7 @@ export function getDb() {
   
   dbInstance = new Database(dbPath, {
     prepareRetain: true,
-    verbose: console.log
+    verbose: process.env.ENABLE_SQL_LOGGING === 'true' ? console.log : null
   });
   
   dbInstance.pragma('journal_mode = WAL');
@@ -135,7 +135,8 @@ export function getDb() {
       address TEXT PRIMARY KEY,
       source TEXT NOT NULL,
       discovered_at INTEGER NOT NULL,
-      last_seen_at INTEGER NOT NULL
+      last_seen_at INTEGER NOT NULL,
+      tags TEXT
     );
   `);
   
@@ -207,6 +208,38 @@ export function getDb() {
   
   // Run the moderated_at column check
   checkModeratedAtColumn();
+  
+  const checkTagsColumn = () => {
+    console.log("Checking if tags column exists in known_subplebbits...");
+    const tableInfo = dbInstance.prepare("PRAGMA table_info(known_subplebbits)").all();
+    const tagsColumn = tableInfo.find(col => col.name === 'tags');
+    
+    if (!tagsColumn) {
+      console.log("tags column missing. Adding column...");
+      
+      // Start a transaction
+      dbInstance.pragma('foreign_keys = OFF');
+      dbInstance.prepare('BEGIN TRANSACTION').run();
+      
+      try {
+        // Add the tags column
+        dbInstance.exec('ALTER TABLE known_subplebbits ADD COLUMN tags TEXT');
+        
+        dbInstance.prepare('COMMIT').run();
+        console.log("Successfully added tags column");
+      } catch (error) {
+        dbInstance.prepare('ROLLBACK').run();
+        console.error("Error adding tags column:", error.message);
+      } finally {
+        dbInstance.pragma('foreign_keys = ON');
+      }
+    } else {
+      console.log("tags column exists. No changes needed.");
+    }
+  };
+  
+  // Run the tags column check
+  checkTagsColumn();
   
   const tablesCheck = {
     posts: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'").get(),

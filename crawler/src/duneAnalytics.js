@@ -107,21 +107,21 @@ export async function processDuneResults(db) {
         console.log(`Found new subplebbit: ${address}`);
         // Add to known subplebbits
         const insertStmt = db.prepare(`
-          INSERT OR IGNORE INTO known_subplebbits (address, source, discovered_at, last_seen_at)
-          VALUES (?, 'dune', ?, ?)
+          INSERT OR IGNORE INTO known_subplebbits (address, source, discovered_at, last_seen_at, tags)
+          VALUES (?, 'dune', ?, ?, ?)
         `);
         const now = Date.now();
-        insertStmt.run(address, now, now);
+        insertStmt.run(address, now, now, JSON.stringify([]));
         
         newAddresses.push(address);
       } else {
         // Update last_seen_at
         const updateStmt = db.prepare(`
           UPDATE known_subplebbits 
-          SET last_seen_at = ? 
+          SET last_seen_at = ?, tags = ?
           WHERE address = ?
         `);
-        updateStmt.run(Date.now(), address);
+        updateStmt.run(Date.now(), JSON.stringify([]), address);
       }
     }
     
