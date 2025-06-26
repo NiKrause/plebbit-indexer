@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SubplebbitStats } from '../types';
-import { getSubplebbits } from '../api/subplebbits';
+import { SubplebbitStats, SubplebbitsResponse } from '../types';
 
 // Format timestamp to human readable date
 function formatAge(timestamp: number): string {
@@ -25,9 +24,12 @@ function formatAge(timestamp: number): string {
 type SortField = 'address' | 'title' | 'cph' | 'totalPosts' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
 
-export default function SubplebbitsTable() {
+interface SubplebbitsTableProps {
+  initialData: SubplebbitsResponse | null;
+}
+
+export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps) {
   const [subplebbits, setSubplebbits] = useState<SubplebbitStats[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sortField, setSortField] = useState<SortField>(() => {
     // Initialize from localStorage if available
@@ -46,37 +48,14 @@ export default function SubplebbitsTable() {
     return 'desc';
   });
 
+  // Initialize data from server-side props
   useEffect(() => {
-    let mounted = true;
-
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const data = await getSubplebbits();
-        if (mounted) {
-          if (data) {
-            setSubplebbits(data.subplebbits);
-          } else {
-            setError('Failed to load subplebbit data');
-          }
-        }
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err.message : 'An error occurred');
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    if (initialData) {
+      setSubplebbits(initialData.subplebbits);
+    } else {
+      setError('Failed to load subplebbit data');
+    }
+  }, [initialData]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -126,16 +105,6 @@ export default function SubplebbitsTable() {
     if (sortField !== field) return '↕️';
     return sortDirection === 'asc' ? '↑' : '↓';
   };
-
-  if (loading) {
-    return (
-      <div className="text-center">
-        <div style={{ padding: '40px', color: '#666' }}>
-          Loading subplebbit statistics...
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (

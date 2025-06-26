@@ -3,7 +3,7 @@ import { FlaggedPost, AdminStats } from '../types';
 export function getApiBaseUrl(): string {
   let apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (apiBaseUrl && process.env.NODE_ENV === 'development') {
-    apiBaseUrl = 'http://localhost:3001';
+    apiBaseUrl = 'http://crawler01:3001';
   } 
   console.log("apiBaseUrl-admin ", apiBaseUrl);
   return apiBaseUrl || '';

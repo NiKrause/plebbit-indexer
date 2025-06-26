@@ -1,7 +1,7 @@
 import Header from '../header';
 import SubplebbitsTable from '../../components/SubplebbitsTable';
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
+import { getSubplebbits } from '../../api/subplebbits';
 
 // Export metadata for the page
 export const metadata: Metadata = {
@@ -9,7 +9,10 @@ export const metadata: Metadata = {
   description: 'Browse statistics for all known subplebbits including activity levels and post counts.',
 };
 
-export default function SubplebbitsPage() {
+export default async function SubplebbitsPage() {
+  // Fetch data on the server side
+  const data = await getSubplebbits();
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header pathname="/subplebbits" />
@@ -26,9 +29,7 @@ export default function SubplebbitsPage() {
         </div>
 
         <div style={{ padding: '0 16px' }}>
-          <Suspense fallback={<div>Loading subplebbit statistics...</div>}>
-            <SubplebbitsTable />
-          </Suspense>
+          <SubplebbitsTable initialData={data} />
         </div>
       </main>
     </div>
