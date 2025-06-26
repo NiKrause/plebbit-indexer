@@ -45,7 +45,7 @@ test.describe('Home page', () => {
     expect(content).toContain('<loc>');
     
     // Verify homepage entry
-    expect(content).toContain('<loc>https://plebscan.com/</loc>');
+    expect(content).toContain('<loc>https://plebscan.org/</loc>');
     expect(content).toContain('<priority>1.0</priority>');
     
     // Verify sitemap URLs are present

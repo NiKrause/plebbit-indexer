@@ -62,8 +62,6 @@ services:
       - "host.docker.internal:host-gateway"
 
   plebbit-cli:
-    # build: ./plebbit-cli
-    # image: plebbit-cli
     image: silkroadnomad/plebbit-cli:v0.0.1
     ports:
       - "9138:9138"

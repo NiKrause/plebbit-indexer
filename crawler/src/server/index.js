@@ -939,7 +939,7 @@ export async function startServer(_db) {
       
       // Create sitemap index stream
       const stream = new SitemapStream({ 
-        hostname: process.env.NEXT_PUBLIC_APP_URL || 'https://plebscan.com' 
+        hostname: process.env.NEXT_PUBLIC_APP_URL || 'https://plebscan.org' 
       });
       
       // Add static routes to first sitemap
@@ -993,7 +993,7 @@ export async function startServer(_db) {
       
       // Create sitemap stream
       const stream = new SitemapStream({ 
-        hostname: process.env.NEXT_PUBLIC_APP_URL || 'https://plebscan.com' 
+        hostname: process.env.NEXT_PUBLIC_APP_URL || 'https://plebscan.org' 
       });
       
       // Add post routes

@@ -50,7 +50,7 @@ describe('Sitemap functionality', () => {
     assert(xml.includes('<loc>'), 'Should contain loc elements');
     
     // Verify homepage entry
-    assert(xml.includes('<loc>https://plebscan.com/</loc>'), 'Should contain homepage URL');
+    assert(xml.includes('<loc>https://plebscan.org/</loc>'), 'Should contain homepage URL');
     assert(xml.includes('<priority>1.0</priority>'), 'Should contain homepage priority');
 
     // Extract and verify sitemap URLs
@@ -81,7 +81,7 @@ describe('Sitemap functionality', () => {
       const urlMatch = url.match(/<loc>(.*?)<\/loc>/);
       assert(urlMatch, 'Should be able to extract URL');
       const urlPath = urlMatch[1];
-      assert(urlPath.startsWith('https://plebscan.com/p/'), 'URL should start with correct domain and path');
+      assert(urlPath.startsWith('https://plebscan.org/p/'), 'URL should start with correct domain and path');
       assert(urlPath.includes('/c/'), 'URL should contain comment path');
     });
   }, 20000);
