@@ -57,7 +57,7 @@ export default function RootLayout({
         <footer className="fixed bottom-0 left-0 right-0 py-4 text-center text-xs text-gray-500 border-t z-[9998] bg-white">
           <div className="container mx-auto px-4">
             <p className="text-center">
-              Plebscan test is a search engine for Plebbit, a decentralized P2P Reddit alternative. 
+              {process.env.NEXT_PUBLIC_SITE_NAME ?? "Plebscan.org"} is a search engine for Plebbit, a decentralized P2P Reddit alternative. 
               All content is user-generated and we are not responsible for any content posted by users. 
               Plebbit aims to provide a censorship-resistant platform similar to Reddit, but with enhanced privacy and decentralization features.
             </p>
