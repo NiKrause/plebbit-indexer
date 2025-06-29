@@ -297,6 +297,14 @@ export async function indexSubplebbit(sub, db, isUpdateEvent = false) {
   }
   
   console.log(`[Indexer] Successfully indexed ${allPosts.length} posts for ${sub.address}`);
+
+  // Store the subplebbit title in known_subplebbits
+  const updateTitleStmt = db.prepare(`
+    UPDATE known_subplebbits 
+    SET title = ?, last_seen_at = ? 
+    WHERE address = ?
+  `);
+  updateTitleStmt.run(sub.title || null, Date.now(), sub.address);
 }
 
 // New helper function that uses the flattening approach

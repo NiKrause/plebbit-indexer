@@ -130,7 +130,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
             <th
               onClick={() => handleSort('address')}
               style={{
-                // padding: '12px',
+                padding: '12px',
                 textAlign: 'left',
                 borderBottom: '2px solid #dee2e6',
                 cursor: 'pointer',
@@ -142,9 +142,23 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
               Subplebbit Address {getSortIcon('address')}
             </th>
             <th
+              onClick={() => handleSort('title')}
+              style={{
+                padding: '12px',
+                textAlign: 'left',
+                borderBottom: '2px solid #dee2e6',
+                cursor: 'pointer',
+                userSelect: 'none',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              Title {getSortIcon('title')}
+            </th>
+            <th
               onClick={() => handleSort('cph')}
               style={{
-                // padding: '12px',
+                padding: '12px',
                 textAlign: 'right',
                 borderBottom: '2px solid #dee2e6',
                 cursor: 'pointer',
@@ -205,7 +219,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
                 borderBottom: '1px solid #dee2e6'
               }}
             >
-              <td style={{ padding: '0px' }}>
+              <td style={{ padding: '12px' }}>
                 <a
                   href={`https://seedit.app/#/p/${sub.address}`}
                   target="_blank"
@@ -221,6 +235,9 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
                 >
                   {sub.address}
                 </a>
+              </td>
+              <td style={{ padding: '12px', fontSize: '14px' }}>
+                {sub.title || 'No title'}
               </td>
               <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px' }}>
                 {sub.cph.toFixed(6)}

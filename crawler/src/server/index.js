@@ -184,6 +184,7 @@ export async function startServer(_db) {
       const subplebbitsQuery = `
         SELECT 
           p.subplebbitAddress,
+          k.title as subplebbitTitle,
           COUNT(*) as totalPosts,
           COUNT(CASE WHEN p.timestamp > ? THEN 1 END) as recentPosts,
           MIN(p.timestamp) as oldestPost,
@@ -199,14 +200,19 @@ export async function startServer(_db) {
       const stmt = db.prepare(subplebbitsQuery);
       const subplebbits = stmt.all(sevenDaysAgo);
       
+      console.log(`[API] Fetched ${subplebbits.length} subplebbits from database`);
+      
       // Calculate CPH (Comments Per Hour) for each subplebbit
       const result = subplebbits.map(sub => {
         const hoursInWeek = 7 * 24; // 168 hours
         const cph = (sub.recentPosts / hoursInWeek).toFixed(6);
         
+        const title = sub.subplebbitTitle || sub.subplebbitAddress;
+        console.log(`[API] Subplebbit: ${title} (${sub.subplebbitAddress}) - ${sub.totalPosts} total posts, ${sub.recentPosts} recent posts`);
+        
         return {
           address: sub.subplebbitAddress,
-          title: sub.subplebbitAddress, // We don't have actual titles stored, use address
+          title: title,
           totalPosts: sub.totalPosts,
           cph: parseFloat(cph),
           oldestPost: sub.oldestPost,
@@ -215,6 +221,8 @@ export async function startServer(_db) {
           tags: sub.tags ? JSON.parse(sub.tags) : [] // Parse the JSON string back to array
         };
       });
+      
+      console.log(`[API] Returning ${result.length} subplebbits with calculated CPH values`);
       
       res.json({
         subplebbits: result,

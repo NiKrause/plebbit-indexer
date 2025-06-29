@@ -31,6 +31,7 @@ export function getDb() {
       timestamp INTEGER NOT NULL,
       title TEXT,
       content TEXT,
+      raw TEXT,
       subplebbitAddress TEXT NOT NULL,
       authorAddress TEXT,
       authorDisplayName TEXT,
@@ -74,6 +75,7 @@ export function getDb() {
       timestamp INTEGER NOT NULL,
       title TEXT,
       content TEXT,
+      raw TEXT,
       subplebbitAddress TEXT NOT NULL,
       authorAddress TEXT,
       authorDisplayName TEXT,
@@ -240,6 +242,72 @@ export function getDb() {
   
   // Run the tags column check
   checkTagsColumn();
+  
+  // Check if raw column exists and add if missing
+  const checkRawColumn = () => {
+    console.log("Checking if raw column exists...");
+    const tableInfo = dbInstance.prepare("PRAGMA table_info(posts)").all();
+    const rawColumn = tableInfo.find(col => col.name === 'raw');
+    
+    if (!rawColumn) {
+      console.log("raw column missing. Adding column...");
+      
+      // Start a transaction
+      dbInstance.pragma('foreign_keys = OFF');
+      dbInstance.prepare('BEGIN TRANSACTION').run();
+      
+      try {
+        // Add the raw column
+        dbInstance.exec('ALTER TABLE posts ADD COLUMN raw TEXT');
+        
+        dbInstance.prepare('COMMIT').run();
+        console.log("Successfully added raw column");
+      } catch (error) {
+        dbInstance.prepare('ROLLBACK').run();
+        console.error("Error adding raw column:", error.message);
+      } finally {
+        dbInstance.pragma('foreign_keys = ON');
+      }
+    } else {
+      console.log("raw column exists. No changes needed.");
+    }
+  };
+  
+  // Run the raw column check
+  checkRawColumn();
+  
+  // Check if raw column exists in flagged_posts and add if missing
+  const checkFlaggedPostsRawColumn = () => {
+    console.log("Checking if raw column exists in flagged_posts...");
+    const tableInfo = dbInstance.prepare("PRAGMA table_info(flagged_posts)").all();
+    const rawColumn = tableInfo.find(col => col.name === 'raw');
+    
+    if (!rawColumn) {
+      console.log("raw column missing in flagged_posts. Adding column...");
+      
+      // Start a transaction
+      dbInstance.pragma('foreign_keys = OFF');
+      dbInstance.prepare('BEGIN TRANSACTION').run();
+      
+      try {
+        // Add the raw column
+        dbInstance.exec('ALTER TABLE flagged_posts ADD COLUMN raw TEXT');
+        
+        dbInstance.prepare('COMMIT').run();
+        console.log("Successfully added raw column to flagged_posts");
+      } catch (error) {
+        dbInstance.prepare('ROLLBACK').run();
+        console.error("Error adding raw column to flagged_posts:", error.message);
+      } finally {
+        dbInstance.pragma('foreign_keys = ON');
+      }
+    } else {
+      console.log("raw column exists in flagged_posts. No changes needed.");
+    }
+  };
+  
+  // Run the flagged_posts raw column check
+  checkFlaggedPostsRawColumn();
   
   const tablesCheck = {
     posts: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'").get(),

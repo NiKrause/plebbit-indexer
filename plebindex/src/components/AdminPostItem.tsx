@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FlaggedPost } from '../types';
 import { takeModerationAction } from '../api/admin';
 import { truncateText } from '../utils/formatting';
+import DownloadRaw from './DownloadRaw';
 
 interface AdminPostItemProps {
   post: FlaggedPost;
@@ -127,6 +128,9 @@ export default function AdminPostItem({ post }: AdminPostItemProps) {
         whiteSpace: 'pre-wrap'
       }}>
         {post.content}
+        <div style={{ marginTop: '10px' }}>
+          <DownloadRaw post={post} />
+        </div>
       </div>
 
       {/* Post Stats */}

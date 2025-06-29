@@ -8,10 +8,10 @@ export async function indexPosts(db, posts) {
 
     const transaction = db.transaction(() => {
       const insertStmt = db.prepare(`
-        INSERT INTO posts (id, timestamp, title, content, subplebbitAddress, 
+        INSERT INTO posts (id, timestamp, title, content, raw, subplebbitAddress, 
                            authorAddress, authorDisplayName, upvoteCount, downvoteCount, 
                            replyCount, parentCid, postCid, depth)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       let insertedCount = 0;
@@ -75,11 +75,20 @@ export async function indexPosts(db, posts) {
           const deleteStmt = db.prepare('DELETE FROM posts where id = ?');
           deleteStmt.run(post.cid);
           
+          // Check if post.raw exists and log it
+          console.log('post', post);
+          if (post.raw !== undefined) {
+            console.log(`🎉 POST ${post.cid} HAS RAW FIELD! Raw content length: ${post.raw?.length || 0} characters`);
+          } else {
+            console.log(`❌ POST ${post.cid} DOES NOT HAVE RAW FIELD - using JSON.stringify fallback`);
+          }
+          
           insertStmt.run(
             post.cid,
             post.timestamp,
             post.title || null, // Title may be null for comments
             post.content,
+            JSON.stringify(post.raw), // 
             post.subplebbitAddress,
             post.author?.address,
             post.author?.displayName,

@@ -2,6 +2,7 @@ export interface Post {
   id: string;
   title: string;
   content: string;
+  raw?: string;
   subplebbitAddress: string;
   authorAddress: string;
   authorDisplayName: string;
@@ -18,6 +19,8 @@ export interface Post {
   postReplyCount?: number; 
   postTimestamp: number;
 }
+
+
 
 export interface PaginatedResponse {
   posts: Post[];
@@ -66,6 +69,7 @@ export interface FlaggedPost {
   id: string;
   title?: string;
   content: string;
+  raw?: string;
   subplebbitAddress: string;
   authorAddress: string;
   authorDisplayName: string;

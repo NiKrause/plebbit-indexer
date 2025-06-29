@@ -238,10 +238,10 @@ export async function flagPost(db, postId, flagReason) {
       // Insert into flagged_posts
       const insertStmt = db.prepare(`
         INSERT OR IGNORE INTO flagged_posts (
-          id, timestamp, title, content, subplebbitAddress, 
+          id, timestamp, title, content, raw, subplebbitAddress, 
           authorAddress, authorDisplayName, upvoteCount, downvoteCount, 
           replyCount, parentCid, postCid, depth, harm, reason, category, flagged_at, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       
       insertStmt.run(
@@ -249,6 +249,7 @@ export async function flagPost(db, postId, flagReason) {
         post.timestamp,
         post.title,
         post.content,
+        post.raw,
         post.subplebbitAddress,
         post.authorAddress,
         post.authorDisplayName,
@@ -291,7 +292,7 @@ export async function moderatePosts(batchSize = 100) {
   try {
     // Get posts to analyze - only fetch unmoderated posts
     const posts = db.prepare(`
-      SELECT id, content, title FROM posts 
+      SELECT id, content, title, raw FROM posts 
       WHERE moderated_at IS NULL
       ORDER BY timestamp DESC 
       LIMIT ?

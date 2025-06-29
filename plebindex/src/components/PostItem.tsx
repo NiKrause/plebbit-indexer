@@ -1,6 +1,7 @@
 import { Post } from '../types';
 import PostStats from './PostStats';
 import ReportButton from './ReportButton';
+import DownloadRaw from './DownloadRaw';
 import TimestampDisplay from './TimeStampDisplay';
 import { truncateText } from '../utils/formatting';
 
@@ -78,6 +79,7 @@ export default function PostItem({ post }: PostItemProps) {
             <TimestampDisplay timestamp={post.timestamp} />
           </span>
           <ReportButton postId={post.id} />
+          <DownloadRaw post={post} />
         </div>
         {/* Content */}
         <div style={{ 
@@ -240,6 +242,7 @@ export default function PostItem({ post }: PostItemProps) {
               <TimestampDisplay timestamp={post.timestamp} />
             </span>
             <ReportButton postId={post.id} />
+            <DownloadRaw post={post} />
           </div>
           {/* Reply content */}
           <div style={{ 
