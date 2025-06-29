@@ -6,8 +6,12 @@ import { requiresCookieConsent } from '../utils/geo';
 
 export default function Analytics() {
   const [hasConsent, setHasConsent] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // Mark that we're on the client side
+    setIsClient(true);
+    
     const checkConsent = async () => {
       try {
         const consent = localStorage.getItem('cookie-consent');
@@ -33,6 +37,11 @@ export default function Analytics() {
 
     checkConsent();
   }, []);
+
+  // Don't render anything until we're on the client side
+  if (!isClient) {
+    return null;
+  }
 
   if (!hasConsent) {
     return null;
