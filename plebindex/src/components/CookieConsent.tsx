@@ -16,28 +16,28 @@ export default function CookieConsent() {
   useEffect(() => {
     const checkCountry = async () => {
       try {
-        const needsConsent = await requiresCookieConsent();
-        
+        // First check if we already have consent stored
         const consent = localStorage.getItem('cookie-consent');
         
+        if (consent !== null) {
+          // User has already made a choice, no need to check country
+          setAnalyticsEnabled(consent === 'accepted');
+          return;
+        }
+        
+        // Only call geo API if no consent is stored
+        const needsConsent = await requiresCookieConsent();
+        
         if (needsConsent) {
-          // For countries requiring consent, show banner if no consent is stored
-          if (consent === null) {
-            setShowBanner(true);
-          } else {
-            setAnalyticsEnabled(consent === 'accepted');
-          }
+          // For countries requiring consent, show banner
+          setShowBanner(true);
         } else {
           // For other countries, enable analytics by default
-          if (consent === null) {
-            localStorage.setItem('cookie-consent', 'accepted');
-            setAnalyticsEnabled(true);
-            window.gtag?.('consent', 'update', {
-              'analytics_storage': 'granted'
-            });
-          } else {
-            setAnalyticsEnabled(consent === 'accepted');
-          }
+          localStorage.setItem('cookie-consent', 'accepted');
+          setAnalyticsEnabled(true);
+          window.gtag?.('consent', 'update', {
+            'analytics_storage': 'granted'
+          });
         }
       } catch (error) {
         console.error('Error in checkCountry:', error);
