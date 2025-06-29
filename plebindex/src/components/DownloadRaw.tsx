@@ -1,3 +1,5 @@
+'use client';
+
 import { Post, FlaggedPost } from '../types';
 
 interface DownloadRawProps {
