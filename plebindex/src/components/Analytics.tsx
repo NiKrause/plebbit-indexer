@@ -11,12 +11,18 @@ export default function Analytics() {
     const checkConsent = async () => {
       try {
         const consent = localStorage.getItem('cookie-consent');
+        
+        // If consent is already stored, use it directly
+        if (consent !== null) {
+          setHasConsent(consent === 'accepted');
+          return;
+        }
+        
+        // Only call geo API if no consent is stored
         const needsConsent = await requiresCookieConsent();
         
-        // Enable analytics if either:
-        // 1. User has explicitly consented
-        // 2. User is from a non-EU country and no consent is stored
-        setHasConsent(consent === 'accepted' || (!needsConsent && consent === null));
+        // Enable analytics if user is from a non-EU country and no consent is stored
+        setHasConsent(!needsConsent);
       } catch (error) {
         console.error('Error in checkConsent:', error);
         // Fallback: only enable if user has explicitly consented
