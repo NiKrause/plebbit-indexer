@@ -31,34 +31,59 @@ export async function requiresCookieConsent(): Promise<boolean> {
   // Skip API call in development to avoid rate limits
   if (process.env.NODE_ENV === 'development') {
     console.log('Development mode: skipping geolocation API call');
-    // Return false to not show consent banner in development
-    // Change to true if you want to test the consent banner
     return false;
   }
 
   try {
-    // Use IP-based geolocation
-    const response = await fetch('https://ipapi.co/json/');
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // Try multiple geolocation services for better reliability
+    const services = [
+      'https://ipapi.co/json/',
+      'https://ipapi.com/json/',
+      // 'https://api.ipify.org?format=json'
+    ];
+
+    for (const serviceUrl of services) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout per service
+        
+        const response = await fetch(serviceUrl, {
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          const data = await response.json();
+          const countryCode = data.country_code || data.country;
+          
+          if (countryCode) {
+            console.log('Country detected:', countryCode, 'from', serviceUrl);
+            
+            // Special handling for US (California)
+            if (countryCode === 'US') {
+              return data.region_code === 'CA';
+            }
+            
+            return CONSENT_REQUIRED_COUNTRIES.includes(countryCode);
+          }
+        }
+      } catch (serviceError) {
+        console.warn(`Service ${serviceUrl} failed:`, serviceError);
+        continue; // Try next service
+      }
     }
     
-    const data = await response.json();
-    const countryCode = data.country_code;
+    // If all services fail, assume consent is required
+    console.warn('All geolocation services failed, assuming consent required');
+    return true;
     
-    console.log('Country detected:', countryCode);
-    
-    // Special handling for US (California)
-    if (countryCode === 'US') {
-      return data.region_code === 'CA';
-    }
-    
-    return CONSENT_REQUIRED_COUNTRIES.includes(countryCode);
   } catch (error) {
     console.error('Error detecting country:', error);
-    // If we can't detect the country, we don't want to show the consent banner
-    // since it might be blocked by sanctions / russia or similar
-    return false;
+    // If we can't detect the country, assume consent is required (safer approach)
+    return true;
   }
 } 

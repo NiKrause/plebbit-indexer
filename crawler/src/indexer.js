@@ -88,7 +88,7 @@ export async function indexPosts(db, posts) {
             post.timestamp,
             post.title || null, // Title may be null for comments
             post.content,
-            JSON.stringify(post.raw), // 
+            JSON.stringify(post.raw), // Use post.raw if it exists, otherwise fallback to JSON.stringify
             post.subplebbitAddress,
             post.author?.address,
             post.author?.displayName,
