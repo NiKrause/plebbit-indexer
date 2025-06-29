@@ -45,8 +45,8 @@ export default function DownloadRaw({ post }: DownloadRawProps) {
         border: '1px solid #ddd',
         borderRadius: '4px',
         padding: '4px 8px',
-        fontSize: '11px',
-        color: '#666',
+        fontSize: '12px',
+        color: '#888',
         cursor: 'pointer',
         marginLeft: '8px',
         transition: 'all 0.2s ease'

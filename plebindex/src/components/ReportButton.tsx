@@ -15,16 +15,25 @@ export default function ReportButton({ postId }: ReportButtonProps) {
       <button
         onClick={() => setIsModalOpen(true)}
         style={{
-          color: '#888',
-          textDecoration: 'underline',
-          fontSize: 12,
           background: 'none',
-          border: 'none',
-          padding: 0,
+          border: '1px solid #ddd',
+          borderRadius: '4px',
+          padding: '4px 8px',
+          fontSize: '12px',
+          color: '#888',
           cursor: 'pointer',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#f5f5f5';
+          e.currentTarget.style.borderColor = '#999';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.borderColor = '#ddd';
         }}
       >
-        report
+        ⚠️ report
       </button>
       <ReportModal
         postId={postId}
