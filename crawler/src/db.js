@@ -309,6 +309,39 @@ export function getDb() {
   // Run the flagged_posts raw column check
   checkFlaggedPostsRawColumn();
   
+  // Check if title column exists in known_subplebbits and add if missing
+  const checkKnownSubplebbitsTitleColumn = () => {
+    console.log("Checking if title column exists in known_subplebbits...");
+    const tableInfo = dbInstance.prepare("PRAGMA table_info(known_subplebbits)").all();
+    const titleColumn = tableInfo.find(col => col.name === 'title');
+    
+    if (!titleColumn) {
+      console.log("title column missing in known_subplebbits. Adding column...");
+      
+      // Start a transaction
+      dbInstance.pragma('foreign_keys = OFF');
+      dbInstance.prepare('BEGIN TRANSACTION').run();
+      
+      try {
+        // Add the title column
+        dbInstance.exec('ALTER TABLE known_subplebbits ADD COLUMN title TEXT');
+        
+        dbInstance.prepare('COMMIT').run();
+        console.log("Successfully added title column to known_subplebbits");
+      } catch (error) {
+        dbInstance.prepare('ROLLBACK').run();
+        console.error("Error adding title column to known_subplebbits:", error.message);
+      } finally {
+        dbInstance.pragma('foreign_keys = ON');
+      }
+    } else {
+      console.log("title column exists in known_subplebbits. No changes needed.");
+    }
+  };
+  
+  // Run the known_subplebbits title column check
+  checkKnownSubplebbitsTitleColumn();
+
   const tablesCheck = {
     posts: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'").get(),
     queue: dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='subplebbit_queue'").get(),
