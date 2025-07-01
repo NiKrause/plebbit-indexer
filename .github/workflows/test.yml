@@ -65,17 +65,17 @@ jobs:
         echo "=== Checking container logs ==="
         docker compose -f docker-compose.dev.yml logs plebbit-cli
         
-        # # Simple wait for auth key - much faster
-        # echo "Waiting for auth key to be generated..."
-        # timeout 60 bash -c '
-        #   while ! docker compose -f docker-compose.dev.yml exec -T plebbit-cli test -f /app/data/auth-key 2>/dev/null; do
-        #     echo "Waiting for auth-key file..."
-        #     sleep 2
-        #   done
-        #   echo "Auth-key file found!"
-        # '
+        # Wait for auth key to be generated
+        echo "Waiting for auth key to be generated..."
+        timeout 60 bash -c '
+          while ! docker compose -f docker-compose.dev.yml exec -T plebbit-cli test -f /app/data/auth-key 2>/dev/null; do
+            echo "Waiting for auth-key file..."
+            sleep 2
+          done
+          echo "Auth-key file found!"
+        '
         
-        # # Copy the auth key to host - simple and direct
+        # Copy the auth key to host - simple and direct
         echo "Copying auth-key to host..."
         docker compose -f docker-compose.dev.yml exec -T plebbit-cli cat /app/data/auth-key > data/plebbit/auth-key
         
