@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { getSubplebbitAddresses, indexSubplebbit } from '../src/subplebbit.js';
+import { getNewSubplebbitAddressesFromGithub, indexSubplebbit } from '../src/subplebbit.js';
 import { startServer } from '../src/server/index.js';
 import { getDb } from '../src/db.js';
 import { getPlebbitClient } from '../src/plebbitClient.js';
@@ -38,14 +38,14 @@ describe('Subplebbit functionality', function () {
 
   it('should get subplebbit addresses', async function() {
     console.log("getting subplebbit addresses");
-    const addresses = await getSubplebbitAddresses();
+    const addresses = await getNewSubplebbitAddressesFromGithub(db);
     assert(Array.isArray(addresses), 'Should return an array of addresses');
     assert(addresses.length > 0, 'Should return at least one address');
   });
 
   it('should index the first subplebbit and be queryable via API', async function() {
     // await db.runAsync('DELETE FROM posts');
-    const addresses = await getSubplebbitAddresses();
+    const addresses = await getNewSubplebbitAddressesFromGithub(db);
     const firstAddress = addresses[0];
     const sub = await plebbit.getSubplebbit(firstAddress);
     await sub.update();
@@ -232,4 +232,4 @@ describe('Subplebbit functionality', function () {
     }
   }, 20000);
 
-}, 20000); 
+}); 

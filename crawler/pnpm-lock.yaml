@@ -15,8 +15,8 @@ importers:
         specifier: ^4.0.4
         version: 4.0.4(keyv@5.3.3)
       '@plebbit/plebbit-js':
-        specifier: github:plebbit/plebbit-js
-        version: https://codeload.github.com/plebbit/plebbit-js/tar.gz/12fdc28873f48fe4415bc2705452f776a4f451ca(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.79.3(@babel/core@7.27.4)(bufferutil@4.0.9)(react@19.1.0)(utf-8-validate@5.0.10))(typescript@5.8.3)(undici@6.21.3)(utf-8-validate@5.0.10)
+        specifier: github:plebbit/plebbit-js#a8754456fd2cd061a2b050d73beee588483d6714
+        version: https://codeload.github.com/plebbit/plebbit-js/tar.gz/a8754456fd2cd061a2b050d73beee588483d6714(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.79.3(@babel/core@7.27.4)(bufferutil@4.0.9)(react@19.1.0)(utf-8-validate@5.0.10))(typescript@5.8.3)(undici@6.21.3)(utf-8-validate@5.0.10)
       better-sqlite3:
         specifier: ^8.7.0
         version: 8.7.0
@@ -40,7 +40,7 @@ importers:
         version: 11.5.0
       openai:
         specifier: ^4.28.0
-        version: 4.104.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.24.4)
+        version: 4.104.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.64)
       plebbit-js:
         specifier: ^1.0.0
         version: 1.0.0
@@ -701,8 +701,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@plebbit/plebbit-js@https://codeload.github.com/plebbit/plebbit-js/tar.gz/12fdc28873f48fe4415bc2705452f776a4f451ca':
-    resolution: {tarball: https://codeload.github.com/plebbit/plebbit-js/tar.gz/12fdc28873f48fe4415bc2705452f776a4f451ca}
+  '@plebbit/plebbit-js@https://codeload.github.com/plebbit/plebbit-js/tar.gz/a8754456fd2cd061a2b050d73beee588483d6714':
+    resolution: {tarball: https://codeload.github.com/plebbit/plebbit-js/tar.gz/a8754456fd2cd061a2b050d73beee588483d6714}
     version: 0.0.7
     engines: {node: '>=20.18.0'}
 
@@ -4530,8 +4530,8 @@ packages:
     resolution: {integrity: sha512-AyeEbWOu/TAXdxlV9wmGcR0+yh2j3vYPGOECcIj2S7MkrLyC7ne+oye2BKTItt0ii2PHk4cDy+95+LshzbXnGg==}
     engines: {node: '>=12.20'}
 
-  zod@3.24.4:
-    resolution: {integrity: sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg==}
+  zod@3.25.64:
+    resolution: {integrity: sha512-hbP9FpSZf7pkS7hRVUrOjhwKJNyampPgtXKc3AN6DsWtoHsg2Sb4SQaS4Tcay380zSwd2VPo9G9180emBACp5g==}
 
 snapshots:
 
@@ -4976,7 +4976,7 @@ snapshots:
       ipfs-unixfs: 11.2.1
       ipfs-unixfs-exporter: 13.6.2
       ipfs-unixfs-importer: 15.3.2(encoding@0.1.13)
-      it-all: 3.0.6
+      it-all: 3.0.9
       it-first: 3.0.9
       it-glob: 3.0.4
       it-last: 3.0.9
@@ -5967,7 +5967,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@plebbit/plebbit-js@https://codeload.github.com/plebbit/plebbit-js/tar.gz/12fdc28873f48fe4415bc2705452f776a4f451ca(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.79.3(@babel/core@7.27.4)(bufferutil@4.0.9)(react@19.1.0)(utf-8-validate@5.0.10))(typescript@5.8.3)(undici@6.21.3)(utf-8-validate@5.0.10)':
+  '@plebbit/plebbit-js@https://codeload.github.com/plebbit/plebbit-js/tar.gz/a8754456fd2cd061a2b050d73beee588483d6714(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.79.3(@babel/core@7.27.4)(bufferutil@4.0.9)(react@19.1.0)(utf-8-validate@5.0.10))(typescript@5.8.3)(undici@6.21.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@bonfida/spl-name-service': 3.0.10(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@chainsafe/libp2p-gossipsub': 14.1.1
@@ -6025,8 +6025,8 @@ snapshots:
       ts-custom-error: 3.3.1
       typestub-ipfs-only-hash: 4.0.0(encoding@0.1.13)
       uuid: 11.1.0
-      viem: 2.29.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
-      zod: 3.24.4
+      viem: 2.29.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64)
+      zod: 3.25.64
     transitivePeerDependencies:
       - '@solana/web3.js'
       - bufferutil
@@ -6388,7 +6388,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 12.20.55
+      '@types/node': 22.15.30
 
   '@types/dns-packet@5.6.5':
     dependencies:
@@ -6468,7 +6468,7 @@ snapshots:
 
   '@types/ws@7.4.7':
     dependencies:
-      '@types/node': 12.20.55
+      '@types/node': 22.15.30
 
   '@types/ws@8.18.1':
     dependencies:
@@ -6482,10 +6482,10 @@ snapshots:
 
   abbrev@1.1.1: {}
 
-  abitype@1.0.8(typescript@5.8.3)(zod@3.24.4):
+  abitype@1.0.8(typescript@5.8.3)(zod@3.25.64):
     optionalDependencies:
       typescript: 5.8.3
-      zod: 3.24.4
+      zod: 3.25.64
 
   abort-controller@3.0.0:
     dependencies:
@@ -7961,7 +7961,7 @@ snapshots:
       interface-blockstore: 5.3.2
       interface-store: 6.0.3
       ipfs-unixfs: 11.2.1
-      it-all: 3.0.6
+      it-all: 3.0.9
       it-batch: 3.0.9
       it-first: 3.0.9
       it-parallel-batch: 3.0.9
@@ -8310,7 +8310,7 @@ snapshots:
 
   it-sort@3.0.9:
     dependencies:
-      it-all: 3.0.6
+      it-all: 3.0.9
 
   it-stream-types@2.0.2: {}
 
@@ -8741,7 +8741,7 @@ snapshots:
       err-code: 3.0.1
       ipfs-unixfs: 11.2.1
       iso-url: 1.2.1
-      it-all: 3.0.6
+      it-all: 3.0.9
       it-first: 3.0.9
       it-glob: 3.0.4
       it-last: 3.0.9
@@ -9452,7 +9452,7 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openai@4.104.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.24.4):
+  openai@4.104.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.64):
     dependencies:
       '@types/node': 18.19.111
       '@types/node-fetch': 2.6.12
@@ -9463,18 +9463,18 @@ snapshots:
       node-fetch: 2.7.0(encoding@0.1.13)
     optionalDependencies:
       ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      zod: 3.24.4
+      zod: 3.25.64
     transitivePeerDependencies:
       - encoding
 
-  ox@0.6.9(typescript@5.8.3)(zod@3.24.4):
+  ox@0.6.9(typescript@5.8.3)(zod@3.25.64):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.8.2
-      '@noble/hashes': 1.7.2
+      '@noble/curves': 1.9.2
+      '@noble/hashes': 1.8.0
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.4)
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.25.64)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.8.3
@@ -9487,7 +9487,7 @@ snapshots:
 
   p-event@6.0.1:
     dependencies:
-      p-timeout: 6.1.2
+      p-timeout: 6.1.4
 
   p-fifo@1.0.0:
     dependencies:
@@ -9522,7 +9522,7 @@ snapshots:
   p-queue@8.1.0:
     dependencies:
       eventemitter3: 5.0.1
-      p-timeout: 6.1.2
+      p-timeout: 6.1.4
 
   p-retry@6.2.1:
     dependencies:
@@ -10566,15 +10566,15 @@ snapshots:
 
   vary@1.1.2: {}
 
-  viem@2.29.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4):
+  viem@2.29.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64):
     dependencies:
       '@noble/curves': 1.8.2
       '@noble/hashes': 1.7.2
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.4)
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.25.64)
       isows: 1.0.6(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      ox: 0.6.9(typescript@5.8.3)(zod@3.24.4)
+      ox: 0.6.9(typescript@5.8.3)(zod@3.25.64)
       ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
       typescript: 5.8.3
@@ -10729,4 +10729,4 @@ snapshots:
 
   yocto-queue@1.2.1: {}
 
-  zod@3.24.4: {}
+  zod@3.25.64: {}

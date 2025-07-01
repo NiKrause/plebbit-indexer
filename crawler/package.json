@@ -4,8 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles ",
-    "test:server": "mocha test/server.test.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles "
   },
   "keywords": [],
   "author": "",
@@ -14,7 +13,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^9.0.1",
     "@keyv/sqlite": "^4.0.4",
-    "@plebbit/plebbit-js": "github:plebbit/plebbit-js",
+    "@plebbit/plebbit-js": "github:plebbit/plebbit-js#a8754456fd2cd061a2b050d73beee588483d6714",
     "better-sqlite3": "^8.7.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
@@ -38,6 +37,9 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^(\\.{1,2}/.*)\\.js$": "$1"
-    }
+    },
+    "testMatch": [
+      "**/test/**/*.test.js"
+    ]
   }
 }

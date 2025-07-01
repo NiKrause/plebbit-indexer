@@ -3,8 +3,6 @@ node_modules/
 *.log
 .git/
 .plebbit/
-test/
-*.test.js
 .env*
 README.md
 pnpm-lock.yaml

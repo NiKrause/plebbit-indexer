@@ -35,26 +35,59 @@ jobs:
         NEXT_PUBLIC_APP_DESCRIPTION=Test environment for Plebbit Indexer
         PLEBBIT_WS_URL=ws://localhost:9138
         SERVER_NAME=localhost
+        # Add missing environment variables with default values
+        OPENROUTER_API_KEY=
+        OPENROUTER_MODEL=gpt-3.5-turbo
+        OPENROUTER_MODEL_B=gpt-4
+        OPENROUTER_MODEL_C=claude-3-haiku
+        SITE_URL=http://localhost:3000
+        SITE_NAME=Plebbit Indexer
+        CONTENT_MODERATION_INTERVAL=3600000
+        QUEUE_REFRESH_INTERVAL=300000
+        ENABLE_CONTENT_MODERATION=false
+        DUNE_API_KEY=
+        DUNE_QUERY_ID=
+        DUNE_QUERY_EXECUTE_INTERVAL_HOURS=168
+        DUNE_QUERY_FETCH_INTERVAL_HOURS=24
         EOF
 
     - name: Start plebbit-cli service
       run: |
         echo "Building and starting plebbit-cli..."
-        docker compose build plebbit-cli
-        docker compose up -d plebbit-cli
+        docker compose -f docker-compose.dev.yml up -d plebbit-cli
         
-        # Wait for auth key to be generated
-        echo "Waiting for auth key to be generated..."
-        timeout 120 bash -c 'while [ ! -f data/plebbit/auth-key ]; do echo "Waiting for auth key..."; sleep 3; done'
+        # Wait a moment for the container to start
+        sleep 10
         
-        echo "Auth key generated successfully!"
+        echo "=== Checking container status ==="
+        docker compose -f docker-compose.dev.yml ps
+        
+        echo "=== Checking container logs ==="
+        docker compose -f docker-compose.dev.yml logs plebbit-cli
+        
+        # # Simple wait for auth key - much faster
+        # echo "Waiting for auth key to be generated..."
+        # timeout 60 bash -c '
+        #   while ! docker compose -f docker-compose.dev.yml exec -T plebbit-cli test -f /app/data/auth-key 2>/dev/null; do
+        #     echo "Waiting for auth-key file..."
+        #     sleep 2
+        #   done
+        #   echo "Auth-key file found!"
+        # '
+        
+        # # Copy the auth key to host - simple and direct
+        echo "Copying auth-key to host..."
+        docker compose -f docker-compose.dev.yml exec -T plebbit-cli cat /app/data/auth-key > data/plebbit/auth-key
+        
+        echo "=== Final data directory contents ==="
+        ls -la data/plebbit/
+        echo "=== Auth key contents ==="
         cat data/plebbit/auth-key
 
     - name: Start crawler service
       run: |
         echo "Building and starting crawler..."
-        docker compose build crawler01
-        docker compose up -d crawler01
+        docker compose -f docker-compose.dev.yml up -d crawler01
         
         # Wait for crawler API to be responsive
         echo "Waiting for crawler API to be ready..."
@@ -65,7 +98,7 @@ jobs:
     - name: Verify services are running
       run: |
         echo "=== Docker containers status ==="
-        docker compose ps
+        docker compose -f docker-compose.dev.yml ps
         
         echo "=== Testing API endpoint ==="
         curl -s http://localhost:3001/api/posts | head -20
@@ -76,31 +109,51 @@ jobs:
     - name: Show service logs before tests
       run: |
         echo "=== Recent Plebbit-CLI logs ==="
-        docker compose logs --tail=30 plebbit-cli
+        docker compose -f docker-compose.dev.yml logs --tail=30 plebbit-cli
         echo "=== Recent Crawler logs ==="
-        docker compose logs --tail=30 crawler01
+        docker compose -f docker-compose.dev.yml logs --tail=30 crawler01
 
     - name: Run tests
       run: |
+        set -o pipefail
         echo "Reading auth key from container..."
-        AUTH_KEY=$(docker compose exec -T crawler01 cat /app/data/auth-key)
-        echo "Auth key found: $AUTH_KEY"
+        AUTH_KEY=$(docker compose -f docker-compose.dev.yml exec -T crawler01 cat /app/data/auth-key)
         
-        echo "Running Jest tests with correct WebSocket URL..."
-        # Run tests inside the crawler container with the proper auth key URL
-        docker compose exec -T -e PLEBBIT_WS_URL=ws://plebbit-cli:9138/$AUTH_KEY crawler01 npm test test/subplebbit.test.js sorting.test.js sitemap.test.js replies.test.js include-replies.test.js enhanced-search.test.js pagination.test.js
+        echo "🧪 RUNNING TESTS..."
+        echo "=========================================="
+        
+        # Run tests and save output
+        docker compose -f docker-compose.dev.yml exec -T -e PLEBBIT_WS_URL=ws://plebbit-cli:9138/$AUTH_KEY crawler01 npm test -- --verbose 2>&1 | tee test-output.log
+        
+        echo "=========================================="
+        echo "TEST RESULTS SAVED TO ARTIFACT"
       timeout-minutes: 15
+
+    - name: Save test results locally
+      if: always()
+      run: |
+        # Copy test results to a location that persists after act run
+        cp test-output.log /tmp/act-test-results.log || echo "No test-output.log found"
+        echo "Test results saved to /tmp/act-test-results.log"
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: test-output.log
 
     - name: Show service logs on failure
       if: failure()
       run: |
         echo "=== Full Plebbit-CLI logs ==="
-        docker compose logs plebbit-cli
+        docker compose -f docker-compose.dev.yml logs plebbit-cli
         echo "=== Full Crawler logs ==="
-        docker compose logs crawler01
+        docker compose -f docker-compose.dev.yml logs crawler01
 
     - name: Clean up
       if: always()
       run: |
-        docker compose down -v
-        docker system prune -f 
+        # Use explicit file reference and handle errors gracefully
+        docker compose -f docker-compose.dev.yml down -v || true
+        docker system prune -f || true 

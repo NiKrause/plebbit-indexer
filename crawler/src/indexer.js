@@ -75,14 +75,6 @@ export async function indexPosts(db, posts) {
           const deleteStmt = db.prepare('DELETE FROM posts where id = ?');
           deleteStmt.run(post.cid);
           
-          // Check if post.raw exists and log it
-          console.log('post', post);
-          if (post.raw !== undefined) {
-            console.log(`🎉 POST ${post.cid} HAS RAW FIELD! Raw content length: ${post.raw?.length || 0} characters`);
-          } else {
-            console.log(`❌ POST ${post.cid} DOES NOT HAVE RAW FIELD - using JSON.stringify fallback`);
-          }
-          
           insertStmt.run(
             post.cid,
             post.timestamp,

@@ -66,6 +66,6 @@ services:
     ports:
       - "9138:9138"
     volumes:
-      - ./plebbit-cli/start-plebbit.sh:/start-plebbit.sh:ro
+      # - ./plebbit-cli/start-plebbit.sh:/start-plebbit.sh:ro
       - ./data/plebbit:/app/data
     command: ["sh", "-c", "/app/plebbit-cli/bin/run daemon --plebbitOptions.dataPath /app/data"]
