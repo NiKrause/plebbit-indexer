@@ -64,29 +64,6 @@ jobs:
         
         echo "=== Checking container logs ==="
         docker compose -f docker-compose.dev.yml logs plebbit-cli
-        
-        # Wait for auth key to be generated
-        echo "Waiting for auth key to be generated..."
-        timeout 60 bash -c '
-          while ! docker compose -f docker-compose.dev.yml exec -T plebbit-cli test -f /app/data/auth-key 2>/dev/null; do
-            echo "Waiting for auth-key file..."
-            sleep 2
-          done
-          echo "Auth-key file found!"
-        '
-        
-        # Copy the auth key to host using docker cp (handles permissions better)
-        CONTAINER_ID=$(docker compose -f docker-compose.dev.yml ps -q plebbit-cli)
-        docker cp $CONTAINER_ID:/app/data/auth-key data/plebbit/auth-key
-        # Copy the auth key to host - simple and direct
-        echo "Copying auth-key to host..."
-        docker compose -f docker-compose.dev.yml exec -T plebbit-cli cat /app/data/auth-key > data/plebbit/auth-key
-        
-        echo "=== Final data directory contents ==="
-        ls -la data/plebbit/
-        echo "=== Auth key contents ==="
-        cat data/plebbit/auth-key
-
     - name: Start crawler service
       run: |
         echo "Building and starting crawler..."
@@ -120,7 +97,9 @@ jobs:
       run: |
         set -o pipefail
         echo "Reading auth key from container..."
-        AUTH_KEY=$(docker compose -f docker-compose.dev.yml exec -T crawler01 cat /app/data/auth-key)
+        AUTH_KEY=$(docker compose -f docker-compose.dev.yml exec -T plebbit-cli cat /app/data/auth-key)
+        
+        echo "Auth key: $AUTH_KEY"
         
         echo "🧪 RUNNING TESTS..."
         echo "=========================================="
