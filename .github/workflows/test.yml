@@ -75,9 +75,9 @@ jobs:
           echo "Auth-key file found!"
         '
         
-        # Ensure the directory is writable
-        chmod -R 777 data/plebbit
-        
+        # Copy the auth key to host using docker cp (handles permissions better)
+        CONTAINER_ID=$(docker compose -f docker-compose.dev.yml ps -q plebbit-cli)
+        docker cp $CONTAINER_ID:/app/data/auth-key data/plebbit/auth-key
         # Copy the auth key to host - simple and direct
         echo "Copying auth-key to host..."
         docker compose -f docker-compose.dev.yml exec -T plebbit-cli cat /app/data/auth-key > data/plebbit/auth-key
