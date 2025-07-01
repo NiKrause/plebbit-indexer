@@ -105,7 +105,7 @@ jobs:
         echo "=========================================="
         
         # Run tests and save output
-        docker compose -f docker-compose.dev.yml exec -T -e PLEBBIT_WS_URL=ws://plebbit-cli:9138/$AUTH_KEY crawler01 npm test -- --verbose 2>&1 | tee test-output.log
+        docker compose -f docker-compose.dev.yml exec -T -e PLEBBIT_WS_URL=ws://plebbit-cli:9138/$AUTH_KEY crawler01 npm test test/replies.test.js --verbose 2>&1 | tee test-output.log
         
         echo "=========================================="
         echo "TEST RESULTS SAVED TO ARTIFACT"

@@ -24,6 +24,9 @@ export function getDb() {
   
   dbInstance.pragma('journal_mode = WAL');
   dbInstance.pragma('synchronous = NORMAL');
+  dbInstance.pragma('busy_timeout = 30000'); // 30 seconds timeout
+  dbInstance.pragma('wal_autocheckpoint = 1000'); // Checkpoint every 1000 pages
+  dbInstance.pragma('cache_size = -64000'); // Use 64MB cache
   
   dbInstance.exec(`
     CREATE TABLE IF NOT EXISTS posts (

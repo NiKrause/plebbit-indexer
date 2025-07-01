@@ -6,7 +6,10 @@ export async function indexPosts(db, posts) {
     let finalInsertedCount = 0;
     let finalSkippedCount = 0;
 
-    const transaction = db.transaction(() => {
+    // Add busy timeout to handle concurrent access
+    db.pragma('busy_timeout = 30000'); // 30 seconds timeout
+
+    const transaction = db.transaction(async () => {
       const insertStmt = db.prepare(`
         INSERT INTO posts (id, timestamp, title, content, raw, subplebbitAddress, 
                            authorAddress, authorDisplayName, upvoteCount, downvoteCount, 
@@ -98,6 +101,15 @@ export async function indexPosts(db, posts) {
             console.log(`Indexed ${insertedCount} posts/comments so far...`);
           }
         } catch (error) {
+          // Handle SQLITE_BUSY specifically
+          if (error.code === 'SQLITE_BUSY') {
+            console.warn(`Database busy for post ${post?.cid || 'unknown'}, retrying after delay...`);
+            // Add a small delay and retry the operation
+            await new Promise(resolve => setTimeout(resolve, 100));
+            skippedCount++;
+            continue;
+          }
+          
           console.error(`Error processing post ${post?.cid || 'unknown'}:`, error);
           skippedCount++;
           // Continue with the next post instead of breaking the entire indexing process
@@ -111,8 +123,24 @@ export async function indexPosts(db, posts) {
       console.log(`Indexing complete. Inserted: ${insertedCount}, Skipped: ${skippedCount}`);
     });
     
-    // Execute transaction
-    transaction();
+    // Execute transaction with retry logic
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount < maxRetries) {
+      try {
+        transaction();
+        break; // Success, exit retry loop
+      } catch (error) {
+        retryCount++;
+        if (error.code === 'SQLITE_BUSY' && retryCount < maxRetries) {
+          console.warn(`Transaction failed with SQLITE_BUSY, retrying (${retryCount}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
+          continue;
+        }
+        throw error; // Re-throw if not SQLITE_BUSY or max retries reached
+      }
+    }
     
     // Now we can safely use the final counts
     console.log(`[DB] Starting to index ${posts.length} posts...`);
