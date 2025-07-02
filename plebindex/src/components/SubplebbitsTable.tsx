@@ -219,7 +219,15 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
                 borderBottom: '1px solid #dee2e6'
               }}
             >
-              <td style={{ padding: '12px' }}>
+              <td style={{
+                padding: '12px',
+                maxWidth: '180px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                fontSize: '14px',
+                wordBreak: 'break-all'
+              }}>
                 <a
                   href={`https://seedit.app/#/p/${sub.address}`}
                   target="_blank"
@@ -230,13 +238,21 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
                     fontSize: '14px',
                     wordBreak: 'break-all'
                   }}
+                  title={sub.address}
                   onMouseOver={(e) => e.currentTarget.style.textDecoration = 'underline'}
                   onMouseOut={(e) => e.currentTarget.style.textDecoration = 'none'}
                 >
                   {sub.address}
                 </a>
               </td>
-              <td style={{ padding: '12px', fontSize: '14px' }}>
+              <td style={{
+                padding: '12px',
+                fontSize: '14px',
+                maxWidth: '160px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }} title={sub.title || 'No title'}>
                 {sub.title || 'No title'}
               </td>
               <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px' }}>
@@ -249,9 +265,9 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
                 {formatAge(sub.createdAt)}
               </td>
               <td style={{ padding: '12px', fontSize: '14px' }}>
-                {sub.tags && sub.tags.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                    {sub.tags.map((tag, i) => (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '120px', overflow: 'hidden' }}>
+                  {sub.tags && sub.tags.length > 0 ? (
+                    sub.tags.map((tag, i) => (
                       <span
                         key={i}
                         style={{
@@ -259,16 +275,21 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
                           padding: '2px 8px',
                           borderRadius: '12px',
                           fontSize: '12px',
-                          color: '#495057'
+                          color: '#495057',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '80px'
                         }}
+                        title={tag}
                       >
                         {tag}
                       </span>
-                    ))}
-                  </div>
-                ) : (
-                  <span style={{ color: '#6c757d', fontSize: '12px' }}>No tags</span>
-                )}
+                    ))
+                  ) : (
+                    <span style={{ color: '#6c757d', fontSize: '12px' }}>No tags</span>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
