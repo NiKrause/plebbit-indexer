@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+// import { Suspense } from 'react';
 import { fetchReplies } from '../../../../../api/posts';
 import { Post } from '../../../../../types';
 import Pagination from '../../../../../components/Pagination';
@@ -88,13 +88,13 @@ export default async function Replies({
   const sort = searchParams?.sort || 'new';
   
   return (
-    <Suspense fallback={<div>Loading replies...</div>}>
+    // <Suspense fallback={<div>Loading replies...</div>}>
       <RepliesContent 
         postId={postId}
         post={post}
         page={page} 
         sort={sort}
       />
-    </Suspense>
+    // </Suspense>
   );
 }

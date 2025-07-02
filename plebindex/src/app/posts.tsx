@@ -1,6 +1,6 @@
 // app/Posts.tsx
 
-import { Suspense } from 'react';
+// import { Suspense } from 'react';
 import { fetchPosts } from '../api/posts';
 import { Post, PaginatedResponse } from '../types';
 import PostItem from '../components/PostItem';
@@ -142,7 +142,7 @@ export default async function Posts({ searchParams }: {
   const includeReplies = searchParams?.['include-replies'] !== 'false'; // defaults to true
   
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    // <Suspense fallback={<div>Loading...</div>}>
       <PostsContent 
         searchTerm={searchTerm} 
         page={page} 
@@ -150,6 +150,6 @@ export default async function Posts({ searchParams }: {
         timeFilter={timeFilter} 
         includeReplies={includeReplies}
       />
-    </Suspense>
+    // </Suspense>
   );
 }

@@ -4,7 +4,7 @@ import PlebscanLogo from './plebscanlogo';
 import SearchBar from './search';
 import './header.css';
 import MobileMenu from '../components/MobileMenu';
-import { Suspense } from 'react';
+// import { Suspense } from 'react';
 
 const styles = {
   header: {
@@ -131,9 +131,9 @@ export default function Header({ pathname }: { pathname: string }) {
         {/* Search row - only show if not on subplebbits page */}
         {!isSubplebbitsPage && (
           <div style={styles.searchContainer}>
-            <Suspense fallback={<div>Loading search...</div>}>
+            {/* <Suspense fallback={<div>Loading search...</div>}> */}
               <SearchBar aria-label="Search content" />
-            </Suspense>
+            {/* </Suspense> */}
           </div>
         )}
       </div>
