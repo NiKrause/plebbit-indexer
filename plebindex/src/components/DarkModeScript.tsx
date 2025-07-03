@@ -44,27 +44,25 @@ export default function DarkModeScript() {
             // Make toggle function globally available
             window.toggleDarkMode = toggleDarkMode;
             
-            // Add event listeners when DOM is ready
-            function addEventListeners() {
+            // Initialize icons on load
+            function initializeIcons() {
+              const isDarkMode = document.documentElement.classList.contains('dark');
+              const updateIcon = (button) => {
+                const svg = button.querySelector('svg path');
+                if (svg) {
+                  if (isDarkMode) {
+                    svg.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
+                  } else {
+                    svg.setAttribute('d', 'M12 3v1M12 20v1M4.22 4.22l.7.7M17.68 17.68l.7.7M1 12h1M20 12h1M4.22 19.78l.7-.7M17.68 6.32l.7-.7M12 7a5 5 0 000 10 5 5 0 000-10z');
+                  }
+                }
+              };
+              
               const desktopButton = document.getElementById('dark-mode-toggle');
+              if (desktopButton) updateIcon(desktopButton);
+              
               const mobileButton = document.getElementById('dark-mode-toggle-mobile');
-              
-              if (desktopButton && !desktopButton.hasAttribute('data-listener-added')) {
-                desktopButton.addEventListener('click', toggleDarkMode);
-                desktopButton.setAttribute('data-listener-added', 'true');
-              }
-              
-              if (mobileButton && !mobileButton.hasAttribute('data-listener-added')) {
-                mobileButton.addEventListener('click', toggleDarkMode);
-                mobileButton.setAttribute('data-listener-added', 'true');
-              }
-            }
-            
-            // Try to add listeners immediately if DOM is ready
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', addEventListeners);
-            } else {
-              addEventListeners();
+              if (mobileButton) updateIcon(mobileButton);
             }
             
             // Listen for system theme changes
@@ -77,8 +75,16 @@ export default function DarkModeScript() {
                 } else {
                   document.documentElement.classList.remove('dark');
                 }
+                initializeIcons();
               }
             });
+            
+            // Initialize icons when DOM is ready
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', initializeIcons);
+            } else {
+              initializeIcons();
+            }
           })();
         `,
       }}

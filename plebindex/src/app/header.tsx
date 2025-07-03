@@ -71,31 +71,8 @@ export default function Header({ pathname }: { pathname: string }) {
   const isSubplebbitsPage = pathname === '/subplebbits';
   
   const handleDarkModeToggle = () => {
-    if (typeof window !== 'undefined') {
-      const isDarkMode = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
-      
-      // Update icon for both desktop and mobile buttons
-      const updateIcon = (button: Element) => {
-        const svg = button.querySelector('svg path');
-        if (svg) {
-          if (isDarkMode) {
-            // Moon icon for dark mode
-            svg.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
-          } else {
-            // Sun icon for light mode
-            svg.setAttribute('d', 'M12 3v1M12 20v1M4.22 4.22l.7.7M17.68 17.68l.7.7M1 12h1M20 12h1M4.22 19.78l.7-.7M17.68 6.32l.7-.7M12 7a5 5 0 000 10 5 5 0 000-10z');
-          }
-        }
-      };
-      
-      // Update desktop button icon
-      const desktopButton = document.getElementById('dark-mode-toggle');
-      if (desktopButton) updateIcon(desktopButton);
-      
-      // Update mobile button icon
-      const mobileButton = document.getElementById('dark-mode-toggle-mobile');
-      if (mobileButton) updateIcon(mobileButton);
+    if (typeof window !== 'undefined' && window.toggleDarkMode) {
+      window.toggleDarkMode();
     }
   };
 
@@ -161,7 +138,6 @@ export default function Header({ pathname }: { pathname: string }) {
               style={styles.iconLink}
               aria-label="Toggle dark mode"
               className="hidden md:inline"
-              suppressHydrationWarning
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
