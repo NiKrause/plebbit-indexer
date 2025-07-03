@@ -51,7 +51,7 @@ export default function RootLayout({
         <div className="flex-grow container mx-auto px-4 pb-40">
           {children}
         </div>
-        <footer className="bottom-0 left-0 right-0 py-4 text-center text-xs text-gray-500 border-t z-[9998] bg-white">
+        <footer className="py-4 text-center text-xs text-gray-500 border-t bg-white mt-8">
           <div className="container mx-auto px-4">
             <p className="text-center">
               {process.env.NEXT_PUBLIC_SITE_NAME ?? "Plebscan.org"} is a search engine for Plebbit, a decentralized P2P Reddit alternative. 

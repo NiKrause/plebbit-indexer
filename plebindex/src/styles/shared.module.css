@@ -2,15 +2,10 @@
   display: flex;
   justify-content: center;
   gap: 8px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background: white;
-  padding-top: 1rem;
-  padding-bottom: 3rem;
+  padding: 1rem;
   border-top: 1px solid #e5e7eb;
-  z-index: 40;
+  margin-top: 2rem;
 }
 
 .pageLink {
