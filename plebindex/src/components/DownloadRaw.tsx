@@ -7,21 +7,20 @@ interface DownloadRawProps {
 }
 
 export default function DownloadRaw({ post }: DownloadRawProps) {
-  console.log('post download raw', post);
   const handleDownload = () => {
     if (!post.raw) {
       alert('No raw content available for this post');
       return;
     }
 
-    // Create a blob with the raw content
-    const blob = new Blob([post.raw], { type: 'text/plain' });
+    // Create a blob with the raw content as JSON
+    const blob = new Blob([post.raw], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     
     // Create a temporary link element
     const link = document.createElement('a');
     link.href = url;
-    link.download = `post-${post.id}-raw.txt`;
+    link.download = `post-${post.id}-raw.json`;
     
     // Trigger the download
     document.body.appendChild(link);

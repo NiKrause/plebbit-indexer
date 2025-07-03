@@ -48,7 +48,7 @@ export default function RootLayout({
         <div className="fixed bottom-0 left-0 left-0 z-[9999] p-8 md:p-16 px-4 m-8">
            <CookieConsent />
         </div>
-        <div className="flex-grow container mx-auto px-4 pb-40">
+        <div className="flex-grow container mx-auto px-4">
           {children}
         </div>
         <footer className="py-4 text-center text-xs text-gray-500 border-t bg-white mt-8">
