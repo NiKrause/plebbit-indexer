@@ -162,7 +162,9 @@ export default function SearchBar() {
       fontSize: '14px',
       border: '1px solid #d1d5db',
       borderRadius: '4px',
-      outline: 'none'
+      outline: 'none',
+      background: 'var(--background)',
+      color: 'var(--foreground)'
     },
     button: {
       position: 'absolute' as const,
@@ -191,8 +193,8 @@ export default function SearchBar() {
       borderWidth: '1px',
       borderStyle: 'solid',
       borderColor: '#d1d5db',
-      backgroundColor: 'white',
-      color: '#4b5563',
+      backgroundColor: 'var(--background)',
+      color: 'var(--foreground)',
       display: 'flex' as const,
       alignItems: 'left' as const,
       gap: '4px',
@@ -211,8 +213,8 @@ export default function SearchBar() {
       borderWidth: '1px',
       borderStyle: 'solid',
       borderColor: '#d1d5db',
-      backgroundColor: 'white',
-      color: '#4b5563',
+      backgroundColor: 'var(--background)',
+      color: 'var(--foreground)',
       display: 'flex' as const,
       alignItems: 'left' as const,
       gap: '4px',
@@ -224,12 +226,13 @@ export default function SearchBar() {
       top: '100%',
       left: 0,
       minWidth: '200px',
-      backgroundColor: 'white',
+      backgroundColor: 'var(--background)',
       borderRadius: '4px',
       border: '1px solid #d1d5db',
       padding: '8px',
       zIndex: 1000,
-      width: 'max-content'
+      width: 'max-content',
+      color: 'var(--foreground)'
     },
     dropdownItem: {
       padding: '4px 8px',

@@ -2,10 +2,14 @@
   display: flex;
   justify-content: center;
   gap: 8px;
-  background: white;
+  background: var(--background);
   padding: 1rem;
   border-top: 1px solid #e5e7eb;
   margin-top: 2rem;
+}
+
+html.dark .container {
+  border-top: 1px solid #374151;
 }
 
 .pageLink {
@@ -13,8 +17,12 @@
   border: 1px solid #d1d5db;
   border-radius: 4px;
   text-decoration: none;
-  color: #374151;
-  background: white;
+  color: var(--foreground);
+  background: var(--background);
+}
+
+html.dark .pageLink {
+  border: 1px solid #4b5563;
 }
 
 .activePage {
@@ -69,10 +77,14 @@
   font-size: 14px;
   border-radius: 4px;
   border: 1px solid #d1d5db;
-  background: white;
+  background: var(--background);
   cursor: pointer;
   text-decoration: none;
-  color: inherit;
+  color: var(--foreground);
+}
+
+html.dark .sortButton {
+  border: 1px solid #4b5563;
 }
 
 .sortButtonActive {

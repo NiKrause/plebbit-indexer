@@ -1,24 +1,26 @@
 import { Suspense } from 'react';
 import Header from '../header';
+import DarkModeScript from '../../components/DarkModeScript';
+import './imprint.css';
 
 export default function ImprintPage() {
   return (
-    <div className="imprint-page flex flex-col min-h-screen bg-gray-50">
+    <div className="imprint-page flex flex-col min-h-screen" style={{ backgroundColor: 'var(--imprint-bg)' }}>
       <Suspense fallback={<div>Loading...</div>}>
         <Header pathname="/imprint" />
       </Suspense>
       <main className="flex-grow flex justify-center py-8 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-4 sm:p-8 md:p-12">
+        <div className="w-full max-w-4xl rounded-2xl shadow-xl p-8 sm:p-12 md:p-20" style={{ backgroundColor: 'var(--imprint-card-bg)' }}>
           <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">Imprint / Legal Notice</h1>
+            <h1 className="text-3xl sm:text-4xl font-extrabold mb-4" style={{ color: 'var(--imprint-text-primary)' }}>Imprint / Legal Notice</h1>
           </div>
           <div className="space-y-8">
             <section>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">Information according to § 5 TMG</h2>
+              <h2 className="text-xl sm:text-2xl font-bold pb-4 mb-6" style={{ color: 'var(--imprint-text-secondary)', borderBottom: '1px solid var(--imprint-border)' }}>Information according to § 5 TMG</h2>
               <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
-                <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Service Provider</h3>
-                  <div className="space-y-2 text-gray-700">
+                <div className="p-4 sm:p-6 rounded-lg" style={{ backgroundColor: 'var(--imprint-section-bg)' }}>
+                  <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--imprint-text-secondary)' }}>Service Provider</h3>
+                  <div className="space-y-2" style={{ color: 'var(--imprint-text-muted)' }}>
                     <div>Le Space UG (haftungsbeschränkt)</div>
                     <div>Lichtenberg 44</div>
                     <div>84307 Eggenfelden</div>
@@ -32,9 +34,9 @@ export default function ImprintPage() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Geschäftsführer</h3>
-                  <div className="space-y-2 text-gray-700">
+                <div className="p-4 sm:p-6 rounded-lg" style={{ backgroundColor: 'var(--imprint-section-bg)' }}>
+                  <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--imprint-text-secondary)' }}>Geschäftsführer</h3>
+                  <div className="space-y-2" style={{ color: 'var(--imprint-text-muted)' }}>
                     <div>Nico Krause</div>
                     <div>Lichtenberg 44</div>
                     <div>84307 Eggenfelden</div>
@@ -284,6 +286,7 @@ export default function ImprintPage() {
           </div>
         </div>
       </main>
+      <DarkModeScript />
     </div>
   );
 } 

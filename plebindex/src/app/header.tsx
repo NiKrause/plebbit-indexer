@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import PlebscanLogo from './plebscanlogo';
@@ -67,6 +69,35 @@ const styles = {
 
 export default function Header({ pathname }: { pathname: string }) {
   const isSubplebbitsPage = pathname === '/subplebbits';
+  
+  const handleDarkModeToggle = () => {
+    if (typeof window !== 'undefined') {
+      const isDarkMode = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+      
+      // Update icon for both desktop and mobile buttons
+      const updateIcon = (button: Element) => {
+        const svg = button.querySelector('svg path');
+        if (svg) {
+          if (isDarkMode) {
+            // Moon icon for dark mode
+            svg.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
+          } else {
+            // Sun icon for light mode
+            svg.setAttribute('d', 'M12 3v1M12 20v1M4.22 4.22l.7.7M17.68 17.68l.7.7M1 12h1M20 12h1M4.22 19.78l.7-.7M17.68 6.32l.7-.7M12 7a5 5 0 000 10 5 5 0 000-10z');
+          }
+        }
+      };
+      
+      // Update desktop button icon
+      const desktopButton = document.getElementById('dark-mode-toggle');
+      if (desktopButton) updateIcon(desktopButton);
+      
+      // Update mobile button icon
+      const mobileButton = document.getElementById('dark-mode-toggle-mobile');
+      if (mobileButton) updateIcon(mobileButton);
+    }
+  };
 
   return (
     <header style={styles.header} role="banner">
@@ -86,7 +117,7 @@ export default function Header({ pathname }: { pathname: string }) {
               title="Subplebbits"
               style={styles.iconLink}
               aria-label="Subplebbits Statistics"
-              className="hidden md:inline"
+              className="hidden md:inline header-text-link"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/>
@@ -102,7 +133,7 @@ export default function Header({ pathname }: { pathname: string }) {
               aria-label="Visit our GitHub repository"
               className="hidden md:inline"
             >
-              <Image src="/github.svg" alt="GitHub" width={24} height={24} />
+              <Image src="/github.svg" alt="GitHub" width={24} height={24} className="dark-mode-icon" />
             </Link>
             <Link
               href="https://t.me/plebbitindexer"
@@ -113,17 +144,39 @@ export default function Header({ pathname }: { pathname: string }) {
               aria-label="Join our Telegram channel"
               className="hidden md:inline"
             >
-              <Image src="/telegram.svg" alt="Telegram" width={24} height={24} />
+              <Image src="/telegram.svg" alt="Telegram" width={24} height={24} className="dark-mode-icon" />
             </Link>
             <Link
               href="/imprint"
               title="Imprint"
               style={styles.iconLink}
               aria-label="Legal information"
-              className="hidden md:inline"
+              className="hidden md:inline header-text-link"
             >
               Imprint
             </Link>
+            <button
+              id="dark-mode-toggle"
+              onClick={handleDarkModeToggle}
+              style={styles.iconLink}
+              aria-label="Toggle dark mode"
+              className="hidden md:inline"
+              suppressHydrationWarning
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 3v1M12 20v1M4.22 4.22l.7.7M17.68 17.68l.7.7M1 12h1M20 12h1M4.22 19.78l.7-.7M17.68 6.32l.7-.7M12 7a5 5 0 000 10 5 5 0 000-10z"/>
+              </svg>
+            </button>
             <MobileMenu />
           </div>
         </div>

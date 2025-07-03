@@ -121,18 +121,19 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
       <table style={{
         width: '100%',
         borderCollapse: 'collapse',
-        backgroundColor: 'white',
+        backgroundColor: 'var(--background)',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        borderRadius: '4px'
+        borderRadius: '4px',
+        color: 'var(--foreground)'
       }}>
         <thead>
-          <tr style={{ backgroundColor: '#f8f9fa' }}>
+          <tr style={{ backgroundColor: 'var(--imprint-section-bg)' }}>
             <th
               onClick={() => handleSort('address')}
               style={{
                 padding: '12px',
                 textAlign: 'left',
-                borderBottom: '2px solid #dee2e6',
+                borderBottom: '2px solid var(--imprint-border)',
                 cursor: 'pointer',
                 userSelect: 'none',
                 fontSize: '14px',
@@ -146,7 +147,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
               style={{
                 padding: '12px',
                 textAlign: 'left',
-                borderBottom: '2px solid #dee2e6',
+                borderBottom: '2px solid var(--imprint-border)',
                 cursor: 'pointer',
                 userSelect: 'none',
                 fontSize: '14px',
@@ -160,7 +161,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
               style={{
                 padding: '12px',
                 textAlign: 'right',
-                borderBottom: '2px solid #dee2e6',
+                borderBottom: '2px solid var(--imprint-border)',
                 cursor: 'pointer',
                 userSelect: 'none',
                 fontSize: '14px',
@@ -174,7 +175,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
               style={{
                 padding: '12px',
                 textAlign: 'right',
-                borderBottom: '2px solid #dee2e6',
+                borderBottom: '2px solid var(--imprint-border)',
                 cursor: 'pointer',
                 userSelect: 'none',
                 fontSize: '14px',
@@ -188,7 +189,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
               style={{
                 padding: '12px',
                 textAlign: 'right',
-                borderBottom: '2px solid #dee2e6',
+                borderBottom: '2px solid var(--imprint-border)',
                 cursor: 'pointer',
                 userSelect: 'none',
                 fontSize: '14px',
@@ -201,7 +202,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
               style={{
                 padding: '12px',
                 textAlign: 'left',
-                borderBottom: '2px solid #dee2e6',
+                borderBottom: '2px solid var(--imprint-border)',
                 fontSize: '14px',
                 fontWeight: 'bold'
               }}
@@ -215,8 +216,8 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
             <tr
               key={sub.address}
               style={{
-                backgroundColor: index % 2 === 0 ? 'white' : '#f8f9fa',
-                borderBottom: '1px solid #dee2e6'
+                backgroundColor: index % 2 === 0 ? 'var(--background)' : 'var(--imprint-section-bg)',
+                borderBottom: '1px solid var(--imprint-border)'
               }}
             >
               <td style={{
@@ -233,7 +234,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    color: '#1976d2',
+                    color: 'var(--imprint-text-secondary)',
                     textDecoration: 'none',
                     fontSize: '14px',
                     wordBreak: 'break-all'
@@ -271,11 +272,11 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
                       <span
                         key={i}
                         style={{
-                          backgroundColor: '#e9ecef',
+                          backgroundColor: 'var(--imprint-border)',
                           padding: '2px 8px',
                           borderRadius: '12px',
                           fontSize: '12px',
-                          color: '#495057',
+                          color: 'var(--imprint-text-muted)',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -287,7 +288,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
                       </span>
                     ))
                   ) : (
-                    <span style={{ color: '#6c757d', fontSize: '12px' }}>No tags</span>
+                    <span style={{ color: 'var(--imprint-text-muted)', fontSize: '12px' }}>No tags</span>
                   )}
                 </div>
               </td>
@@ -297,7 +298,7 @@ export default function SubplebbitsTable({ initialData }: SubplebbitsTableProps)
       </table>
 
       {subplebbits.length === 0 && (
-        <div style={{ textAlign: 'center', marginTop: '40px', color: '#666' }}>
+        <div style={{ textAlign: 'center', marginTop: '40px', color: 'var(--foreground)', opacity: '0.6' }}>
           No subplebbit data available.
         </div>
       )}

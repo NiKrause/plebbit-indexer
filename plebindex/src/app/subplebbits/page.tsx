@@ -1,5 +1,6 @@
 import Header from '../header';
 import SubplebbitsTable from '../../components/SubplebbitsTable';
+import DarkModeScript from '../../components/DarkModeScript';
 import type { Metadata } from 'next';
 import { getSubplebbits } from '../../api/subplebbits';
 
@@ -14,15 +15,15 @@ export default async function SubplebbitsPage() {
   const data = await getSubplebbits();
   
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
       <Header pathname="/subplebbits" />
       
       <main className="flex-grow container mx-auto px-4 pt-8 pb-6">
         <div style={{ marginBottom: '20px', padding: '0 16px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '16px 0 8px 0' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '16px 0 8px 0', color: 'var(--foreground)' }}>
             Subplebbit Statistics
           </h1>
-          <p style={{ color: '#666', fontSize: '14px' }}>
+          <p style={{ color: 'var(--foreground)', opacity: '0.7', fontSize: '14px' }}>
             Browse all known subplebbits and their activity statistics. CPH (Comments Per Hour) is averaged over the last 7 days.
             Click column headers to sort.
           </p>
@@ -32,6 +33,7 @@ export default async function SubplebbitsPage() {
           <SubplebbitsTable initialData={data} />
         </div>
       </main>
+      <DarkModeScript />
     </div>
   );
 }

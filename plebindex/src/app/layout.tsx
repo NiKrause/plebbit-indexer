@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CookieConsent from '../components/CookieConsent';
 import Analytics from '../components/Analytics';
+import DarkModeScript from '../components/DarkModeScript';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="alternate" type="application/xml" href="/sitemap.xml" title="Sitemap" />
       </head>
@@ -51,15 +52,20 @@ export default function RootLayout({
         <div className="flex-grow container mx-auto px-4">
           {children}
         </div>
-        <footer className="py-4 text-center text-xs text-gray-500 border-t bg-white mt-8">
+        <footer className="py-4 text-center text-xs border-t mt-8" style={{ 
+          backgroundColor: 'var(--background)', 
+          color: 'var(--footer-text)',
+          borderColor: 'var(--footer-border)'
+        }}>
           <div className="container mx-auto px-4">
-            <p className="text-center">
+            <p className="text-center" style={{ color: 'var(--footer-text)' }}>
               {process.env.NEXT_PUBLIC_SITE_NAME ?? "Plebscan.org"} is a search engine for Plebbit, a decentralized P2P Reddit alternative. 
               All content is user-generated and we are not responsible for any content posted by users. 
               Plebbit aims to provide a censorship-resistant platform similar to Reddit, but with enhanced privacy and decentralization features.
             </p>
           </div>
         </footer>
+        <DarkModeScript />
         <Analytics />
       </body>
     </html>

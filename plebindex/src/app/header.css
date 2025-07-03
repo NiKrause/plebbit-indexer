@@ -1,7 +1,32 @@
+/* Dark mode support for social icons */
+.dark-mode-icon {
+  transition: filter 0.2s;
+}
+
+html.dark .dark-mode-icon {
+  filter: invert(1);
+}
+
+/* Dark mode support for header text links */
+.header-text-link {
+  color: #1976d2;
+  transition: color 0.2s;
+}
+
+html.dark .header-text-link {
+  color: #60a5fa; /* lighter blue for dark mode */
+}
+
+html.dark .header-text-link:hover {
+  color: #93c5fd; /* even lighter blue on hover */
+}
+
+/* Existing styles */
+
 .header-flex-row {
   display: flex;
   flex-direction: row;
-  align-items: s;
+  align-items: center;
   justify-content: space-between;
 }
 

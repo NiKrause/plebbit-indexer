@@ -32,7 +32,8 @@ async function RepliesContent({
         fontSize: 20, 
         fontWeight: 600, 
         margin: '24px 0 12px 0',
-        padding: '0 16px'
+        padding: '0 16px',
+        color: 'var(--foreground)'
       }}>
         {pagination.total} direct {pagination.total === 1 ? 'reply' : 'replies'}
       </h1> 
@@ -51,7 +52,7 @@ async function RepliesContent({
             maxWidth: 700, 
             width: '100%', 
             textAlign: 'left', 
-            color: '#444', 
+            color: 'var(--foreground)', 
             padding: '16px 16px'
           }}>
             No replies found.

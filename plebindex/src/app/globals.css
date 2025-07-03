@@ -5,11 +5,30 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --footer-text: #9ca3af;
+  --footer-border: #374151;
+  --imprint-bg: #111827;
+  --imprint-card-bg: #1f2937;
+  --imprint-section-bg: #374151;
+  --imprint-text-primary: #ffffff;
+  --imprint-text-secondary: #e5e7eb;
+  --imprint-text-muted: #d1d5db;
+  --imprint-border: #4b5563;
+}
+
+:root {
+  --footer-text: #6b7280;
+  --footer-border: #e5e7eb;
+  --imprint-bg: #f9fafb;
+  --imprint-card-bg: #ffffff;
+  --imprint-section-bg: #f9fafb;
+  --imprint-text-primary: #111827;
+  --imprint-text-secondary: #374151;
+  --imprint-text-muted: #4b5563;
+  --imprint-border: #e5e7eb;
 }
 
 html,
@@ -22,9 +41,14 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark body {
+  background: var(--background);
+  color: var(--foreground);
 }
 
 * {
@@ -38,18 +62,11 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+html.dark {
+  color-scheme: dark;
 }
 
-/* plebindex/src/app/reddit-style.css */
-body {
-  background: #f6f7f8;
-  color: #1a1a1b;
-  font-family: verdana, arial, helvetica, sans-serif;
-}
+/* Reddit-style components - should be moved to component-specific CSS files */
 
 .reddit-container {
   max-width: 700px;
@@ -87,21 +104,4 @@ a:hover {
   text-decoration: underline;
 }
 
-.imprint-page {
-  margin: 1rem !important;
-  padding: 2rem !important;
-}
-
-.imprint-page h1 {
-  margin-bottom: 1.5rem !important;
-}
-
-.imprint-page h2 {
-  margin-top: 2rem !important;
-  margin-bottom: 1rem !important;
-}
-
-.imprint-page h3 {
-  margin-top: 1.5rem !important;
-  margin-bottom: 0.75rem !important;
-}
+/* Imprint styles are handled by Tailwind classes in the component */

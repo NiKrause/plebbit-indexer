@@ -1,5 +1,6 @@
 import Posts from '../posts';
 import Header from '../header';
+import DarkModeScript from '../../components/DarkModeScript';
 
 // describe exactly what can appear in the query-string
 type SearchParams = {
@@ -24,6 +25,7 @@ export default async function Search({
       <main className="flex-grow container mx-auto px-4 py-6 flex flex-col">
         <Posts searchParams={resolvedSearchParams} />
       </main>
+      <DarkModeScript />
     </div>
   );
 }

@@ -61,13 +61,13 @@ export default function MobileMenu() {
 
       <div
         id="mobile-menu"
-        style={{
+style={{
+          backgroundColor: 'var(--background)',
           position: 'fixed',
           top: 0,
           right: 0,
           bottom: 0,
           width: '100%',
-          backgroundColor: 'white',
           boxShadow: '-2px 0 5px rgba(0, 0, 0, 0.1)',
           zIndex: 1000,
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
@@ -111,9 +111,9 @@ export default function MobileMenu() {
             <Link
               href="/subplebbits"
               onClick={() => setIsOpen(false)}
+              className="header-text-link"
               style={{
                 padding: '8px 0',
-                color: '#4b5563',
                 textDecoration: 'none',
               }}
             >
@@ -126,14 +126,14 @@ export default function MobileMenu() {
               onClick={() => setIsOpen(false)}
               style={{
                 padding: '8px 0',
-                color: '#4b5563',
                 textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
+                color: 'var(--foreground)',
               }}
             >
-              <Image src="/telegram.svg" alt="Telegram" width={20} height={20} />
+              <Image src="/telegram.svg" alt="Telegram" width={20} height={20} className="dark-mode-icon" />
               Telegram
             </Link>
             <Link
@@ -143,27 +143,90 @@ export default function MobileMenu() {
               onClick={() => setIsOpen(false)}
               style={{
                 padding: '8px 0',
-                color: '#4b5563',
                 textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
+                color: 'var(--foreground)',
               }}
             >
-              <Image src="/github.svg" alt="GitHub" width={20} height={20} />
+              <Image src="/github.svg" alt="GitHub" width={20} height={20} className="dark-mode-icon" />
               GitHub
             </Link>
             <Link
               href="/imprint"
               onClick={() => setIsOpen(false)}
+              className="header-text-link"
               style={{
                 padding: '8px 0',
-                color: '#4b5563',
                 textDecoration: 'none',
               }}
             >
               Imprint
             </Link>
+            <button
+              id="dark-mode-toggle-mobile"
+              suppressHydrationWarning
+              onClick={(e) => {
+                e.preventDefault();
+                // Direct dark mode toggle
+                if (typeof window !== 'undefined') {
+                  const isDarkMode = document.documentElement.classList.toggle('dark');
+                  localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+                  
+                  // Update icon
+                  const svg = e.currentTarget.querySelector('svg path');
+                  if (svg) {
+                    if (isDarkMode) {
+                      svg.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
+                    } else {
+                      svg.setAttribute('d', 'M12 3v1M12 20v1M4.22 4.22l.7.7M17.68 17.68l.7.7M1 12h1M20 12h1M4.22 19.78l.7-.7M17.68 6.32l.7-.7M12 7a5 5 0 000 10 5 5 0 000-10z');
+                    }
+                  }
+                  
+                  // Also update desktop button icon
+                  const desktopButton = document.getElementById('dark-mode-toggle');
+                  if (desktopButton) {
+                    const desktopSvg = desktopButton.querySelector('svg path');
+                    if (desktopSvg) {
+                      if (isDarkMode) {
+                        desktopSvg.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
+                      } else {
+                        desktopSvg.setAttribute('d', 'M12 3v1M12 20v1M4.22 4.22l.7.7M17.68 17.68l.7.7M1 12h1M20 12h1M4.22 19.78l.7-.7M17.68 6.32l.7-.7M12 7a5 5 0 000 10 5 5 0 000-10z');
+                      }
+                    }
+                  }
+                }
+                setIsOpen(false);
+              }}
+              style={{
+                padding: '8px 0',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 'inherit',
+                color: 'var(--foreground)',
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 3v1M12 20v1M4.22 4.22l.7.7M17.68 17.68l.7.7M1 12h1M20 12h1M4.22 19.78l.7-.7M17.68 6.32l.7-.7M12 7a5 5 0 000 10 5 5 0 000-10z"/>
+              </svg>
+              Toggle Dark Mode
+            </button>
           </nav>
         </div>
       </div>
