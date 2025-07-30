@@ -4,6 +4,9 @@ export default function DarkModeScript() {
       dangerouslySetInnerHTML={{
         __html: `
           (function() {
+            // Only run on client side to avoid hydration issues
+            if (typeof window === 'undefined') return;
+            
             // Initialize dark mode from localStorage immediately
             const darkMode = localStorage.getItem('darkMode');
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

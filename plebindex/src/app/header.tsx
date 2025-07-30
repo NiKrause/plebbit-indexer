@@ -11,7 +11,7 @@ import MobileMenu from '../components/MobileMenu';
 const styles = {
   header: {
     width: '100%',
-    borderBottom: '1px solid #e5e7eb',
+    borderBottom: '1px solid var(--border-color)',
     padding: '8px 0',
   },
   container: {

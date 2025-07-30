@@ -3,20 +3,32 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --border-color: #e5e7eb;
+  --border-subtle: #f3f4f6;
 }
 
 html.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #121212;
+  --foreground: #e0e0e0;
+  --border-color: #333333;
+  --border-subtle: #2a2a2a;
   --footer-text: #9ca3af;
   --footer-border: #374151;
-  --imprint-bg: #111827;
-  --imprint-card-bg: #1f2937;
-  --imprint-section-bg: #374151;
+  --imprint-bg: #1a1a1a;
+  --imprint-card-bg: #2d2d2d;
+  --imprint-section-bg: #404040;
   --imprint-text-primary: #ffffff;
   --imprint-text-secondary: #e5e7eb;
   --imprint-text-muted: #d1d5db;
   --imprint-border: #4b5563;
+  
+  /* Reddit-style component variables for dark mode */
+  --reddit-post-bg: #1e1e1e;
+  --reddit-post-border: #2d2d2d;
+  --reddit-post-title: #66b3ff;
+  --reddit-post-meta: #888;
+  --reddit-link-color: #66b3ff;
+  --reddit-shadow: rgba(0, 0, 0, 0.3);
 }
 
 :root {

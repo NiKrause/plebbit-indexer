@@ -44,6 +44,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="alternate" type="application/xml" href="/sitemap.xml" title="Sitemap" />
+        <DarkModeScript />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen flex flex-col`}>
         <div className="fixed bottom-0 left-0 left-0 z-[9999] p-8 md:p-16 px-4 m-8">
@@ -65,7 +66,6 @@ export default function RootLayout({
             </p>
           </div>
         </footer>
-        <DarkModeScript />
         <Analytics />
       </body>
     </html>
