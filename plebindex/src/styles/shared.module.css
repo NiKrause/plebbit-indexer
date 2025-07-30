@@ -4,17 +4,17 @@
   gap: 8px;
   background: var(--background);
   padding: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
   margin-top: 2rem;
 }
 
 html.dark .container {
-  border-top: 1px solid #374151;
+  border-top: 1px solid var(--border-color);
 }
 
 .pageLink {
   padding: 8px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   text-decoration: none;
   color: var(--foreground);
@@ -22,7 +22,7 @@ html.dark .container {
 }
 
 html.dark .pageLink {
-  border: 1px solid #4b5563;
+  border: 1px solid var(--border-color);
 }
 
 .activePage {
@@ -76,7 +76,7 @@ html.dark .pageLink {
   padding: 4px 8px;
   font-size: 14px;
   border-radius: 4px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   background: var(--background);
   cursor: pointer;
   text-decoration: none;
@@ -84,7 +84,7 @@ html.dark .pageLink {
 }
 
 html.dark .sortButton {
-  border: 1px solid #4b5563;
+  border: 1px solid var(--border-color);
 }
 
 .sortButtonActive {

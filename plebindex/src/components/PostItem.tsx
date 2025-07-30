@@ -15,7 +15,7 @@ export default function PostItem({ post }: PostItemProps) {
   if (!isReply) {
     return (
       <div style={{
-        borderBottom: '1px solid #ccc',
+        borderBottom: '1px solid var(--border-color)',
         marginBottom: 16,
         paddingBottom: 8,
         background: 'var(--background)',
@@ -111,7 +111,7 @@ export default function PostItem({ post }: PostItemProps) {
   return (
     <div
       style={{
-        borderBottom: '1px solid #ccc',
+        borderBottom: '1px solid var(--border-color)',
         marginBottom: 16,
         paddingBottom: 8,
         background: 'var(--background)',
