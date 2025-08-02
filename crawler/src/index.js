@@ -11,6 +11,7 @@ import {
   executeDuneQuery, 
   processDuneResults 
 } from './duneAnalytics.js';
+import { cleanupStaleSubplebbits } from './knownSubCleanup.js';
 
 /**
  * 1. we are starting a crawler which at first will get all the subplebbit addresses
@@ -38,7 +39,10 @@ async function main() {
   const refreshIntervalHours = parseInt(process.env.QUEUE_REFRESH_INTERVAL || '6', 10);
   setInterval(() => {
     refreshSubplebbitQueue(db)
-      .then(count => console.log(`Refreshed queue with ${count} addresses`))
+      .then(count => {
+        console.log(`Refreshed queue with ${count} addresses`);
+        cleanupStaleSubplebbits(db, 'github');
+      })
       .catch(err => console.error('Error refreshing queue:', err));
   }, refreshIntervalHours * 60 * 60 * 1000);
   
@@ -63,7 +67,10 @@ async function main() {
   const duneFetchIntervalHours = parseInt(process.env.DUNE_QUERY_FETCH_INTERVAL_HOURS || '24', 10);
   setInterval(() => {
     processDuneResults(db)
-      .then(count => console.log(`Processed ${count} new subplebbits from Dune results`))
+      .then(count => {
+        console.log(`Processed ${count} new subplebbits from Dune results`);
+        cleanupStaleSubplebbits(db, 'dune');
+      })
       .catch(err => console.error('Error processing Dune results:', err));
   }, duneFetchIntervalHours * 60 * 60 * 1000);
   
@@ -71,6 +78,7 @@ async function main() {
   try {
     await executeDuneQuery();
     await processDuneResults(db);
+    cleanupStaleSubplebbits(db);
   } catch (err) {
     console.error('Error in initial Dune operations:', err);
   }
