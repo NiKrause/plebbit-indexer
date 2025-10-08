@@ -712,8 +712,8 @@ export async function startServer(_db) {
     }
   });
 
-  // API endpoint for flagged posts
-  app.get('/api/flagged-posts', requireAuth, async (req, res) => {
+  // API endpoint for flagged posts (public endpoint for blacklist integration)
+  app.get('/api/flagged-posts', async (req, res) => {
     try {
       const db = getDb();
       const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -775,8 +775,8 @@ export async function startServer(_db) {
     }
   });
   
-  // API endpoint for flagged posts statistics
-  app.get('/api/flagged-posts/stats', requireAuth, async (req, res) => {
+  // API endpoint for flagged posts statistics (public endpoint for blacklist integration)
+  app.get('/api/flagged-posts/stats', async (req, res) => {
     try {
       const db = getDb();
       
